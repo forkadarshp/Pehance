@@ -467,15 +467,15 @@ Transform the user's basic prompt into a precision-crafted, professional-grade p
 
 async def orchestrate_enhancement(user_prompt: str):
     """
-    Orchestrates the multi-agent enhancement process:
+    Orchestrates the multi-agent enhancement process with rate limiting:
     1. Classify intent
     2. Generate supporting content with domain knowledge
     3. Create dynamically enhanced prompt
     """
     
-    # Step 1: Classify Intent
+    # Step 1: Classify Intent with rate limiting
     print("🎯 Classifying intent...")
-    intent_result = await Runner.run(intent_classifier_agent, user_prompt)
+    intent_result = await rate_limited_request(Runner.run, intent_classifier_agent, user_prompt)
     intent_data = parse_intent_json(intent_result.final_output)
     
     print(f"Intent: {intent_data.intent_category} ({intent_data.confidence:.1%} confidence)")
@@ -483,7 +483,7 @@ async def orchestrate_enhancement(user_prompt: str):
     print(f"Complexity: {intent_data.complexity_level}")
     print(f"Needs context: {intent_data.requires_context}")
     
-    # Step 2: Generate Supporting Content (if needed)
+    # Step 2: Generate Supporting Content (if needed) with rate limiting
     supporting_context = ""
     research_performed = False
     
@@ -506,12 +506,12 @@ async def orchestrate_enhancement(user_prompt: str):
         Provide detailed context that will help create a much more effective enhanced prompt.
         """
         
-        support_result = await Runner.run(supporting_content_agent, support_prompt)
+        support_result = await rate_limited_request(Runner.run, supporting_content_agent, support_prompt)
         supporting_context = support_result.final_output
         research_performed = True
         print(f"Context gathered: {len(supporting_context)} characters")
     
-    # Step 3: Generate Best Practices (if needed)
+    # Step 3: Generate Best Practices (if needed) with rate limiting
     best_practices_context = ""
     if intent_data.complexity_level in ["intermediate", "advanced"]:
         print("🔍 Gathering best practices...")
@@ -521,7 +521,7 @@ async def orchestrate_enhancement(user_prompt: str):
         
         Please provide the most current and effective prompt writing best practices that should be applied universally, regardless of the specific intent or domain.
         """
-        best_practices_result = await Runner.run(best_practices_agent, best_practices_prompt)
+        best_practices_result = await rate_limited_request(Runner.run, best_practices_agent, best_practices_prompt)
         best_practices_context = best_practices_result.final_output
         print(f"Best practices gathered: {len(best_practices_context)} characters")
     
@@ -536,8 +536,8 @@ async def orchestrate_enhancement(user_prompt: str):
         input_guardrails=[InputGuardrail(guardrail_function=safety_guardrail)]
     )
     
-    # Step 5: Generate Enhanced Prompt
-    enhancement_result = await Runner.run(enhancer_agent, user_prompt)
+    # Step 5: Generate Enhanced Prompt with rate limiting
+    enhancement_result = await rate_limited_request(Runner.run, enhancer_agent, user_prompt)
     
     return {
         "enhanced_prompt": enhancement_result.final_output,
