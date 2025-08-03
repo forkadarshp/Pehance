@@ -1,6 +1,8 @@
 import os
 import asyncio
 import json
+import time
+import random
 from typing import Optional
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -16,6 +18,49 @@ set_default_openai_api("chat_completions")
 # Set environment variables for LiteLLM
 os.environ["OPENAI_API_KEY"] = os.environ.get("GROQ_API_KEY")
 os.environ["OPENAI_BASE_URL"] = "https://api.groq.com/openai/v1"
+
+# --- Rate Limiting Configuration ---
+class RateLimitConfig:
+    """Configuration for API rate limiting with exponential backoff"""
+    MAX_RETRIES = 3
+    BASE_DELAY = 1.0  # Base delay in seconds
+    MAX_DELAY = 30.0  # Maximum delay in seconds
+    BACKOFF_MULTIPLIER = 2.0
+    JITTER_RANGE = 0.1  # Random jitter to prevent thundering herd
+
+async def rate_limited_request(func, *args, **kwargs):
+    """Execute a function with exponential backoff rate limiting"""
+    delay = RateLimitConfig.BASE_DELAY
+    
+    for attempt in range(RateLimitConfig.MAX_RETRIES + 1):
+        try:
+            result = await func(*args, **kwargs)
+            return result
+        except Exception as e:
+            error_str = str(e).lower()
+            
+            # Check if it's a rate limit error
+            if "rate limit" in error_str or "too many requests" in error_str or "429" in error_str:
+                if attempt < RateLimitConfig.MAX_RETRIES:
+                    # Add jitter to prevent thundering herd
+                    jitter = random.uniform(-RateLimitConfig.JITTER_RANGE, RateLimitConfig.JITTER_RANGE)
+                    sleep_time = min(delay * (1 + jitter), RateLimitConfig.MAX_DELAY)
+                    
+                    print(f"⏳ Rate limit hit, retrying in {sleep_time:.1f}s (attempt {attempt + 1}/{RateLimitConfig.MAX_RETRIES + 1})")
+                    await asyncio.sleep(sleep_time)
+                    
+                    # Exponential backoff
+                    delay *= RateLimitConfig.BACKOFF_MULTIPLIER
+                    continue
+                else:
+                    print(f"❌ Rate limit exceeded after {RateLimitConfig.MAX_RETRIES} retries")
+                    raise e
+            else:
+                # Non-rate-limit error, re-raise immediately
+                raise e
+    
+    # Should never reach here, but just in case
+    raise Exception("Unexpected error in rate limiting logic")
 
 # --- Intent Classification Models ---
 
