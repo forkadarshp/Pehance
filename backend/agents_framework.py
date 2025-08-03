@@ -64,12 +64,13 @@ class Agent:
         ]
         
         try:
-            # Call Groq API
+            # Call Groq API with timeout handling
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 temperature=0.7,
-                max_tokens=2000
+                max_tokens=2000,
+                timeout=30  # Add explicit timeout
             )
             return response.choices[0].message.content
         except Exception as e:
