@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-dotenv
+openai-agents
+groq
+litellm
+pydantic
+requests
+beautifulsoup4
+duckduckgo-search
