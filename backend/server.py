@@ -26,6 +26,9 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Initialize the agent orchestrator
+orchestrator = AgentOrchestrator()
+
 
 # Define Models
 class StatusCheck(BaseModel):
