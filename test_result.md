@@ -213,10 +213,9 @@
 
 ## test_plan:
   current_focus:
-    - "Add Groq API integration and dependencies"
     - "Create /api/enhance endpoint with multi-agent orchestration"
-    - "Create Pehance landing page UI"
-  stuck_tasks: []
+  stuck_tasks:
+    - "Create /api/enhance endpoint with multi-agent orchestration"
   test_all: false
   test_priority: "high_first"
 
