@@ -26,3 +26,4 @@ typer>=0.9.0
 groq>=0.11.0
 agents>=1.0.0
 litellm>=1.40.0
+httpx>=0.24.0
