@@ -625,6 +625,11 @@ class PehanceBackendTester:
             print("❌ Basic connectivity failed. Stopping tests.")
             return self.generate_summary()
         
+        # Test Groq API connectivity
+        if not self.test_groq_api_connectivity():
+            print("❌ Groq API connectivity failed. This is critical for enhancement functionality.")
+            # Continue with other tests to get full picture
+        
         # Run all tests
         test_methods = [
             self.test_enhance_endpoint_structure,
