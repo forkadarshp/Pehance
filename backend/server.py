@@ -69,6 +69,46 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Pehance Enhancement Endpoint
+@api_router.post("/enhance", response_model=PromptEnhanceResponse)
+async def enhance_prompt(request: PromptEnhanceRequest):
+    """
+    Enhance a user prompt using the multi-agent system:
+    1. Intent Classifier - identifies user's goal
+    2. Supporting Content - gathers context 
+    3. Guardrail - filters for safety
+    4. Enhancer - generates improved prompt
+    """
+    try:
+        # Run the multi-agent enhancement pipeline
+        result = await orchestrator.enhance_prompt(request.prompt)
+        
+        if not result["success"]:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Enhancement failed: {result.get('error', 'Unknown error')}"
+            )
+        
+        # Create response object
+        response = PromptEnhanceResponse(
+            original_prompt=result["original_prompt"],
+            enhanced_prompt=result["enhanced_prompt"], 
+            agent_results=result["agent_results"],
+            success=result["success"],
+            error=result.get("error")
+        )
+        
+        # Store in database for analytics
+        await db.prompt_enhancements.insert_one(response.dict())
+        
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in enhance_prompt: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 # Include the router in the main app
 app.include_router(api_router)
 
