@@ -39,6 +39,19 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+# Pehance Models
+class PromptEnhanceRequest(BaseModel):
+    prompt: str
+
+class PromptEnhanceResponse(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    original_prompt: str
+    enhanced_prompt: str
+    agent_results: Dict[str, Any]
+    success: bool
+    error: str = None
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
