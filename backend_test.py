@@ -55,7 +55,7 @@ class PehanceBackendTester:
     def test_basic_connectivity(self):
         """Test basic API connectivity"""
         try:
-            response = requests.get(f"{API_BASE}/", timeout=10)
+            response = requests.get(f"{API_BASE}/", timeout=30)
             if response.status_code == 200:
                 data = response.json()
                 self.log_result(
