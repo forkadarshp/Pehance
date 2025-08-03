@@ -74,6 +74,31 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Simple test endpoint for debugging
+@api_router.post("/test-groq")
+async def test_groq(request: PromptEnhanceRequest):
+    """Simple test endpoint to verify Groq API connectivity"""
+    try:
+        from groq import Groq
+        import os
+        client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+        
+        response = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role": "user", "content": request.prompt}],
+            max_tokens=100,
+            timeout=15
+        )
+        
+        return {
+            "success": True,
+            "response": response.choices[0].message.content,
+            "model": "llama3-8b-8192"
+        }
+    except Exception as e:
+        logger.error(f"Groq test failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Groq API error: {str(e)}")
+
 # Pehance Enhancement Endpoint
 @api_router.post("/enhance", response_model=PromptEnhanceResponse)
 async def enhance_prompt(request: PromptEnhanceRequest):
