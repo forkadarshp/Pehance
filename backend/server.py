@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 import uuid
 from datetime import datetime
-from agents.orchestrator import AgentOrchestrator
+from enhanced_agents import orchestrate_enhancement, InputGuardrailTripwireTriggered
 
 
 ROOT_DIR = Path(__file__).parent
@@ -26,8 +26,7 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Initialize the agent orchestrator
-orchestrator = AgentOrchestrator()
+# Agent orchestration is handled by the enhanced_agents module
 
 
 # Define Models
@@ -80,22 +79,16 @@ async def enhance_prompt(request: PromptEnhanceRequest):
     4. Enhancer - generates improved prompt
     """
     try:
-        # Run the multi-agent enhancement pipeline
-        result = await orchestrator.enhance_prompt(request.prompt)
+        # Run the multi-agent enhancement pipeline using the new enhanced_agents module
+        result = await orchestrate_enhancement(request.prompt)
         
-        if not result["success"]:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Enhancement failed: {result.get('error', 'Unknown error')}"
-            )
-        
-        # Create response object
+        # Create response object with the new result structure
         response = PromptEnhanceResponse(
-            original_prompt=result["original_prompt"],
+            original_prompt=request.prompt,
             enhanced_prompt=result["enhanced_prompt"], 
-            agent_results=result["agent_results"],
-            success=result["success"],
-            error=result.get("error")
+            agent_results=result,
+            success=True,
+            error=None
         )
         
         # Store in database for analytics
@@ -103,8 +96,11 @@ async def enhance_prompt(request: PromptEnhanceRequest):
         
         return response
         
-    except HTTPException:
-        raise
+    except InputGuardrailTripwireTriggered as e:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Content safety check failed: {str(e)}"
+        )
     except Exception as e:
         logger.error(f"Unexpected error in enhance_prompt: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
