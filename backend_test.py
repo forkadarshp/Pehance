@@ -52,6 +52,76 @@ class PehanceBackendTester:
             print(f"   Response: {response_data}")
         print()
 
+    def test_groq_api_connectivity(self):
+        """Test Groq API connectivity using the test-groq endpoint"""
+        test_prompt = "Hello, this is a test message"
+        
+        try:
+            response = requests.post(
+                f"{API_BASE}/test-groq",
+                json={"prompt": test_prompt},
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check required fields
+                required_fields = ["success", "response", "model"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    self.log_result(
+                        "Groq API Connectivity",
+                        False,
+                        f"Missing required fields: {missing_fields}",
+                        data
+                    )
+                    return False
+                
+                # Check if success is true
+                if not data.get("success", False):
+                    self.log_result(
+                        "Groq API Connectivity",
+                        False,
+                        "API returned success=false",
+                        data
+                    )
+                    return False
+                
+                # Check if we got a response
+                if not data.get("response", "").strip():
+                    self.log_result(
+                        "Groq API Connectivity",
+                        False,
+                        "Empty response from Groq API",
+                        data
+                    )
+                    return False
+                
+                self.log_result(
+                    "Groq API Connectivity",
+                    True,
+                    f"Groq API working. Model: {data.get('model', 'unknown')}, Response length: {len(data.get('response', ''))} chars"
+                )
+                return True
+                
+            else:
+                self.log_result(
+                    "Groq API Connectivity",
+                    False,
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result(
+                "Groq API Connectivity",
+                False,
+                f"Request error: {str(e)}"
+            )
+            return False
+
     def test_basic_connectivity(self):
         """Test basic API connectivity"""
         try:
