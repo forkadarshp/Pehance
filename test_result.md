@@ -101,3 +101,158 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+## user_problem_statement: "Create an MVP landing page for 'Pehance' - a prompt enhancement service. The page should have a prompt input area, 'Enhance' button, and display area for enhanced prompts. Backend should use multi-agent system with Groq/Llama 3 8B for: Intent Classifier → Supporting Content → Guardrail → Enhancer agents."
+
+## backend:
+  - task: "Add Groq API integration and dependencies"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/requirements.txt, /app/backend/.env"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need to add groq library to requirements and API key to env"
+
+  - task: "Create Intent Classifier Agent"
+    implemented: false
+    working: "NA" 
+    file: "/app/backend/agents/intent_classifier.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Needs to identify user's goal from prompt input"
+
+  - task: "Create Supporting Content Agent"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/agents/supporting_content.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Needs to gather context to enrich the prompt"
+
+  - task: "Create Guardrail Agent"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/agents/guardrail.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Needs to filter for safety, profanity, and relevance"
+
+  - task: "Create Enhancer Agent"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/agents/enhancer.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Needs to generate final improved prompt"
+
+  - task: "Create /api/enhance endpoint with multi-agent orchestration"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Main endpoint that orchestrates all 4 agents in sequence"
+
+## frontend:
+  - task: "Create Pehance landing page UI"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Replace current basic page with Pehance landing page"
+
+  - task: "Implement prompt input textarea"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Large textarea for user prompt input"
+
+  - task: "Implement Enhance button with loading states"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Button to trigger prompt enhancement with loading feedback"
+
+  - task: "Implement enhanced prompt display area"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Area to display the enhanced prompt results"
+
+  - task: "Add API integration for /api/enhance endpoint"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Connect frontend to backend enhancement endpoint"
+
+## metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+## test_plan:
+  current_focus:
+    - "Add Groq API integration and dependencies"
+    - "Create /api/enhance endpoint with multi-agent orchestration"
+    - "Create Pehance landing page UI"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+## agent_communication:
+  - agent: "main"
+    message: "Starting Pehance MVP development. Current app has basic FastAPI backend and React frontend. Need to implement multi-agent prompt enhancement system and replace frontend with Pehance landing page. User provided GROQ_API_KEY for Llama 3 8B integration."
