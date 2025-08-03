@@ -49,7 +49,7 @@ class PromptEnhanceResponse(BaseModel):
     enhanced_prompt: str
     agent_results: Dict[str, Any]
     success: bool
-    error: str = None
+    error: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 # Add your routes to the router instead of directly to app
