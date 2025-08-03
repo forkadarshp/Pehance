@@ -72,14 +72,14 @@ async def get_status_checks():
 @api_router.post("/enhance", response_model=PromptEnhanceResponse)
 async def enhance_prompt(request: PromptEnhanceRequest):
     """
-    Enhance a user prompt using the multi-agent system:
-    1. Intent Classifier - identifies user's goal
-    2. Supporting Content - gathers context 
-    3. Guardrail - filters for safety
-    4. Enhancer - generates improved prompt
+    Enhance a user prompt using the sophisticated multi-agent system:
+    1. Intent Classifier - identifies user's goal, domain, and complexity
+    2. Supporting Content - gathers domain-specific context 
+    3. Best Practices - applies universal optimization techniques
+    4. Dynamic Enhancer - generates precision-crafted prompt
     """
     try:
-        # Run the multi-agent enhancement pipeline using the new enhanced_agents module
+        # Run the multi-agent enhancement pipeline using the enhanced_agents module
         result = await orchestrate_enhancement(request.prompt)
         
         # Create response object with the new result structure
