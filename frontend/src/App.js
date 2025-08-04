@@ -619,8 +619,17 @@ const App = () => {
                             style={{ width: `${((currentStageIndex + 1) / 4) * 100}%` }}
                           ></div>
                         </div>
-                        <div className="text-sm">
-                          Step {currentStageIndex + 1} of 4
+                        <div className="text-sm" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>Step {currentStageIndex + 1} of 4</span>
+                          <span style={{ 
+                            background: 'rgba(245, 158, 11, 0.2)', 
+                            padding: '2px 8px', 
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            fontWeight: '500'
+                          }}>
+                            {stages[currentStageIndex]?.model || 'Processing...'}
+                          </span>
                         </div>
                       </div>
                     </div>
