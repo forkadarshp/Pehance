@@ -1100,7 +1100,7 @@ async def orchestrate_enhancement(user_prompt: str, mode: str = "single"):
     # Step 2: Mode-Aware Enhancement Routing
     if mode == "single":
         # SINGLE MODE: Always provide enhanced responses, never ask clarification
-        print("🔄 Single Mode: Converting any clarification requests to direct enhancements")
+        print("🔄 Single Mode: Converting any clarification requests to comprehensive enhancements")
         
         if intent_data.suggested_action == "request_clarification":
             # In single mode, handle simple inputs with enhanced greeting/response templates
@@ -1117,12 +1117,23 @@ async def orchestrate_enhancement(user_prompt: str, mode: str = "single"):
                     "process_steps": ["intent_classification", "single_mode_greeting_enhancement"],
                     "enhancement_ratio": round(len(enhanced_greeting) / len(user_prompt), 1),
                     "complexity_score": intent_data.input_complexity_score,
+                    "model_used": "greeting_template",
                     "mode": mode
                 }
             else:
-                # For other simple inputs, force basic enhancement
-                intent_data.suggested_action = "basic_enhancement"
-                print("🔄 Converting to basic enhancement for single mode")
+                # For any non-greeting input in single mode, upgrade to at least standard enhancement
+                # This ensures requests like "help me code a todo list" get comprehensive responses
+                if intent_data.input_complexity_score < 0.5:
+                    intent_data.input_complexity_score = 0.5  # Bump up complexity for better enhancement
+                intent_data.suggested_action = "standard_enhancement"
+                print("🔄 Single Mode: Upgrading to standard enhancement for comprehensive response")
+        
+        # In single mode, ensure minimum complexity for proper enhancement
+        elif intent_data.suggested_action == "basic_enhancement" and intent_data.input_complexity_score < 0.4:
+            # For single mode, we want comprehensive responses, so upgrade basic to standard
+            intent_data.suggested_action = "standard_enhancement"
+            intent_data.input_complexity_score = max(0.5, intent_data.input_complexity_score)
+            print("🔄 Single Mode: Upgrading basic to standard enhancement for comprehensive response")
     
     elif mode == "multi" and intent_data.suggested_action == "request_clarification":
         # MULTI MODE: Allow clarification requests as normal
