@@ -19,6 +19,70 @@ set_default_openai_api("chat_completions")
 os.environ["OPENAI_API_KEY"] = os.environ.get("GROQ_API_KEY")
 os.environ["OPENAI_BASE_URL"] = "https://api.groq.com/openai/v1"
 
+# --- Multi-Model Configuration ---
+class ModelConfig:
+    """Optimized model selection for different agent types and complexity levels"""
+    
+    # Fast, efficient model for quick tasks
+    FAST_MODEL = "llama-3.1-8b-instant"
+    
+    # Primary model for general reasoning tasks
+    PRIMARY_MODEL = "llama-3.3-70b-versatile"
+    
+    # Advanced model for complex enhancements
+    ADVANCED_MODEL = "qwen/qwen3-32b"  # Alternative: "moonshotai/kimi-k2-instruct"
+    
+    # Safety and guardrail model
+    SAFETY_MODEL = "meta-llama/llama-guard-4-12b"
+    
+    # Fallback model in case of issues
+    FALLBACK_MODEL = "llama3-8b-8192"
+
+def select_model_for_task(task_type: str, complexity_score: float = 0.5, agent_type: str = "general") -> str:
+    """
+    Intelligent model selection based on task requirements
+    
+    Args:
+        task_type: Type of task (intent_classification, enhancement, safety, etc.)
+        complexity_score: Complexity of the input (0.0-1.0)
+        agent_type: Type of agent (classifier, enhancer, guardrail, etc.)
+    
+    Returns:
+        Optimal model name for the task
+    """
+    try:
+        # Intent Classification - Use fast model for quick analysis
+        if task_type == "intent_classification" or agent_type == "classifier":
+            return ModelConfig.FAST_MODEL
+        
+        # Safety and Guardrails - Use specialized safety model
+        elif task_type == "safety" or agent_type == "guardrail":
+            return ModelConfig.SAFETY_MODEL
+        
+        # Complex Enhancement Tasks - Use advanced model for sophisticated reasoning
+        elif (task_type == "enhancement" and complexity_score > 0.7) or agent_type == "advanced_enhancer":
+            return ModelConfig.ADVANCED_MODEL
+        
+        # Context and Supporting Content - Use primary model for balanced performance
+        elif task_type in ["context", "supporting_content", "methodology"]:
+            return ModelConfig.PRIMARY_MODEL
+        
+        # Standard Enhancement - Use primary model for good reasoning
+        elif task_type == "enhancement" and complexity_score > 0.3:
+            return ModelConfig.PRIMARY_MODEL
+        
+        # Basic Enhancement - Use fast model for simple tasks
+        elif task_type == "basic_enhancement" or complexity_score <= 0.3:
+            return ModelConfig.FAST_MODEL
+        
+        # Default to primary model
+        else:
+            return ModelConfig.PRIMARY_MODEL
+            
+    except Exception as e:
+        print(f"Model selection error: {e}, using fallback model")
+        return ModelConfig.FALLBACK_MODEL
+
 # --- Rate Limiting Configuration ---
 class RateLimitConfig:
     """Configuration for API rate limiting with exponential backoff"""
