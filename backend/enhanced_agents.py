@@ -1254,7 +1254,7 @@ async def orchestrate_enhancement(user_prompt: str, mode: str = "single"):
             dynamic_instructions += "\n\n**CRITICAL: SINGLE MODE OPERATION** - Always provide a complete, standalone enhanced prompt. Never ask questions or request clarification. Transform any input into a useful, enhanced prompt ready for immediate use."
         
         enhancer_agent = Agent(
-            name="Lyra - Proportional Enhancement Specialist",
+            name="Pehance - Precision Enhancement Specialist",
             instructions=dynamic_instructions,
             model=enhancement_model,
             input_guardrails=[InputGuardrail(guardrail_function=enhanced_safety_guardrail)]
