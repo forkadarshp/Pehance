@@ -113,53 +113,78 @@ class ModelConfig:
         print(f"⚠️ All preferred models unavailable, using fallback: {cls.FALLBACK_MODEL}")
         return cls.FALLBACK_MODEL
 
-async def select_model_for_task(task_type: str, complexity_score: float = 0.5, agent_type: str = "general") -> str:
+async def select_model_for_task(task_type: str, complexity_score: float = 0.5, agent_type: str = "general", prefer_speed: bool = False) -> str:
     """
-    Intelligent model selection based on task requirements with dynamic availability checking
+    Intelligent model selection based on task requirements, complexity, and performance characteristics.
     
     Args:
         task_type: Type of task (intent_classification, enhancement, safety, etc.)
         complexity_score: Complexity of the input (0.0-1.0)
         agent_type: Type of agent (classifier, enhancer, guardrail, etc.)
+        prefer_speed: Whether to prioritize speed over reasoning capability
     
     Returns:
-        Optimal available model name for the task
+        Optimal available model name for the task with fallback strategy
     """
     try:
-        # Intent Classification - Use fast model for quick analysis
+        print(f"🎯 Selecting model for task: {task_type}, complexity: {complexity_score:.2f}, agent: {agent_type}")
+        
+        # INTENT CLASSIFICATION - Prioritize speed and JSON mode support
         if task_type == "intent_classification" or agent_type == "classifier":
-            preferred_models = [ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
+            if prefer_speed:
+                preferred_models = [ModelConfig.ULTRA_FAST_MODEL, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
+            else:
+                # Use Scout model for better JSON mode support
+                preferred_models = [ModelConfig.BALANCED_MODEL, ModelConfig.ULTRA_FAST_MODEL, ModelConfig.LEGACY_FALLBACK]
         
-        # Safety and Guardrails - Use fast, reliable model
+        # SAFETY AND GUARDRAILS - Use specialized safety models first
         elif task_type == "safety" or agent_type == "guardrail":
-            preferred_models = [ModelConfig.SAFETY_MODEL, ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
+            preferred_models = [ModelConfig.SAFETY_MODEL, ModelConfig.SAFETY_FALLBACK, ModelConfig.ULTRA_FAST_MODEL, ModelConfig.LEGACY_FALLBACK]
         
-        # Complex Enhancement Tasks - Use advanced model for sophisticated reasoning
+        # COMPLEX ENHANCEMENT (high complexity) - Use best reasoning models
         elif (task_type == "enhancement" and complexity_score > 0.7) or agent_type == "advanced_enhancer":
-            preferred_models = [ModelConfig.ADVANCED_MODEL, ModelConfig.ADVANCED_MODEL_ALT, ModelConfig.PRIMARY_MODEL, ModelConfig.FALLBACK_MODEL]
+            if prefer_speed:
+                preferred_models = [ModelConfig.ADVANCED_REASONING, ModelConfig.REASONING_MODEL, ModelConfig.REASONING_ALT, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
+            else:
+                preferred_models = [ModelConfig.REASONING_MODEL, ModelConfig.REASONING_ALT, ModelConfig.ADVANCED_REASONING, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
         
-        # Context and Supporting Content - Use primary model for balanced performance
+        # CREATIVE TASKS - Use models with strong creative capabilities
+        elif task_type in ["creative_enhancement", "creative"] or (task_type == "enhancement" and complexity_score > 0.6):
+            preferred_models = [ModelConfig.CREATIVE_MODEL, ModelConfig.REASONING_MODEL, ModelConfig.ADVANCED_REASONING, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
+        
+        # CONTEXT AND SUPPORTING CONTENT - Use balanced performance models
         elif task_type in ["context", "supporting_content", "methodology"]:
-            preferred_models = [ModelConfig.PRIMARY_MODEL, ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
+            preferred_models = [ModelConfig.BALANCED_MODEL, ModelConfig.REASONING_MODEL, ModelConfig.ULTRA_FAST_MODEL, ModelConfig.LEGACY_FALLBACK]
         
-        # Standard Enhancement - Use primary model for good reasoning
+        # STANDARD ENHANCEMENT (medium complexity) - Use balanced models
         elif task_type == "enhancement" and complexity_score > 0.3:
-            preferred_models = [ModelConfig.PRIMARY_MODEL, ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
+            preferred_models = [ModelConfig.BALANCED_MODEL, ModelConfig.REASONING_MODEL, ModelConfig.ULTRA_FAST_MODEL, ModelConfig.LEGACY_FALLBACK]
         
-        # Basic Enhancement - Use fast model for simple tasks
+        # BASIC ENHANCEMENT (low complexity) - Use fast, efficient models
         elif task_type == "basic_enhancement" or complexity_score <= 0.3:
-            preferred_models = [ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
+            preferred_models = [ModelConfig.ULTRA_FAST_MODEL, ModelConfig.BALANCED_ALT, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
         
-        # Default to primary model
+        # DEFAULT - Use balanced approach
         else:
-            preferred_models = [ModelConfig.PRIMARY_MODEL, ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
+            preferred_models = [ModelConfig.BALANCED_MODEL, ModelConfig.REASONING_MODEL, ModelConfig.ULTRA_FAST_MODEL, ModelConfig.LEGACY_FALLBACK]
         
         # Get the best available model from preferences
-        return await ModelConfig.get_best_available_model(preferred_models)
+        selected_model = await ModelConfig.get_best_available_model(preferred_models)
+        
+        # Log performance expectations
+        expected_speed = ModelConfig.MODEL_PERFORMANCE.get(selected_model, 350)
+        features = ModelConfig.MODEL_FEATURES.get(selected_model, [])
+        
+        print(f"✅ Selected model: {selected_model}")
+        print(f"📊 Expected performance: {expected_speed} tokens/sec")
+        if features:
+            print(f"🔧 Model features: {', '.join(features)}")
+        
+        return selected_model
             
     except Exception as e:
-        print(f"Model selection error: {e}, using fallback model")
-        return ModelConfig.FALLBACK_MODEL
+        print(f"❌ Model selection error: {e}, using fallback model")
+        return ModelConfig.LEGACY_FALLBACK
 
 # --- Rate Limiting Configuration ---
 class RateLimitConfig:
