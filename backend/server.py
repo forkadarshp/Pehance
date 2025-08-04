@@ -120,7 +120,7 @@ async def test_models():
                 return "Tier 2: Balanced"
             elif model_name in [ModelConfig.REASONING_MODEL, ModelConfig.REASONING_ALT]:
                 return "Tier 3: High-Reasoning"
-            elif model_name in [ModelConfig.ADVANCED_REASONING, ModelConfig.CREATIVE_MODEL]:
+            elif model_name in [ModelConfig.ADVANCED_REASONING, ModelConfig.CREATIVE_MODEL, ModelConfig.ADVANCED_COMPLEX]:
                 return "Tier 4: Specialized"
             elif model_name in [ModelConfig.SAFETY_MODEL, ModelConfig.SAFETY_FALLBACK]:
                 return "Safety Models"
