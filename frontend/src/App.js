@@ -21,6 +21,14 @@ const App = () => {
   const [modelStatus, setModelStatus] = useState(null);
   const [showChatInterface, setShowChatInterface] = useState(false);
   
+  // Processing stages with model information
+  const stages = [
+    { text: "Analyzing intent and context", icon: "⚡", duration: 2000, model: "Classification Agent" },
+    { text: "Gathering domain insights", icon: "🎯", duration: 2200, model: "Context Agent" },
+    { text: "Applying best practices", icon: "⚙️", duration: 1800, model: "Methodology Agent" },
+    { text: "Crafting enhanced prompt", icon: "✨", duration: 2400, model: "Enhancement Agent" }
+  ];
+  
   const enhancedTextRef = useRef(null);
   const heroRef = useRef(null);
   const inputSectionRef = useRef(null);
