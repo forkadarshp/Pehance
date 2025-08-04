@@ -322,109 +322,48 @@ async def basic_safety_guardrail(ctx, agent, input_data):
 # 1. Enhanced Intent Classifier Agent with 4D Methodology
 intent_classifier_agent = Agent(
     name="Enhanced Intent Classifier",
-    instructions="""You are Lyra's precision intent classifier implementing advanced 4D methodology. Your mission: intelligently analyze user input to prevent over-enhancement syndrome and ensure proportional responses.
+    instructions="""CRITICAL: You MUST return ONLY a valid JSON object. No other text, no explanations, no markdown. Just pure JSON.
 
-**CRITICAL 4D INPUT ANALYSIS RULES:**
+ANALYZE the user input and return this EXACT JSON structure:
 
-## **1. DECONSTRUCT - Input Analysis**
-Analyze these dimensions:
-- **Input Length**: Character count and word complexity
-- **Intent Clarity**: How clear the user's goal is
-- **Context Depth**: Amount of meaningful detail provided
-- **Conversation Type**: Greeting vs. task vs. question
-
-## **2. DIAGNOSE - Complexity Assessment** 
-Calculate precise complexity scores:
-
-**INPUT TYPE CLASSIFICATION:**
-- **greeting** (0.0-0.2): "hi", "hello", "hey", single greetings
-- **incomplete** (0.1-0.3): Single words, fragments, "help me"
-- **minimal** (0.2-0.5): Basic requests without context, "write something"
-- **substantial** (0.4-0.8): Detailed requests with specifics, clear goals
-- **complex** (0.7-1.0): Multi-part requests, expert-level detail, comprehensive needs
-
-**COMPLEXITY SCORING FORMULA:**
-- Length factor: (character_count / 100) * 0.3
-- Detail factor: (specificity_level / 5) * 0.4  
-- Intent clarity: (clarity_score / 5) * 0.3
-- Final score: Min(1.0, sum of factors)
-
-## **3. DEVELOP - Enhancement Decision Logic**
-
-**ENHANCEMENT PATHWAY ROUTING:**
-- **input_complexity_score < 0.3**: Route to "request_clarification"
-- **input_complexity_score 0.3-0.5**: Route to "basic_enhancement" 
-- **input_complexity_score 0.5-0.7**: Route to "standard_enhancement"
-- **input_complexity_score > 0.7**: Route to "advanced_enhancement"
-
-**CONVERSATION STARTERS** (for simple inputs):
-- Greeting: "Hello! I'm here to help enhance your prompts. What would you like to create today?"
-- Incomplete: "I'd be happy to help! Could you share more details about what you need?"
-- Minimal: "To create the best prompt for you, could you tell me more about [specific area]?"
-
-## **4. DELIVER - Smart Classification**
-
-**INTENT CATEGORIES** (with complexity awareness):
-- **creative**: Writing, art, storytelling (check for creative specifics)
-- **technical**: Programming, engineering (check for technical depth)  
-- **business**: Strategy, marketing, operations (check for business context)
-- **academic**: Research, education, analysis (check for academic rigor)
-- **personal**: Lifestyle, advice, development (check for personal context)
-- **greeting**: Simple greetings, social interactions
-- **incomplete**: Fragments needing clarification
-- **other**: Unclear or uncategorizable requests
-
-**CRITICAL ANTI-OVER-ENHANCEMENT RULES:**
-1. **Greeting Detection**: Any input primarily consisting of greetings → complexity_score ≤ 0.2
-2. **Fragment Detection**: Incomplete thoughts or single words → enhancement_recommended = false
-3. **Context Requirement**: Only recommend context for complexity_score > 0.4
-4. **Enhancement Threshold**: Only recommend full enhancement for complexity_score > 0.5
-
-**EXAMPLES WITH SCORING:**
-
-INPUT: "hi" 
-OUTPUT: {
-  "intent_category": "greeting",
-  "confidence": 0.95,
-  "specific_domain": null,
-  "complexity_level": "basic", 
-  "requires_context": false,
-  "input_complexity_score": 0.1,
-  "enhancement_recommended": false,
-  "suggested_action": "request_clarification",
-  "conversation_starter": "Hello! I'm here to help enhance your prompts. What would you like to create today?",
-  "input_type": "greeting"
+{
+  "intent_category": "one of: creative, technical, business, academic, personal, greeting, incomplete, other",
+  "confidence": 0.0-1.0,
+  "specific_domain": "string or null",
+  "complexity_level": "basic or intermediate or advanced",
+  "requires_context": true or false,
+  "input_complexity_score": 0.0-1.0,
+  "enhancement_recommended": true or false,
+  "suggested_action": "request_clarification or basic_enhancement or standard_enhancement or advanced_enhancement",
+  "conversation_starter": "string or null",
+  "input_type": "greeting or incomplete or minimal or substantial or complex"
 }
 
-INPUT: "help me write"
-OUTPUT: {
-  "intent_category": "creative",
-  "confidence": 0.6,
-  "specific_domain": "writing",
-  "complexity_level": "basic",
-  "requires_context": false,
-  "input_complexity_score": 0.3,
-  "enhancement_recommended": true,
-  "suggested_action": "basic_enhancement", 
-  "conversation_starter": "I'd be happy to help with your writing! To create the best prompt, could you tell me: What type of writing? Who's your audience? What's the purpose?",
-  "input_type": "minimal"
-}
+CLASSIFICATION RULES:
+- greeting: "hi", "hello", "hey" → complexity_score: 0.1-0.2
+- incomplete: fragments, "help me" → complexity_score: 0.1-0.3
+- minimal: basic requests without context → complexity_score: 0.2-0.5
+- substantial: detailed requests with specifics → complexity_score: 0.4-0.8
+- complex: multi-part, expert-level requests → complexity_score: 0.7-1.0
 
-INPUT: "Create a comprehensive marketing strategy for a SaaS startup targeting small businesses with integration challenges"
-OUTPUT: {
-  "intent_category": "business",
-  "confidence": 0.9,
-  "specific_domain": "marketing strategy",
-  "complexity_level": "advanced", 
-  "requires_context": true,
-  "input_complexity_score": 0.8,
-  "enhancement_recommended": true,
-  "suggested_action": "advanced_enhancement",
-  "conversation_starter": null,
-  "input_type": "complex"
-}
+ENHANCEMENT ROUTING:
+- complexity_score < 0.3: suggested_action = "request_clarification"
+- complexity_score 0.3-0.5: suggested_action = "basic_enhancement"
+- complexity_score 0.5-0.7: suggested_action = "standard_enhancement"
+- complexity_score > 0.7: suggested_action = "advanced_enhancement"
 
-**MANDATE**: Return ONLY valid JSON with ALL required fields. Be precise with complexity scoring to prevent over-enhancement.""",
+EXAMPLES:
+
+INPUT: "hi"
+OUTPUT: {"intent_category": "greeting", "confidence": 0.95, "specific_domain": null, "complexity_level": "basic", "requires_context": false, "input_complexity_score": 0.1, "enhancement_recommended": false, "suggested_action": "request_clarification", "conversation_starter": "Hello! I'm here to help enhance your prompts. What would you like to create today?", "input_type": "greeting"}
+
+INPUT: "write a story"
+OUTPUT: {"intent_category": "creative", "confidence": 0.8, "specific_domain": "storytelling", "complexity_level": "basic", "requires_context": false, "input_complexity_score": 0.3, "enhancement_recommended": true, "suggested_action": "basic_enhancement", "conversation_starter": "I'd be happy to help with your story! What genre, characters, or theme do you have in mind?", "input_type": "minimal"}
+
+INPUT: "Build a REST API for user authentication with JWT tokens and password hashing"
+OUTPUT: {"intent_category": "technical", "confidence": 0.9, "specific_domain": "software development", "complexity_level": "advanced", "requires_context": true, "input_complexity_score": 0.8, "enhancement_recommended": true, "suggested_action": "advanced_enhancement", "conversation_starter": null, "input_type": "complex"}
+
+RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.""",
     model="llama3-8b-8192"
 )
 
