@@ -191,48 +191,107 @@ class IntentClassification(BaseModel):
 # --- Utility Functions ---
 
 def parse_intent_json(text: str) -> IntentClassification:
-    """Parse JSON response from intent classifier with enhanced 4D methodology fields"""
+    """Parse JSON response from intent classifier with enhanced fallback mechanism"""
     try:
-        # Try to find JSON in the response
+        # Clean the response text
         text = text.strip()
         
-        # Look for JSON object in the text
-        start_idx = text.find('{')
-        end_idx = text.rfind('}') + 1
+        # Remove any markdown formatting
+        if text.startswith('```json'):
+            text = text[7:]
+        if text.endswith('```'):
+            text = text[:-3]
+        text = text.strip()
         
-        if start_idx != -1 and end_idx > start_idx:
-            json_text = text[start_idx:end_idx]
-            data = json.loads(json_text)
+        # Try multiple JSON extraction methods
+        json_data = None
+        
+        # Method 1: Direct JSON parsing if the whole text is JSON
+        try:
+            json_data = json.loads(text)
+        except json.JSONDecodeError:
+            pass
+        
+        # Method 2: Find JSON object boundaries
+        if json_data is None:
+            start_idx = text.find('{')
+            end_idx = text.rfind('}') + 1
             
+            if start_idx != -1 and end_idx > start_idx:
+                json_text = text[start_idx:end_idx]
+                try:
+                    json_data = json.loads(json_text)
+                except json.JSONDecodeError:
+                    pass
+        
+        # Method 3: Try to extract JSON from lines
+        if json_data is None:
+            for line in text.split('\n'):
+                line = line.strip()
+                if line.startswith('{') and line.endswith('}'):
+                    try:
+                        json_data = json.loads(line)
+                        break
+                    except json.JSONDecodeError:
+                        continue
+        
+        # If we successfully parsed JSON, create the classification
+        if json_data:
             return IntentClassification(
-                intent_category=data.get("intent_category", "other"),
-                confidence=float(data.get("confidence", 0.5)),
-                specific_domain=data.get("specific_domain"),
-                complexity_level=data.get("complexity_level", "basic"),
-                requires_context=bool(data.get("requires_context", True)),
-                # NEW: Enhanced fields with smart defaults
-                input_complexity_score=float(data.get("input_complexity_score", 0.5)),
-                enhancement_recommended=bool(data.get("enhancement_recommended", True)),
-                suggested_action=data.get("suggested_action", "standard_enhancement"),
-                conversation_starter=data.get("conversation_starter"),
-                input_type=data.get("input_type", "minimal")
+                intent_category=json_data.get("intent_category", "other"),
+                confidence=float(json_data.get("confidence", 0.5)),
+                specific_domain=json_data.get("specific_domain"),
+                complexity_level=json_data.get("complexity_level", "basic"),
+                requires_context=bool(json_data.get("requires_context", True)),
+                input_complexity_score=float(json_data.get("input_complexity_score", 0.5)),
+                enhancement_recommended=bool(json_data.get("enhancement_recommended", True)),
+                suggested_action=json_data.get("suggested_action", "standard_enhancement"),
+                conversation_starter=json_data.get("conversation_starter"),
+                input_type=json_data.get("input_type", "minimal")
             )
+        
     except (json.JSONDecodeError, ValueError, KeyError) as e:
         print(f"Failed to parse intent JSON: {e}")
         print(f"Raw text: {text}")
     
-    # Fallback to default classification with conservative enhancement
+    # Enhanced fallback with basic heuristics
+    print("Using fallback classification with basic heuristics")
+    
+    # Try to determine category from text content
+    text_lower = text.lower()
+    intent_category = "other"
+    confidence = 0.3
+    complexity_score = 0.5
+    
+    # Basic keyword matching for fallback
+    if any(word in text_lower for word in ['hello', 'hi', 'hey', 'greetings']):
+        intent_category = "greeting"
+        complexity_score = 0.1
+        confidence = 0.8
+    elif any(word in text_lower for word in ['write', 'story', 'creative', 'art', 'design']):
+        intent_category = "creative"
+        complexity_score = 0.4
+        confidence = 0.7
+    elif any(word in text_lower for word in ['code', 'api', 'program', 'develop', 'software', 'technical']):
+        intent_category = "technical"
+        complexity_score = 0.6
+        confidence = 0.7
+    elif any(word in text_lower for word in ['business', 'strategy', 'marketing', 'startup', 'company']):
+        intent_category = "business"
+        complexity_score = 0.6
+        confidence = 0.7
+    
     return IntentClassification(
-        intent_category="other",
-        confidence=0.5,
+        intent_category=intent_category,
+        confidence=confidence,
         specific_domain=None,
-        complexity_level="basic",
-        requires_context=False,
-        input_complexity_score=0.3,
-        enhancement_recommended=False,
-        suggested_action="request_clarification",
-        conversation_starter="I'd be happy to help! Could you provide more details about what you'd like me to help you with?",
-        input_type="incomplete"
+        complexity_level="basic" if complexity_score < 0.4 else "intermediate",
+        requires_context=complexity_score > 0.5,
+        input_complexity_score=complexity_score,
+        enhancement_recommended=complexity_score > 0.2,
+        suggested_action="request_clarification" if complexity_score < 0.3 else "basic_enhancement",
+        conversation_starter="I'd be happy to help! Could you provide more details about what you'd like me to help you with?" if complexity_score < 0.3 else None,
+        input_type="greeting" if intent_category == "greeting" else ("minimal" if complexity_score < 0.5 else "substantial")
     )
 
 # --- Enhanced Guardrail Definition ---
