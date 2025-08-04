@@ -529,56 +529,91 @@ supporting_content_agent = Agent(
     model="llama3-8b-8192"
 )
 
-# 2.5. Intent Classifier Agent Creator
+# 2.5. Intent Classifier Agent Creator with Production-Grade Prompts
 async def create_intent_classifier_agent():
-    """Create an intent classifier agent with smart model selection"""
-    classification_model = await select_model_for_task("intent_classification", 0.5, "classifier")
+    """Create an intent classifier agent with smart model selection and production-grade prompts"""
+    # Use Scout model for better JSON mode support if available
+    classification_model = await select_model_for_task("intent_classification", 0.5, "classifier", prefer_speed=False)
     print(f"Using classification model: {classification_model}")
     
-    return Agent(
-        name="Enhanced Intent Classifier",
-        instructions="""CRITICAL: You MUST return ONLY a valid JSON object. No other text, no explanations, no markdown. Just pure JSON.
+    # Check if the model supports JSON mode
+    model_features = ModelConfig.MODEL_FEATURES.get(classification_model, [])
+    supports_json_mode = "json_mode" in model_features
+    
+    # Enhanced production-grade instructions with multiple JSON examples and better structure
+    instructions = """You are a production-grade intent classification system. Your sole task is to analyze user input and return ONLY a valid JSON object.
 
-ANALYZE the user input and return this EXACT JSON structure:
+🚨 CRITICAL: Return ONLY JSON. No text before or after. No explanations. No markdown. Just pure JSON.
 
+**REQUIRED JSON OUTPUT FORMAT:**
 {
-  "intent_category": "one of: creative, technical, business, academic, personal, greeting, incomplete, other",
-  "confidence": 0.0-1.0,
+  "intent_category": "string",
+  "confidence": number,
   "specific_domain": "string or null",
-  "complexity_level": "basic or intermediate or advanced",
-  "requires_context": true or false,
-  "input_complexity_score": 0.0-1.0,
-  "enhancement_recommended": true or false,
-  "suggested_action": "request_clarification or basic_enhancement or standard_enhancement or advanced_enhancement",
+  "complexity_level": "string", 
+  "requires_context": boolean,
+  "input_complexity_score": number,
+  "enhancement_recommended": boolean,
+  "suggested_action": "string",
   "conversation_starter": "string or null",
-  "input_type": "greeting or incomplete or minimal or substantial or complex"
+  "input_type": "string"
 }
 
-CLASSIFICATION RULES:
-- greeting: "hi", "hello", "hey" → complexity_score: 0.1-0.2
-- incomplete: fragments, "help me" → complexity_score: 0.1-0.3
-- minimal: basic requests without context → complexity_score: 0.2-0.5
-- substantial: detailed requests with specifics → complexity_score: 0.4-0.8
-- complex: multi-part, expert-level requests → complexity_score: 0.7-1.0
+**CLASSIFICATION TAXONOMY:**
 
-ENHANCEMENT ROUTING:
-- complexity_score < 0.3: suggested_action = "request_clarification"
-- complexity_score 0.3-0.5: suggested_action = "basic_enhancement"
-- complexity_score 0.5-0.7: suggested_action = "standard_enhancement"
-- complexity_score > 0.7: suggested_action = "advanced_enhancement"
+**Intent Categories:**
+- "greeting": Basic greetings, hello messages
+- "creative": Writing, storytelling, art, design requests
+- "technical": Programming, API development, software engineering
+- "business": Strategy, marketing, operations, planning
+- "academic": Research, analysis, educational content
+- "personal": Self-improvement, planning, productivity
+- "incomplete": Fragments, unclear requests
+- "other": Everything else
 
-EXAMPLES:
+**Input Types:**
+- "greeting": "hi", "hello", "hey" → complexity_score: 0.1-0.2
+- "incomplete": Fragments, "help me" → complexity_score: 0.1-0.3  
+- "minimal": Basic requests without detail → complexity_score: 0.2-0.5
+- "substantial": Detailed requests with specifics → complexity_score: 0.4-0.8
+- "complex": Multi-part, expert-level requests → complexity_score: 0.7-1.0
 
-INPUT: "hi"
-OUTPUT: {"intent_category": "greeting", "confidence": 0.95, "specific_domain": null, "complexity_level": "basic", "requires_context": false, "input_complexity_score": 0.1, "enhancement_recommended": false, "suggested_action": "request_clarification", "conversation_starter": "Hello! I'm here to help enhance your prompts. What would you like to create today?", "input_type": "greeting"}
+**Enhancement Actions:**
+- complexity_score < 0.3: "request_clarification"
+- complexity_score 0.3-0.5: "basic_enhancement" 
+- complexity_score 0.5-0.7: "standard_enhancement"
+- complexity_score > 0.7: "advanced_enhancement"
 
-INPUT: "write a story"
-OUTPUT: {"intent_category": "creative", "confidence": 0.8, "specific_domain": "storytelling", "complexity_level": "basic", "requires_context": false, "input_complexity_score": 0.3, "enhancement_recommended": true, "suggested_action": "basic_enhancement", "conversation_starter": "I'd be happy to help with your story! What genre, characters, or theme do you have in mind?", "input_type": "minimal"}
+**EXAMPLES:**
 
-INPUT: "Build a REST API for user authentication with JWT tokens and password hashing"
-OUTPUT: {"intent_category": "technical", "confidence": 0.9, "specific_domain": "software development", "complexity_level": "advanced", "requires_context": true, "input_complexity_score": 0.8, "enhancement_recommended": true, "suggested_action": "advanced_enhancement", "conversation_starter": null, "input_type": "complex"}
+Input: "hi"
+Output: {"intent_category": "greeting", "confidence": 0.95, "specific_domain": null, "complexity_level": "basic", "requires_context": false, "input_complexity_score": 0.1, "enhancement_recommended": false, "suggested_action": "request_clarification", "conversation_starter": "Hello! I'm here to help enhance your prompts. What would you like to create today?", "input_type": "greeting"}
 
-RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.""",
+Input: "write a story"  
+Output: {"intent_category": "creative", "confidence": 0.8, "specific_domain": "storytelling", "complexity_level": "basic", "requires_context": false, "input_complexity_score": 0.3, "enhancement_recommended": true, "suggested_action": "basic_enhancement", "conversation_starter": "I'd be happy to help with your story! What genre, characters, or theme do you have in mind?", "input_type": "minimal"}
+
+Input: "Build a REST API for user authentication with JWT tokens and password hashing"
+Output: {"intent_category": "technical", "confidence": 0.9, "specific_domain": "software development", "complexity_level": "advanced", "requires_context": true, "input_complexity_score": 0.8, "enhancement_recommended": true, "suggested_action": "advanced_enhancement", "conversation_starter": null, "input_type": "complex"}
+
+Input: "Create a comprehensive marketing strategy for a B2B SaaS startup targeting enterprise clients with a focus on digital transformation and ROI measurement"
+Output: {"intent_category": "business", "confidence": 0.95, "specific_domain": "marketing strategy", "complexity_level": "advanced", "requires_context": true, "input_complexity_score": 0.9, "enhancement_recommended": true, "suggested_action": "advanced_enhancement", "conversation_starter": null, "input_type": "complex"}
+
+Input: "help me"
+Output: {"intent_category": "incomplete", "confidence": 0.7, "specific_domain": null, "complexity_level": "basic", "requires_context": false, "input_complexity_score": 0.2, "enhancement_recommended": false, "suggested_action": "request_clarification", "conversation_starter": "I'd be happy to help! Could you tell me more about what you're working on or what kind of assistance you need?", "input_type": "incomplete"}
+
+**CRITICAL RULES:**
+1. ALWAYS return valid JSON - no exceptions
+2. Handle ALL input types consistently  
+3. Use proper complexity scoring (0.0-1.0)
+4. Set confidence based on clarity of intent
+5. Provide conversation starters for simple inputs only
+6. Never include explanatory text outside JSON
+
+ANALYZE THE FOLLOWING INPUT AND RETURN ONLY THE JSON:"""
+
+    return Agent(
+        name="Production Intent Classifier",
+        instructions=instructions,
         model=classification_model
     )
 
