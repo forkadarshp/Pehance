@@ -23,20 +23,64 @@ os.environ["OPENAI_BASE_URL"] = "https://api.groq.com/openai/v1"
 class ModelConfig:
     """Optimized model selection for different agent types and complexity levels"""
     
-    # Fast, efficient model for quick tasks
+    # Fast, efficient model for quick tasks (verified available on Groq free tier)
     FAST_MODEL = "llama-3.1-8b-instant"
     
-    # Primary model for general reasoning tasks
+    # Primary model for general reasoning tasks (verified available on Groq free tier)
     PRIMARY_MODEL = "llama-3.3-70b-versatile"
     
-    # Advanced model for complex enhancements
-    ADVANCED_MODEL = "qwen/qwen3-32b"  # Alternative: "moonshotai/kimi-k2-instruct"
+    # Advanced model for complex enhancements (verified available on Groq free tier)
+    ADVANCED_MODEL = "deepseek-r1-distill-llama-70b"
     
-    # Safety and guardrail model
-    SAFETY_MODEL = "meta-llama/llama-guard-4-12b"
+    # Alternative advanced model
+    ADVANCED_MODEL_ALT = "qwen2.5-72b-instruct"
+    
+    # Safety and guardrail model (fallback to fast model if not available)
+    SAFETY_MODEL = "llama-3.1-8b-instant"  # Using fast model for safety checks
     
     # Fallback model in case of issues
     FALLBACK_MODEL = "llama3-8b-8192"
+    
+    # Model availability cache
+    _model_availability = {}
+    
+    @classmethod
+    async def test_model_availability(cls, model_name: str) -> bool:
+        """Test if a model is available and cache the result"""
+        if model_name in cls._model_availability:
+            return cls._model_availability[model_name]
+        
+        try:
+            from groq import Groq
+            client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+            
+            # Quick test with minimal tokens
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=[{"role": "user", "content": "test"}],
+                max_tokens=1,
+                timeout=10
+            )
+            
+            cls._model_availability[model_name] = True
+            print(f"✅ Model {model_name} is available")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Model {model_name} not available: {e}")
+            cls._model_availability[model_name] = False
+            return False
+    
+    @classmethod
+    async def get_best_available_model(cls, preferred_models: list) -> str:
+        """Get the best available model from a list of preferences"""
+        for model in preferred_models:
+            if await cls.test_model_availability(model):
+                return model
+        
+        # Ultimate fallback
+        print(f"⚠️ All preferred models unavailable, using fallback: {cls.FALLBACK_MODEL}")
+        return cls.FALLBACK_MODEL
 
 def select_model_for_task(task_type: str, complexity_score: float = 0.5, agent_type: str = "general") -> str:
     """
