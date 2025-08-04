@@ -83,36 +83,88 @@ async def get_status_checks():
 # Model testing endpoint
 @api_router.get("/test-models")
 async def test_models():
-    """Test all available models and return their availability status"""
+    """Test all available models and return their availability status with performance metrics"""
     try:
         from enhanced_agents import ModelConfig
         
+        # Test all model tiers
         models_to_test = [
-            ModelConfig.FAST_MODEL,
-            ModelConfig.PRIMARY_MODEL,
-            ModelConfig.ADVANCED_MODEL,
-            ModelConfig.ADVANCED_MODEL_ALT,
+            # Tier 1: Ultra-Fast
+            ModelConfig.ULTRA_FAST_MODEL,
+            # Tier 2: Balanced
+            ModelConfig.BALANCED_MODEL,
+            ModelConfig.BALANCED_ALT,
+            # Tier 3: High-Reasoning
+            ModelConfig.REASONING_MODEL,
+            ModelConfig.REASONING_ALT,
+            # Tier 4: Specialized
+            ModelConfig.ADVANCED_REASONING,
+            ModelConfig.CREATIVE_MODEL,
+            # Safety
             ModelConfig.SAFETY_MODEL,
-            ModelConfig.FALLBACK_MODEL
+            ModelConfig.SAFETY_FALLBACK,
+            # Fallback
+            ModelConfig.LEGACY_FALLBACK
         ]
         
         results = {}
+        available_count = 0
+        total_models = len(models_to_test)
+        
+        def get_model_tier(model_name: str) -> str:
+            """Determine the tier of a given model"""
+            if model_name == ModelConfig.ULTRA_FAST_MODEL:
+                return "Tier 1: Ultra-Fast"
+            elif model_name in [ModelConfig.BALANCED_MODEL, ModelConfig.BALANCED_ALT]:
+                return "Tier 2: Balanced"
+            elif model_name in [ModelConfig.REASONING_MODEL, ModelConfig.REASONING_ALT]:
+                return "Tier 3: High-Reasoning"
+            elif model_name in [ModelConfig.ADVANCED_REASONING, ModelConfig.CREATIVE_MODEL]:
+                return "Tier 4: Specialized"
+            elif model_name in [ModelConfig.SAFETY_MODEL, ModelConfig.SAFETY_FALLBACK]:
+                return "Safety Models"
+            elif model_name == ModelConfig.LEGACY_FALLBACK:
+                return "Legacy Fallback"
+            else:
+                return "Unknown"
+        
         for model in models_to_test:
             try:
                 is_available = await ModelConfig.test_model_availability(model)
+                performance = ModelConfig.MODEL_PERFORMANCE.get(model, "Unknown")
+                features = ModelConfig.MODEL_FEATURES.get(model, [])
+                
+                if is_available:
+                    available_count += 1
+                
                 results[model] = {
                     "available": is_available,
-                    "status": "✅ Available" if is_available else "❌ Not Available"
+                    "status": "✅ Available" if is_available else "❌ Not Available",
+                    "performance_tokens_sec": performance,
+                    "features": features,
+                    "tier": get_model_tier(model)
                 }
             except Exception as e:
                 results[model] = {
                     "available": False,
-                    "status": f"❌ Error: {str(e)}"
+                    "status": f"❌ Error: {str(e)}",
+                    "performance_tokens_sec": "Unknown",
+                    "features": [],
+                    "tier": "Unknown"
                 }
         
         return {
             "success": True,
             "models": results,
+            "summary": {
+                "total_models": total_models,
+                "available_models": available_count,
+                "availability_rate": f"{(available_count/total_models)*100:.1f}%",
+                "recommended_fast": ModelConfig.ULTRA_FAST_MODEL,
+                "recommended_reasoning": ModelConfig.REASONING_MODEL,
+                "recommended_creative": ModelConfig.CREATIVE_MODEL,
+                "safety_model": ModelConfig.SAFETY_MODEL
+            },
             "timestamp": datetime.utcnow().isoformat()
         }
     except Exception as e:
