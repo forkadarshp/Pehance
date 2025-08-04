@@ -487,6 +487,18 @@ async def create_intent_classifier_agent():
         model=classification_model
     )
 
+# 2.6. Supporting Content Agent Creator
+async def create_supporting_content_agent():
+    """Create a supporting content agent with smart model selection"""
+    context_model = await select_model_for_task("supporting_content", 0.5, "context")
+    print(f"Using supporting content model: {context_model}")
+    
+    return Agent(
+        name="Supporting Content Agent",
+        instructions=supporting_content_agent.instructions,  # Reuse existing instructions
+        model=context_model
+    )
+
 # 3. Best Practices Agent (4-D Methodology Specialist)
 def create_best_practices_agent():
     """Create a best practices agent implementing the 4-D methodology"""
