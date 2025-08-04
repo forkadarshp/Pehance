@@ -422,7 +422,48 @@ async def create_intent_classifier_agent():
     
     return Agent(
         name="Enhanced Intent Classifier",
-        instructions=intent_classifier_agent.instructions,  # Reuse existing instructions
+        instructions="""CRITICAL: You MUST return ONLY a valid JSON object. No other text, no explanations, no markdown. Just pure JSON.
+
+ANALYZE the user input and return this EXACT JSON structure:
+
+{
+  "intent_category": "one of: creative, technical, business, academic, personal, greeting, incomplete, other",
+  "confidence": 0.0-1.0,
+  "specific_domain": "string or null",
+  "complexity_level": "basic or intermediate or advanced",
+  "requires_context": true or false,
+  "input_complexity_score": 0.0-1.0,
+  "enhancement_recommended": true or false,
+  "suggested_action": "request_clarification or basic_enhancement or standard_enhancement or advanced_enhancement",
+  "conversation_starter": "string or null",
+  "input_type": "greeting or incomplete or minimal or substantial or complex"
+}
+
+CLASSIFICATION RULES:
+- greeting: "hi", "hello", "hey" → complexity_score: 0.1-0.2
+- incomplete: fragments, "help me" → complexity_score: 0.1-0.3
+- minimal: basic requests without context → complexity_score: 0.2-0.5
+- substantial: detailed requests with specifics → complexity_score: 0.4-0.8
+- complex: multi-part, expert-level requests → complexity_score: 0.7-1.0
+
+ENHANCEMENT ROUTING:
+- complexity_score < 0.3: suggested_action = "request_clarification"
+- complexity_score 0.3-0.5: suggested_action = "basic_enhancement"
+- complexity_score 0.5-0.7: suggested_action = "standard_enhancement"
+- complexity_score > 0.7: suggested_action = "advanced_enhancement"
+
+EXAMPLES:
+
+INPUT: "hi"
+OUTPUT: {"intent_category": "greeting", "confidence": 0.95, "specific_domain": null, "complexity_level": "basic", "requires_context": false, "input_complexity_score": 0.1, "enhancement_recommended": false, "suggested_action": "request_clarification", "conversation_starter": "Hello! I'm here to help enhance your prompts. What would you like to create today?", "input_type": "greeting"}
+
+INPUT: "write a story"
+OUTPUT: {"intent_category": "creative", "confidence": 0.8, "specific_domain": "storytelling", "complexity_level": "basic", "requires_context": false, "input_complexity_score": 0.3, "enhancement_recommended": true, "suggested_action": "basic_enhancement", "conversation_starter": "I'd be happy to help with your story! What genre, characters, or theme do you have in mind?", "input_type": "minimal"}
+
+INPUT: "Build a REST API for user authentication with JWT tokens and password hashing"
+OUTPUT: {"intent_category": "technical", "confidence": 0.9, "specific_domain": "software development", "complexity_level": "advanced", "requires_context": true, "input_complexity_score": 0.8, "enhancement_recommended": true, "suggested_action": "advanced_enhancement", "conversation_starter": null, "input_type": "complex"}
+
+RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.""",
         model=classification_model
     )
 
