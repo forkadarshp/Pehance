@@ -431,84 +431,93 @@ If the user input is very simple (like "hi" or single words), provide a friendly
 
 async def orchestrate_enhancement(user_prompt: str):
     """
-    Orchestrates the multi-agent enhancement process with rate limiting:
-    1. Classify intent
-    2. Generate supporting content with domain knowledge
-    3. Create dynamically enhanced prompt
+    Orchestrates the multi-agent enhancement process using 4-D methodology:
+    1. Classify intent with smart complexity detection
+    2. Generate supporting content only when beneficial 
+    3. Apply 4-D methodology based on complexity level
     """
     
     # Step 1: Classify Intent with rate limiting
-    print("🎯 Classifying intent...")
+    print("🎯 Analyzing user input...")
     intent_result = await rate_limited_request(Runner.run, intent_classifier_agent, user_prompt)
     intent_data = parse_intent_json(intent_result.final_output)
     
     print(f"Intent: {intent_data.intent_category} ({intent_data.confidence:.1%} confidence)")
-    print(f"Domain: {intent_data.specific_domain}")
+    print(f"Domain: {intent_data.specific_domain or 'None specified'}")
     print(f"Complexity: {intent_data.complexity_level}")
-    print(f"Needs context: {intent_data.requires_context}")
+    print(f"Context needed: {intent_data.requires_context}")
     
-    # Step 2: Generate Supporting Content (if needed) with rate limiting
+    # Step 2: Smart Context Generation (only for intermediate/advanced)
     supporting_context = ""
     research_performed = False
     
     if intent_data.requires_context and intent_data.complexity_level in ["intermediate", "advanced"]:
-        print("🔍 Gathering supporting context...")
+        print("🔍 Gathering domain-specific context...")
         
-        # Generate supporting content with domain knowledge
         support_prompt = f"""
         Intent Analysis: {intent_data.dict()}
-        Original Prompt: {user_prompt}
+        Original User Input: "{user_prompt}"
         
-        Please provide comprehensive supporting context for this {intent_data.intent_category} prompt in the {intent_data.specific_domain or 'general'} domain. 
+        Provide focused, relevant context for this {intent_data.intent_category} request in the {intent_data.specific_domain or 'general'} domain.
         
-        Focus on:
-        - Current best practices and industry standards
-        - Relevant frameworks, tools, and methodologies
-        - Common challenges and proven solutions
-        - Key considerations for {intent_data.complexity_level} level implementation
-        
-        Provide detailed context that will help create a much more effective enhanced prompt.
+        Match context depth to complexity level: {intent_data.complexity_level}
         """
         
         support_result = await rate_limited_request(Runner.run, supporting_content_agent, support_prompt)
         supporting_context = support_result.final_output
         research_performed = True
         print(f"Context gathered: {len(supporting_context)} characters")
+    else:
+        print("📝 Skipping context gathering for basic/simple request")
     
-    # Step 3: Generate Best Practices (if needed) with rate limiting
+    # Step 3: 4-D Methodology Guidance (only for intermediate/advanced)
     best_practices_context = ""
-    if intent_data.complexity_level in ["intermediate", "advanced"]:
-        print("🔍 Gathering best practices...")
-        best_practices_prompt = f"""
-        Intent Analysis: {intent_data.dict()}
-        Original Prompt: {user_prompt}
-        
-        Please provide the most current and effective prompt writing best practices that should be applied universally, regardless of the specific intent or domain.
-        """
-        best_practices_result = await rate_limited_request(Runner.run, best_practices_agent, best_practices_prompt)
-        best_practices_context = best_practices_result.final_output
-        print(f"Best practices gathered: {len(best_practices_context)} characters")
+    methodology_applied = False
     
-    # Step 4: Create Dynamic Enhancer Agent
-    print("✨ Enhancing prompt with dynamic context...")
+    if intent_data.complexity_level in ["intermediate", "advanced"]:
+        print("⚡ Applying 4-D methodology guidance...")
+        methodology_prompt = f"""
+        Intent Analysis: {intent_data.dict()}
+        Original User Input: "{user_prompt}"
+        
+        Apply 4-D methodology analysis for this {intent_data.complexity_level} complexity {intent_data.intent_category} request.
+        """
+        
+        methodology_result = await rate_limited_request(Runner.run, best_practices_agent, methodology_prompt) 
+        best_practices_context = methodology_result.final_output
+        methodology_applied = True
+        print(f"4-D methodology guidance: {len(best_practices_context)} characters")
+    else:
+        print("📝 Using basic enhancement mode - minimal 4-D methodology")
+    
+    # Step 4: Create Sophisticated Dynamic Enhancer
+    print("✨ Crafting optimized prompt...")
     dynamic_instructions = create_dynamic_enhancer_instructions(intent_data, supporting_context, best_practices_context)
     
     enhancer_agent = Agent(
-        name="Dynamic Prompt Enhancer",
+        name="Lyra - Prompt Enhancement Specialist",
         instructions=dynamic_instructions,
         model="llama3-8b-8192",
         input_guardrails=[InputGuardrail(guardrail_function=safety_guardrail)]
     )
     
-    # Step 5: Generate Enhanced Prompt with rate limiting
+    # Step 5: Generate Enhanced Prompt with 4-D methodology
     enhancement_result = await rate_limited_request(Runner.run, enhancer_agent, user_prompt)
+    
+    # Determine process steps based on what was actually performed
+    process_steps = ["intent_classification"]
+    if research_performed:
+        process_steps.append("domain_context_research")
+    if methodology_applied:
+        process_steps.append("4d_methodology_application")
+    process_steps.append("prompt_optimization")
     
     return {
         "enhanced_prompt": enhancement_result.final_output,
         "intent_analysis": intent_data.dict(),
         "supporting_context_length": len(supporting_context),
-        "best_practices_length": len(best_practices_context),
-        "web_research_performed": research_performed,
-        "best_practices_applied": bool(best_practices_context),
-        "process_steps": ["intent_classification", "knowledge_research", "best_practices_gathering", "dynamic_enhancement"] if best_practices_context else ["intent_classification", "knowledge_research", "dynamic_enhancement"]
+        "methodology_guidance_length": len(best_practices_context),
+        "domain_research_performed": research_performed,
+        "4d_methodology_applied": methodology_applied,
+        "process_steps": process_steps
     }
