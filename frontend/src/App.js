@@ -817,6 +817,52 @@ const App = () => {
                           <div className="text-sm">Mode Used</div>
                         </div>
                       </div>
+                      
+                      {/* Models Used Section */}
+                      {enhancementMetrics.modelsUsed && (
+                        <div style={{ marginTop: 'var(--space-6)' }}>
+                          <h4 style={{ 
+                            marginBottom: 'var(--space-4)', 
+                            color: 'var(--color-slate-300)',
+                            fontSize: '1rem',
+                            fontWeight: '600'
+                          }}>
+                            🤖 Models Used
+                          </h4>
+                          <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+                            gap: 'var(--space-4)' 
+                          }}>
+                            {Object.entries(enhancementMetrics.modelsUsed).map(([step, model]) => 
+                              model && (
+                                <div key={step} className="card-elevated" style={{ padding: 'var(--space-4)' }}>
+                                  <div style={{ 
+                                    fontSize: '0.875rem',
+                                    fontWeight: '600',
+                                    marginBottom: 'var(--space-2)',
+                                    textTransform: 'capitalize',
+                                    color: 'var(--color-slate-300)'
+                                  }}>
+                                    {step.replace('_', ' ')}
+                                  </div>
+                                  <div style={{ 
+                                    fontSize: '0.75rem',
+                                    color: 'var(--color-amber-primary)',
+                                    fontFamily: 'Monaco, monospace',
+                                    background: 'rgba(245, 158, 11, 0.1)',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    wordBreak: 'break-all'
+                                  }}>
+                                    {model}
+                                  </div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
