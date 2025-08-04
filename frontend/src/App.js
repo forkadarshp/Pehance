@@ -122,10 +122,12 @@ const App = () => {
       const metrics = {
         originalLength: prompt.length,
         enhancedLength: response.data.enhanced_prompt.length,
-        improvementRatio: (response.data.enhanced_prompt.length / prompt.length).toFixed(1),
+        improvementRatio: response.data.enhancement_ratio || (response.data.enhanced_prompt.length / prompt.length).toFixed(1),
         processingTime: processingTime,
         confidenceScore: response.data.agent_results.intent_analysis.confidence,
-        agentSteps: response.data.agent_results.process_steps?.length || 4
+        agentSteps: response.data.agent_results.process_steps?.length || 4,
+        enhancementType: response.data.enhancement_type || 'standard_enhancement',
+        complexityScore: response.data.complexity_score || response.data.agent_results.complexity_score || 0.5
       };
       
       setEnhancementMetrics(metrics);
