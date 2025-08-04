@@ -834,7 +834,7 @@ async def orchestrate_enhancement(user_prompt: str):
             name="Lyra - Proportional Enhancement Specialist",
             instructions=dynamic_instructions,
             model="llama3-8b-8192",
-            input_guardrails=[InputGuardrail(guardrail_function=safety_guardrail)]
+            input_guardrails=[InputGuardrail(guardrail_function=enhanced_safety_guardrail)]
         )
         
         # Step 6: Generate Enhanced Prompt with Proportionality Controls
