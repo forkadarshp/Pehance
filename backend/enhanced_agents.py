@@ -62,14 +62,20 @@ async def rate_limited_request(func, *args, **kwargs):
     # Should never reach here, but just in case
     raise Exception("Unexpected error in rate limiting logic")
 
-# --- Intent Classification Models ---
+# --- Enhanced Intent Classification Models ---
 
 class IntentClassification(BaseModel):
-    intent_category: str  # creative, technical, business, academic, personal, other
+    intent_category: str  # creative, technical, business, academic, personal, other, greeting, incomplete
     confidence: float  # 0.0 to 1.0
     specific_domain: Optional[str]  # programming, writing, marketing, research, etc.
     complexity_level: str  # basic, intermediate, advanced
     requires_context: bool  # whether additional context would be helpful
+    # NEW: Enhanced 4D methodology fields
+    input_complexity_score: float  # 0.0 to 1.0 - actual complexity of the input
+    enhancement_recommended: bool  # whether full enhancement is appropriate
+    suggested_action: str  # request_clarification, basic_enhancement, standard_enhancement, advanced_enhancement
+    conversation_starter: Optional[str]  # personalized response for simple inputs
+    input_type: str  # greeting, incomplete, minimal, substantial, complex
 
 # --- Utility Functions ---
 
