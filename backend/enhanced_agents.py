@@ -188,18 +188,6 @@ def parse_intent_json(text: str) -> IntentClassification:
         input_type="incomplete"
     )
 
-# --- Guardrail Definition ---
-
-async def safety_guardrail(ctx, agent, input_data):
-    # Simple keyword-based check without external dependencies
-    blocklist = ["hack", "illegal", "harmful", "violence", "exploit", "bypass"]
-    is_flagged = any(word in input_data.lower() for word in blocklist)
-    
-    return GuardrailFunctionOutput(
-        output_info={"flagged": is_flagged, "reason": "Contains potentially harmful content" if is_flagged else "Safe"},
-        tripwire_triggered=is_flagged,
-    )
-
 # --- Enhanced Guardrail Definition ---
 
 async def enhanced_safety_guardrail(ctx, agent, input_data):
