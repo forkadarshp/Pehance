@@ -56,6 +56,10 @@ class PromptEnhanceResponse(BaseModel):
     success: bool
     error: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+    # NEW: Additional fields for 4D methodology tracking
+    enhancement_type: Optional[str] = None  # clarification_request, basic_enhancement, standard_enhancement, advanced_enhancement
+    enhancement_ratio: Optional[float] = None
+    complexity_score: Optional[float] = None
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
