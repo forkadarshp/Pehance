@@ -1172,11 +1172,7 @@ async def orchestrate_enhancement(user_prompt: str, mode: str = "single"):
             methodology_model = await select_model_for_task("methodology", intent_data.input_complexity_score)
             print(f"Using methodology model: {methodology_model}")
             
-            methodology_agent = Agent(
-                name="Best Practices Agent", 
-                instructions=best_practices_agent.instructions,
-                model=methodology_model
-            )
+            methodology_agent = await create_best_practices_agent()
             
             methodology_prompt = f"""
             Intent Analysis: {intent_data.dict()}
