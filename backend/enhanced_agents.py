@@ -57,6 +57,7 @@ class ModelConfig:
         "gemma2-9b-it": 500,
         "deepseek-r1-distill-llama-70b": 400,
         "qwen-qwq-32b": 400,
+        "moonshotai/kimi-k2-instruct": 380,
         "llama-3.3-70b-versatile": 394,
         "llama3-8b-8192": 350,  # estimated
     }
