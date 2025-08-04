@@ -82,9 +82,9 @@ class ModelConfig:
         print(f"⚠️ All preferred models unavailable, using fallback: {cls.FALLBACK_MODEL}")
         return cls.FALLBACK_MODEL
 
-def select_model_for_task(task_type: str, complexity_score: float = 0.5, agent_type: str = "general") -> str:
+async def select_model_for_task(task_type: str, complexity_score: float = 0.5, agent_type: str = "general") -> str:
     """
-    Intelligent model selection based on task requirements
+    Intelligent model selection based on task requirements with dynamic availability checking
     
     Args:
         task_type: Type of task (intent_classification, enhancement, safety, etc.)
@@ -92,36 +92,39 @@ def select_model_for_task(task_type: str, complexity_score: float = 0.5, agent_t
         agent_type: Type of agent (classifier, enhancer, guardrail, etc.)
     
     Returns:
-        Optimal model name for the task
+        Optimal available model name for the task
     """
     try:
         # Intent Classification - Use fast model for quick analysis
         if task_type == "intent_classification" or agent_type == "classifier":
-            return ModelConfig.FAST_MODEL
+            preferred_models = [ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
         
-        # Safety and Guardrails - Use specialized safety model
+        # Safety and Guardrails - Use fast, reliable model
         elif task_type == "safety" or agent_type == "guardrail":
-            return ModelConfig.SAFETY_MODEL
+            preferred_models = [ModelConfig.SAFETY_MODEL, ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
         
         # Complex Enhancement Tasks - Use advanced model for sophisticated reasoning
         elif (task_type == "enhancement" and complexity_score > 0.7) or agent_type == "advanced_enhancer":
-            return ModelConfig.ADVANCED_MODEL
+            preferred_models = [ModelConfig.ADVANCED_MODEL, ModelConfig.ADVANCED_MODEL_ALT, ModelConfig.PRIMARY_MODEL, ModelConfig.FALLBACK_MODEL]
         
         # Context and Supporting Content - Use primary model for balanced performance
         elif task_type in ["context", "supporting_content", "methodology"]:
-            return ModelConfig.PRIMARY_MODEL
+            preferred_models = [ModelConfig.PRIMARY_MODEL, ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
         
         # Standard Enhancement - Use primary model for good reasoning
         elif task_type == "enhancement" and complexity_score > 0.3:
-            return ModelConfig.PRIMARY_MODEL
+            preferred_models = [ModelConfig.PRIMARY_MODEL, ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
         
         # Basic Enhancement - Use fast model for simple tasks
         elif task_type == "basic_enhancement" or complexity_score <= 0.3:
-            return ModelConfig.FAST_MODEL
+            preferred_models = [ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
         
         # Default to primary model
         else:
-            return ModelConfig.PRIMARY_MODEL
+            preferred_models = [ModelConfig.PRIMARY_MODEL, ModelConfig.FAST_MODEL, ModelConfig.FALLBACK_MODEL]
+        
+        # Get the best available model from preferences
+        return await ModelConfig.get_best_available_model(preferred_models)
             
     except Exception as e:
         print(f"Model selection error: {e}, using fallback model")
