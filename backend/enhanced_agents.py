@@ -200,6 +200,87 @@ async def safety_guardrail(ctx, agent, input_data):
         tripwire_triggered=is_flagged,
     )
 
+# --- Enhanced Guardrail Definition ---
+
+async def enhanced_safety_guardrail(ctx, agent, input_data):
+    """Enhanced safety guardrail using specialized safety model"""
+    try:
+        # Use specialized safety model for better content filtering
+        safety_model = select_model_for_task("safety", agent_type="guardrail")
+        
+        # Create a safety assessment agent
+        safety_agent = Agent(
+            name="Safety Guardrail",
+            instructions="""You are a specialized content safety classifier. Analyze the input for:
+
+**SAFETY CATEGORIES TO DETECT:**
+1. **Harmful Content**: Violence, self-harm, illegal activities
+2. **Inappropriate Requests**: Bypassing AI systems, hacking, exploitation
+3. **Offensive Content**: Hate speech, harassment, discrimination
+4. **Privacy Violations**: Requests for personal information, doxxing
+5. **Misinformation**: Requests to generate false or misleading information
+
+**ASSESSMENT CRITERIA:**
+- Rate safety level: SAFE, CAUTION, UNSAFE
+- Provide specific reason if flagged
+- Consider context and intent
+
+**OUTPUT FORMAT:**
+Return ONLY a JSON object:
+{
+  "safety_level": "SAFE|CAUTION|UNSAFE",
+  "flagged": true/false,
+  "reason": "specific reason if flagged",
+  "confidence": 0.95
+}
+
+Analyze this input for safety concerns:""",
+            model=safety_model
+        )
+        
+        # Run safety assessment
+        result = await rate_limited_request(Runner.run, safety_agent, input_data)
+        
+        try:
+            # Parse safety result
+            safety_result = json.loads(result.final_output.strip())
+            is_flagged = safety_result.get("flagged", False)
+            safety_level = safety_result.get("safety_level", "SAFE")
+            reason = safety_result.get("reason", "Content appears safe")
+            
+            return GuardrailFunctionOutput(
+                output_info={
+                    "flagged": is_flagged,
+                    "safety_level": safety_level,
+                    "reason": reason,
+                    "model_used": safety_model
+                },
+                tripwire_triggered=is_flagged,
+            )
+            
+        except (json.JSONDecodeError, KeyError):
+            # Fallback to keyword-based check
+            print("Safety model response parsing failed, using fallback method")
+            return await basic_safety_guardrail(ctx, agent, input_data)
+            
+    except Exception as e:
+        print(f"Enhanced safety guardrail error: {e}, using fallback")
+        return await basic_safety_guardrail(ctx, agent, input_data)
+
+async def basic_safety_guardrail(ctx, agent, input_data):
+    """Basic keyword-based safety check as fallback"""
+    blocklist = ["hack", "illegal", "harmful", "violence", "exploit", "bypass", "jailbreak"]
+    is_flagged = any(word in input_data.lower() for word in blocklist)
+    
+    return GuardrailFunctionOutput(
+        output_info={
+            "flagged": is_flagged, 
+            "reason": "Contains potentially harmful content" if is_flagged else "Safe",
+            "method": "keyword_based"
+        },
+        tripwire_triggered=is_flagged,
+    )
+
 # --- Agent Definitions ---
 
 # 1. Enhanced Intent Classifier Agent with 4D Methodology
