@@ -80,6 +80,45 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Model testing endpoint
+@api_router.get("/test-models")
+async def test_models():
+    """Test all available models and return their availability status"""
+    try:
+        from enhanced_agents import ModelConfig
+        
+        models_to_test = [
+            ModelConfig.FAST_MODEL,
+            ModelConfig.PRIMARY_MODEL,
+            ModelConfig.ADVANCED_MODEL,
+            ModelConfig.ADVANCED_MODEL_ALT,
+            ModelConfig.SAFETY_MODEL,
+            ModelConfig.FALLBACK_MODEL
+        ]
+        
+        results = {}
+        for model in models_to_test:
+            try:
+                is_available = await ModelConfig.test_model_availability(model)
+                results[model] = {
+                    "available": is_available,
+                    "status": "✅ Available" if is_available else "❌ Not Available"
+                }
+            except Exception as e:
+                results[model] = {
+                    "available": False,
+                    "status": f"❌ Error: {str(e)}"
+                }
+        
+        return {
+            "success": True,
+            "models": results,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Model testing failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Model testing error: {str(e)}")
+
 # Simple test endpoint for debugging
 @api_router.post("/test-groq")
 async def test_groq(request: PromptEnhanceRequest):
