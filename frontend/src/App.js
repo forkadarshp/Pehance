@@ -120,14 +120,7 @@ const App = () => {
     setCurrentStageIndex(0);
     setEnhancementMetrics(null);
 
-    // Processing stages with model information
-    const stages = [
-      { text: "Analyzing intent and context", icon: "⚡", duration: 2000, model: "Classification Agent" },
-      { text: "Gathering domain insights", icon: "🎯", duration: 2200, model: "Context Agent" },
-      { text: "Applying best practices", icon: "⚙️", duration: 1800, model: "Methodology Agent" },
-      { text: "Crafting enhanced prompt", icon: "✨", duration: 2400, model: "Enhancement Agent" }
-    ];
-
+    // Processing stages - already defined at component level
     let currentStage = 0;
     
     const advanceStage = () => {
