@@ -1157,6 +1157,14 @@ async def orchestrate_enhancement(user_prompt: str, mode: str = "single"):
         }
     
     # Step 3: Enhanced Processing with Smart Model Selection
+    # SINGLE MODE QUALITY ENHANCEMENT: Upgrade basic to standard for comprehensive responses
+    if mode == "single" and intent_data.suggested_action == "basic_enhancement":
+        # For meaningful requests in single mode, provide comprehensive enhancement
+        if intent_data.input_complexity_score >= 0.3 and intent_data.intent_category in ["technical", "creative", "business"]:
+            print("🔄 Single Mode: Upgrading basic to comprehensive enhancement for better quality")
+            intent_data.suggested_action = "standard_enhancement"
+            intent_data.input_complexity_score = max(0.5, intent_data.input_complexity_score)
+    
     if intent_data.suggested_action == "basic_enhancement":
         print("⚡ Applying basic enhancement (proportional to input complexity)")
         
