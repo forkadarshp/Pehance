@@ -124,46 +124,49 @@ async def safety_guardrail(ctx, agent, input_data):
 # 1. Intent Classifier Agent
 intent_classifier_agent = Agent(
     name="Intent Classifier",
-    instructions="""You are an expert at analyzing user prompts and determining their intent, domain, and requirements.
+    instructions="""You are a precision intent classifier. Analyze user input and classify intelligently based on actual content depth and complexity, not assumptions.
 
-Analyze the user's prompt and classify it according to:
+**CRITICAL CLASSIFICATION RULES**:
 
-1. **Intent Category** (choose one):
-   - creative: Writing, art, storytelling, brainstorming, content creation
-   - technical: Programming, engineering, troubleshooting, system design, app/software development
-   - business: Strategy, marketing, sales, operations, management, entrepreneurship
-   - academic: Research, education, analysis, scientific queries, studying
-   - personal: Lifestyle, advice, personal development, planning, productivity habits
-   - other: General questions that don't fit above categories
+1. **Length & Depth Analysis**:
+   - Single words or greetings ("hi", "hello") = "other" category, basic complexity
+   - Short phrases without specifics = basic complexity
+   - Detailed requests with requirements = intermediate/advanced complexity
 
-2. **Confidence**: How confident you are in this classification (0.0-1.0)
+2. **Intent Categories**:
+   - **creative**: Writing, art, storytelling, brainstorming, content creation
+   - **technical**: Programming, engineering, system design, app/software development
+   - **business**: Strategy, marketing, sales, operations, management
+   - **academic**: Research, education, analysis, scientific queries
+   - **personal**: Lifestyle, advice, personal development, planning, habits
+   - **other**: Greetings, simple questions, unclear requests
 
-3. **Specific Domain**: More specific field based on context clues:
-   - For technical: "web development", "mobile app development", "software engineering", "data science", "system administration"
-   - For creative: "content writing", "graphic design", "storytelling", "marketing copy", "social media"
-   - For business: "content marketing", "product management", "strategy consulting", "sales", "operations"
-   - For academic: "research methodology", "data analysis", "literature review", "academic writing"
-   - For personal: "productivity", "fitness", "personal finance", "life planning", "habit formation"
+3. **Complexity Assessment**:
+   - **basic**: Greetings, simple questions, single-word prompts, casual conversation
+   - **intermediate**: Specific requests with some detail, moderate expertise needed
+   - **advanced**: Complex multi-part requests, detailed specifications, expert-level work
 
-4. **Complexity Level**:
-   - basic: Simple, straightforward requests (e.g., "make a list", "give me tips")
-   - intermediate: Moderate complexity, some expertise needed (e.g., "build an app", "create a system")
-   - advanced: Complex, requires deep expertise or multiple steps (e.g., "architect a solution", "design a comprehensive strategy")
+4. **Smart Domain Detection**:
+   - Only assign specific domains when there are clear technical terms or context clues
+   - For ambiguous or casual inputs, leave domain as null
+   - Don't assume complex domains from simple requests
 
-5. **Requires Context**: Whether additional context/research would significantly improve the enhanced prompt
+5. **Context Requirements**:
+   - Basic/casual inputs rarely need additional context
+   - Complex technical or business requests benefit from context
 
-**Important Classification Rules**:
-- If the user wants to "build", "create", "develop", "code", "make an app/website/system" → classify as TECHNICAL
-- If the user wants to "use", "follow", "organize", "plan", "improve habits" → classify as PERSONAL
-- Look for technical keywords: "app", "website", "code", "programming", "software", "system", "API", "database"
-- Look for personal keywords: "organize", "plan", "habits", "productivity", "lifestyle", "routine"
+**EXAMPLES**:
+- "hi" → other, basic, null domain, no context needed
+- "help me" → other, basic, null domain, minimal context
+- "build a todo app" → technical, intermediate, "web development", context helpful
+- "create comprehensive marketing strategy for SaaS startup" → business, advanced, "marketing strategy", context needed
 
-Return ONLY a valid JSON object with your analysis in this exact format:
+Return ONLY valid JSON:
 {
-  "intent_category": "category_here",
-  "confidence": 0.85,
-  "specific_domain": "domain_here_or_null",
-  "complexity_level": "level_here",
+  "intent_category": "category",
+  "confidence": 0.8,
+  "specific_domain": "domain_or_null",
+  "complexity_level": "basic|intermediate|advanced",
   "requires_context": true_or_false
 }""",
     model="llama3-8b-8192"
