@@ -18,6 +18,8 @@ const App = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [typingAnimation, setTypingAnimation] = useState("");
   const [enhancementMetrics, setEnhancementMetrics] = useState(null);
+  const [mode, setMode] = useState("single"); // New state for mode toggle
+  const [modelStatus, setModelStatus] = useState(null); // New state for model status
   
   const enhancedTextRef = useRef(null);
   const heroRef = useRef(null);
