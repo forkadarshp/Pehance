@@ -144,16 +144,16 @@ async def select_model_for_task(task_type: str, complexity_score: float = 0.5, a
         elif task_type == "safety" or agent_type == "guardrail":
             preferred_models = [ModelConfig.SAFETY_MODEL, ModelConfig.SAFETY_FALLBACK, ModelConfig.ULTRA_FAST_MODEL, ModelConfig.LEGACY_FALLBACK]
         
-        # COMPLEX ENHANCEMENT (high complexity) - Use best reasoning models
+        # COMPLEX ENHANCEMENT (high complexity) - Use advanced models for complex tasks
         elif (task_type == "enhancement" and complexity_score > 0.7) or agent_type == "advanced_enhancer":
             if prefer_speed:
-                preferred_models = [ModelConfig.ADVANCED_REASONING, ModelConfig.REASONING_MODEL, ModelConfig.REASONING_ALT, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
+                preferred_models = [ModelConfig.ADVANCED_COMPLEX, ModelConfig.CREATIVE_MODEL, ModelConfig.REASONING_MODEL, ModelConfig.ADVANCED_REASONING, ModelConfig.LEGACY_FALLBACK]
             else:
-                preferred_models = [ModelConfig.REASONING_MODEL, ModelConfig.REASONING_ALT, ModelConfig.ADVANCED_REASONING, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
+                preferred_models = [ModelConfig.ADVANCED_COMPLEX, ModelConfig.REASONING_MODEL, ModelConfig.CREATIVE_MODEL, ModelConfig.ADVANCED_REASONING, ModelConfig.LEGACY_FALLBACK]
         
-        # CREATIVE TASKS - Use models with strong creative capabilities
+        # CREATIVE TASKS - Use models with strong creative capabilities including advanced models
         elif task_type in ["creative_enhancement", "creative"] or (task_type == "enhancement" and complexity_score > 0.6):
-            preferred_models = [ModelConfig.CREATIVE_MODEL, ModelConfig.REASONING_MODEL, ModelConfig.ADVANCED_REASONING, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
+            preferred_models = [ModelConfig.CREATIVE_MODEL, ModelConfig.ADVANCED_COMPLEX, ModelConfig.REASONING_MODEL, ModelConfig.ADVANCED_REASONING, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
         
         # CONTEXT AND SUPPORTING CONTENT - Use balanced performance models
         elif task_type in ["context", "supporting_content", "methodology"]:
