@@ -214,7 +214,7 @@ const App = () => {
   };
 
   if (showChatInterface) {
-    return <ChatInterface mode={mode} setMode={setMode} setShowChatInterface={setShowChatInterface} />;
+    return <ChatInterface onBack={() => setShowChatInterface(false)} />;
   }
 
   return (
