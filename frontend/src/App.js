@@ -1080,25 +1080,4 @@ const App = () => {
   );
 };
 
-// Chat Interface Component (placeholder for now)
-const ChatInterface = ({ mode, setMode, setShowChatInterface }) => {
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-obsidian)', padding: 'var(--space-8)' }}>
-      <div className="container">
-        <div style={{ textAlign: 'center', marginBottom: 'var(--space-8)' }}>
-          <h1 className="heading-xl">Chat Interface</h1>
-          <p className="text-lg">Multi-turn conversation mode coming soon...</p>
-          <button 
-            onClick={() => setShowChatInterface(false)}
-            className="btn btn-secondary"
-            style={{ marginTop: 'var(--space-4)' }}
-          >
-            Back to Single Turn
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export default App;
