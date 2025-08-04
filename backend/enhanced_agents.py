@@ -742,18 +742,34 @@ Enhancement should be proportional to this complexity level."""
 
 # --- Multi-Agent Orchestration Function ---
 
-async def orchestrate_enhancement(user_prompt: str):
+async def orchestrate_enhancement(user_prompt: str, mode: str = "single"):
     """
-    Enhanced orchestration implementing 4D methodology with smart routing:
+    Enhanced orchestration implementing 4D methodology with smart routing and mode awareness:
     1. Classify intent with precision complexity detection
-    2. Route to appropriate enhancement pathway
+    2. Route to appropriate enhancement pathway based on mode
     3. Apply proportional enhancement based on complexity
-    4. Prevent over-enhancement syndrome
+    4. Prevent over-enhancement syndrome (in single mode, always enhance)
+    
+    Args:
+        user_prompt: The user's input to enhance
+        mode: "single" (always enhance) or "multi" (allow clarification requests)
     """
     
-    # Step 1: Enhanced Intent Classification with 4D methodology
-    print("🎯 Analyzing user input with 4D methodology...")
-    intent_result = await rate_limited_request(Runner.run, intent_classifier_agent, user_prompt)
+    # Step 1: Enhanced Intent Classification with 4D methodology using smart model selection
+    print(f"🎯 Analyzing user input with 4D methodology (Mode: {mode})...")
+    
+    # Select optimal model for classification
+    classification_model = await select_model_for_task("intent_classification", 0.5, "classifier")
+    print(f"Using classification model: {classification_model}")
+    
+    # Create intent classifier with selected model
+    intent_classifier = Agent(
+        name="Enhanced Intent Classifier",
+        instructions=intent_classifier_agent.instructions,  # Reuse existing instructions
+        model=classification_model
+    )
+    
+    intent_result = await rate_limited_request(Runner.run, intent_classifier, user_prompt)
     intent_data = parse_intent_json(intent_result.final_output)
     
     print(f"Intent: {intent_data.intent_category} ({intent_data.confidence:.1%} confidence)")
@@ -762,11 +778,37 @@ async def orchestrate_enhancement(user_prompt: str):
     print(f"Input Type: {intent_data.input_type}")
     print(f"Suggested Action: {intent_data.suggested_action}")
     
-    # Step 2: Smart Enhancement Routing Based on 4D Analysis
-    if intent_data.suggested_action == "request_clarification":
-        print("📝 Routing to clarification response (preventing over-enhancement)")
+    # Step 2: Mode-Aware Enhancement Routing
+    if mode == "single":
+        # SINGLE MODE: Always provide enhanced responses, never ask clarification
+        print("🔄 Single Mode: Converting any clarification requests to direct enhancements")
         
-        # Return a conversational response asking for more details
+        if intent_data.suggested_action == "request_clarification":
+            # In single mode, handle simple inputs with enhanced greeting/response templates
+            if intent_data.input_type == "greeting":
+                enhanced_greeting = create_enhanced_greeting_response(user_prompt, intent_data)
+                return {
+                    "enhanced_prompt": enhanced_greeting,
+                    "intent_analysis": intent_data.dict(),
+                    "enhancement_type": "enhanced_greeting",
+                    "supporting_context_length": 0,
+                    "methodology_guidance_length": 0,
+                    "domain_research_performed": False,
+                    "4d_methodology_applied": True,
+                    "process_steps": ["intent_classification", "single_mode_greeting_enhancement"],
+                    "enhancement_ratio": round(len(enhanced_greeting) / len(user_prompt), 1),
+                    "complexity_score": intent_data.input_complexity_score,
+                    "mode": mode
+                }
+            else:
+                # For other simple inputs, force basic enhancement
+                intent_data.suggested_action = "basic_enhancement"
+                print("🔄 Converting to basic enhancement for single mode")
+    
+    elif mode == "multi" and intent_data.suggested_action == "request_clarification":
+        # MULTI MODE: Allow clarification requests as normal
+        print("📝 Multi Mode: Routing to clarification response")
+        
         clarification_response = intent_data.conversation_starter or \
             "I'd be happy to help enhance your prompt! Could you share more details about what you'd like to create or improve? The more specific you are, the better I can tailor the enhancement to your needs."
         
@@ -777,22 +819,27 @@ async def orchestrate_enhancement(user_prompt: str):
             "supporting_context_length": 0,
             "methodology_guidance_length": 0,
             "domain_research_performed": False,
-            "4d_methodology_applied": True,  # 4D was applied to determine clarification needed
+            "4d_methodology_applied": True,
             "process_steps": ["intent_classification", "clarification_routing"],
             "enhancement_ratio": round(len(clarification_response) / len(user_prompt), 1),
-            "complexity_score": intent_data.input_complexity_score
+            "complexity_score": intent_data.input_complexity_score,
+            "mode": mode
         }
     
-    elif intent_data.suggested_action == "basic_enhancement":
+    # Step 3: Enhanced Processing with Smart Model Selection
+    if intent_data.suggested_action == "basic_enhancement":
         print("⚡ Applying basic enhancement (proportional to input complexity)")
         
-        # For basic enhancement, skip context gathering but apply light improvement
+        # Select optimal model for basic enhancement
+        basic_model = await select_model_for_task("basic_enhancement", intent_data.input_complexity_score)
+        print(f"Using basic enhancement model: {basic_model}")
+        
         basic_instructions = create_basic_enhancement_instructions(intent_data, user_prompt)
         
         basic_enhancer = Agent(
             name="Basic Prompt Enhancer",
             instructions=basic_instructions,
-            model="llama3-8b-8192"
+            model=basic_model
         )
         
         enhancement_result = await rate_limited_request(Runner.run, basic_enhancer, user_prompt)
@@ -807,19 +854,31 @@ async def orchestrate_enhancement(user_prompt: str):
             "4d_methodology_applied": True,
             "process_steps": ["intent_classification", "basic_enhancement"],
             "enhancement_ratio": round(len(enhancement_result.final_output) / len(user_prompt), 1),
-            "complexity_score": intent_data.input_complexity_score
+            "complexity_score": intent_data.input_complexity_score,
+            "model_used": basic_model,
+            "mode": mode
         }
     
     else:
-        # Standard or Advanced Enhancement - use existing sophisticated pipeline
+        # Standard or Advanced Enhancement - use existing sophisticated pipeline with smart models
         print(f"🚀 Applying {intent_data.suggested_action} with full multi-agent system")
         
-        # Step 3: Smart Context Generation (only for standard/advanced)
+        # Step 4: Smart Context Generation with Model Selection
         supporting_context = ""
         research_performed = False
+        context_model = None
         
         if intent_data.requires_context and intent_data.input_complexity_score > 0.4:
             print("🔍 Gathering domain-specific context...")
+            
+            context_model = await select_model_for_task("context", intent_data.input_complexity_score)
+            print(f"Using context model: {context_model}")
+            
+            context_agent = Agent(
+                name="Supporting Content Agent",
+                instructions=supporting_content_agent.instructions,
+                model=context_model
+            )
             
             support_prompt = f"""
             Intent Analysis: {intent_data.dict()}
@@ -831,19 +890,30 @@ async def orchestrate_enhancement(user_prompt: str):
             Complexity Score: {intent_data.input_complexity_score:.2f}
             """
             
-            support_result = await rate_limited_request(Runner.run, supporting_content_agent, support_prompt)
+            support_result = await rate_limited_request(Runner.run, context_agent, support_prompt)
             supporting_context = support_result.final_output
             research_performed = True
             print(f"Context gathered: {len(supporting_context)} characters")
         else:
             print("📝 Skipping context gathering - input complexity doesn't warrant it")
         
-        # Step 4: 4-D Methodology Guidance (scaled to complexity)
+        # Step 5: 4-D Methodology Guidance with Smart Model Selection
         best_practices_context = ""
         methodology_applied = False
+        methodology_model = None
         
         if intent_data.input_complexity_score > 0.5:
             print("⚡ Applying 4-D methodology guidance...")
+            
+            methodology_model = await select_model_for_task("methodology", intent_data.input_complexity_score)
+            print(f"Using methodology model: {methodology_model}")
+            
+            methodology_agent = Agent(
+                name="Best Practices Agent", 
+                instructions=best_practices_agent.instructions,
+                model=methodology_model
+            )
+            
             methodology_prompt = f"""
             Intent Analysis: {intent_data.dict()}
             Original User Input: "{user_prompt}"
@@ -854,25 +924,33 @@ async def orchestrate_enhancement(user_prompt: str):
             Scale the depth of analysis to match the input complexity.
             """
             
-            methodology_result = await rate_limited_request(Runner.run, best_practices_agent, methodology_prompt) 
+            methodology_result = await rate_limited_request(Runner.run, methodology_agent, methodology_prompt) 
             best_practices_context = methodology_result.final_output
             methodology_applied = True
             print(f"4-D methodology guidance: {len(best_practices_context)} characters")
         else:
             print("📝 Using proportional enhancement - minimal 4-D methodology")
         
-        # Step 5: Create Sophisticated Dynamic Enhancer with Anti-Over-Enhancement
+        # Step 6: Create Dynamic Enhancer with Smart Model Selection
         print("✨ Crafting proportionally optimized prompt...")
+        
+        enhancement_model = await select_model_for_task("enhancement", intent_data.input_complexity_score, "advanced_enhancer")
+        print(f"Using enhancement model: {enhancement_model}")
+        
         dynamic_instructions = create_dynamic_enhancer_instructions(intent_data, supporting_context, best_practices_context)
+        
+        # Add mode-specific instructions
+        if mode == "single":
+            dynamic_instructions += "\n\n**CRITICAL: SINGLE MODE OPERATION** - Always provide a complete, standalone enhanced prompt. Never ask questions or request clarification. Transform any input into a useful, enhanced prompt ready for immediate use."
         
         enhancer_agent = Agent(
             name="Lyra - Proportional Enhancement Specialist",
             instructions=dynamic_instructions,
-            model="llama3-8b-8192",
+            model=enhancement_model,
             input_guardrails=[InputGuardrail(guardrail_function=enhanced_safety_guardrail)]
         )
         
-        # Step 6: Generate Enhanced Prompt with Proportionality Controls
+        # Step 7: Generate Enhanced Prompt with Model Tracking
         enhancement_result = await rate_limited_request(Runner.run, enhancer_agent, user_prompt)
         
         # Determine process steps based on what was actually performed
@@ -895,5 +973,36 @@ async def orchestrate_enhancement(user_prompt: str):
             "4d_methodology_applied": methodology_applied,
             "process_steps": process_steps,
             "enhancement_ratio": enhancement_ratio,
-            "complexity_score": intent_data.input_complexity_score
+            "complexity_score": intent_data.input_complexity_score,
+            "models_used": {
+                "classification": classification_model,
+                "context": context_model,
+                "methodology": methodology_model,
+                "enhancement": enhancement_model
+            },
+            "mode": mode
         }
+
+
+def create_enhanced_greeting_response(user_prompt: str, intent_data: IntentClassification) -> str:
+    """Create an enhanced greeting response for single mode"""
+    
+    greeting_templates = {
+        "hi": "Hello! I'm here to help you create powerful, effective prompts. What would you like to build, write, or explore today? I can help enhance any request - from creative writing and technical projects to business strategies and personal goals.",
+        
+        "hello": "Hello there! Welcome to precision prompt engineering. I specialize in transforming your ideas into clear, actionable prompts that unlock AI's full potential. What project or challenge can I help you tackle?",
+        
+        "hey": "Hey! Ready to supercharge your prompts? I can help you craft compelling instructions for any AI task - whether you're writing, coding, strategizing, or creating. What's on your mind?",
+        
+        "good morning": "Good morning! Let's start your day with some powerful prompt engineering. I'm here to help transform any idea or request into a precision-crafted prompt that gets exceptional results. What would you like to work on?",
+        
+        "good afternoon": "Good afternoon! Perfect time to enhance your prompts and boost your productivity. I can help refine any request - from creative projects to technical solutions to business strategies. What can I help you create?",
+        
+        "good evening": "Good evening! Let's make your evening productive with some expert prompt enhancement. Whether you're working on creative projects, technical challenges, or planning tomorrow's tasks, I'm here to help. What's your focus tonight?"
+    }
+    
+    # Find closest match or use default
+    prompt_lower = user_prompt.lower().strip()
+    enhanced_response = greeting_templates.get(prompt_lower, greeting_templates["hi"])
+    
+    return enhanced_response
