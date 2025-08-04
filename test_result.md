@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-## user_problem_statement: "Create an MVP landing page for 'Pehance' - a prompt enhancement service. The page should have a prompt input area, 'Enhance' button, and display area for enhanced prompts. Backend should use multi-agent system with Groq/Llama 3 8B for: Intent Classifier → Supporting Content → Guardrail → Enhancer agents."
+## user_problem_statement: "Improve the backend prompts to actually give some sensible prompts for user input like 'hi'. The current system is giving overly complex responses with 135.3x enhancement ratios. Implement the 4D methodology (Deconstruct, Diagnose, Develop, Deliver) to provide proportional responses based on input complexity."
 
 ## backend:
   - task: "Add Groq API integration and dependencies"
