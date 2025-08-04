@@ -45,6 +45,20 @@ const App = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Load model status on component mount
+  useEffect(() => {
+    const checkModelStatus = async () => {
+      try {
+        const response = await axios.get(`${API}/test-models`);
+        setModelStatus(response.data.models);
+      } catch (err) {
+        console.warn("Model status check failed:", err);
+      }
+    };
+    
+    checkModelStatus();
+  }, []);
+
   // Professional textarea auto-resize
   const adjustTextareaHeight = (element) => {
     const minHeight = 200;
