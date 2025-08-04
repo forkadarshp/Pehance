@@ -19,27 +19,58 @@ set_default_openai_api("chat_completions")
 os.environ["OPENAI_API_KEY"] = os.environ.get("GROQ_API_KEY")
 os.environ["OPENAI_BASE_URL"] = "https://api.groq.com/openai/v1"
 
-# --- Multi-Model Configuration ---
+# --- Enhanced Multi-Model Configuration ---
 class ModelConfig:
-    """Optimized model selection for different agent types and complexity levels"""
+    """
+    Intelligent model selection optimized for different agent types, complexity levels, and use cases.
+    Based on Groq API 2025 model performance benchmarks and capabilities.
+    """
     
-    # Fast, efficient model for quick tasks (verified available on Groq free tier)
-    FAST_MODEL = "llama-3.1-8b-instant"
+    # TIER 1: Ultra-Fast Models (840+ tokens/sec) - For real-time classification and simple tasks
+    ULTRA_FAST_MODEL = "llama-3.1-8b-instant"  # 840 tokens/sec, $0.05/$0.08 per 1M tokens
     
-    # Primary model for general reasoning tasks (verified available on Groq free tier)
-    PRIMARY_MODEL = "llama-3.3-70b-versatile"
+    # TIER 2: Balanced Performance Models (500-600 tokens/sec) - For general reasoning
+    BALANCED_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"  # 594 tokens/sec, supports JSON mode
+    BALANCED_ALT = "gemma2-9b-it"  # 500 tokens/sec, cost-effective
     
-    # Advanced model for complex enhancements (verified available on Groq free tier)
-    ADVANCED_MODEL = "deepseek-r1-distill-llama-70b"
+    # TIER 3: High-Reasoning Models (400+ tokens/sec) - For complex analysis
+    REASONING_MODEL = "llama-3.3-70b-versatile"  # 394 tokens/sec, 70B parameters
+    REASONING_ALT = "deepseek-r1-distill-llama-70b"  # 400 tokens/sec, strong reasoning
     
-    # Alternative advanced model
-    ADVANCED_MODEL_ALT = "qwen2.5-72b-instruct"
+    # TIER 4: Specialized Models
+    ADVANCED_REASONING = "meta-llama/llama-4-maverick-17b-128e-instruct"  # 562 tokens/sec, advanced features
+    CREATIVE_MODEL = "qwen-qwq-32b"  # 400 tokens/sec, strong creative capabilities
     
-    # Safety and guardrail model (fallback to fast model if not available)
-    SAFETY_MODEL = "llama-3.1-8b-instant"  # Using fast model for safety checks
+    # SAFETY & GUARDRAIL MODELS
+    SAFETY_MODEL = "meta-llama/llama-guard-4-12b"  # Specialized safety model
+    SAFETY_FALLBACK = "llama-3.1-8b-instant"  # Fast fallback for safety checks
     
-    # Fallback model in case of issues
-    FALLBACK_MODEL = "llama3-8b-8192"
+    # LEGACY FALLBACK
+    LEGACY_FALLBACK = "llama3-8b-8192"  # Ultimate fallback
+    
+    # MODEL PERFORMANCE METRICS (tokens per second)
+    MODEL_PERFORMANCE = {
+        "llama-3.1-8b-instant": 840,
+        "meta-llama/llama-4-scout-17b-16e-instruct": 594,
+        "meta-llama/llama-4-maverick-17b-128e-instruct": 562,
+        "gemma2-9b-it": 500,
+        "deepseek-r1-distill-llama-70b": 400,
+        "qwen-qwq-32b": 400,
+        "llama-3.3-70b-versatile": 394,
+        "llama3-8b-8192": 350,  # estimated
+    }
+    
+    # MODEL CAPABILITIES
+    MODEL_FEATURES = {
+        "meta-llama/llama-4-scout-17b-16e-instruct": ["json_mode", "function_calling", "image_input"],
+        "meta-llama/llama-4-maverick-17b-128e-instruct": ["json_mode", "function_calling", "image_input"],
+        "llama-3.3-70b-versatile": ["large_context", "reasoning"],
+        "deepseek-r1-distill-llama-70b": ["reasoning", "large_context"],
+        "llama-3.1-8b-instant": ["fast_response", "json_mode"],
+        "gemma2-9b-it": ["balanced", "cost_effective"],
+        "qwen-qwq-32b": ["creative", "preview"],
+        "meta-llama/llama-guard-4-12b": ["safety", "content_filtering"]
+    }
     
     # Model availability cache
     _model_availability = {}
