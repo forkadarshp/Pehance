@@ -62,7 +62,7 @@ class PromptEnhanceResponse(BaseModel):
     enhancement_type: Optional[str] = None  # clarification_request, basic_enhancement, standard_enhancement, advanced_enhancement
     enhancement_ratio: Optional[float] = None
     complexity_score: Optional[float] = None
-    models_used: Optional[Dict[str, str]] = None  # Track which models were used for each step
+    models_used: Optional[Dict[str, Optional[str]]] = None  # Track which models were used for each step
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
