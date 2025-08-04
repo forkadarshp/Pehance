@@ -289,6 +289,27 @@ const App = () => {
               }}></span>
               System Active
             </div>
+            
+            {modelStatus && (
+              <div 
+                className="status-indicator"
+                style={{
+                  backgroundColor: 'var(--color-warm-gray-700)',
+                  border: '1px solid var(--color-warm-gray-600)',
+                  cursor: 'help'
+                }}
+                title={`Models Available: ${Object.values(modelStatus).filter(m => m.available).length}/${Object.keys(modelStatus).length}`}
+              >
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  backgroundColor: Object.values(modelStatus).some(m => m.available) ? 'var(--color-accent)' : 'var(--color-error)',
+                  borderRadius: '50%',
+                  display: 'inline-block'
+                }}></span>
+                AI Models: {Object.values(modelStatus).filter(m => m.available).length}/{Object.keys(modelStatus).length}
+              </div>
+            )}
           </div>
         </div>
       </nav>
