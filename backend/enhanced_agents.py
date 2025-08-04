@@ -238,12 +238,13 @@ def parse_intent_json(text: str) -> IntentClassification:
 # --- Enhanced Guardrail Definition ---
 
 async def enhanced_safety_guardrail(ctx, agent, input_data):
-    """Enhanced safety guardrail using specialized safety model"""
+    """Enhanced safety guardrail using smart model selection"""
     try:
-        # Use specialized safety model for better content filtering
-        safety_model = select_model_for_task("safety", agent_type="guardrail")
+        # Use smart model selection for safety assessment
+        safety_model = await select_model_for_task("safety", agent_type="guardrail")
+        print(f"Using safety model: {safety_model}")
         
-        # Create a safety assessment agent
+        # Create a safety assessment agent with selected model
         safety_agent = Agent(
             name="Safety Guardrail",
             instructions="""You are a specialized content safety classifier. Analyze the input for:
