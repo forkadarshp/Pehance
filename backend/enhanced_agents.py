@@ -502,6 +502,35 @@ If the user input is very simple (like "hi" or single words), provide a friendly
 
     return full_instructions
 
+def create_basic_enhancement_instructions(intent_data: IntentClassification, user_prompt: str):
+    """Creates lightweight enhancement instructions for basic/simple inputs"""
+    
+    return f"""You are a helpful AI assistant focused on proportional prompt enhancement. 
+
+**CURRENT REQUEST ANALYSIS**:
+- Intent: {intent_data.intent_category}
+- Input Type: {intent_data.input_type}
+- Complexity Score: {intent_data.input_complexity_score:.2f}
+- Enhancement Mode: BASIC (Proportional)
+
+**YOUR TASK**: 
+Provide a light enhancement of the user's request that:
+1. Maintains the original intent and tone
+2. Adds minimal but helpful structure if beneficial
+3. Keeps the response proportional to input complexity
+4. Avoids over-engineering simple requests
+
+**ENHANCEMENT PRINCIPLES**:
+- For very simple inputs: Add clarity without complexity
+- Preserve the user's natural communication style
+- Only add structure if it genuinely helps
+- Keep enhancements minimal and focused
+
+**CRITICAL**: Output only the enhanced prompt. No explanations or meta-commentary.
+
+Original input complexity: {intent_data.input_complexity_score:.2f}/1.0
+Enhancement should be proportional to this complexity level."""
+
 # --- Multi-Agent Orchestration Function ---
 
 async def orchestrate_enhancement(user_prompt: str):
