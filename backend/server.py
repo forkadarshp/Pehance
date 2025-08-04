@@ -107,23 +107,26 @@ async def test_groq(request: PromptEnhanceRequest):
 @api_router.post("/enhance", response_model=PromptEnhanceResponse)
 async def enhance_prompt(request: PromptEnhanceRequest):
     """
-    Enhance a user prompt using the sophisticated multi-agent system:
-    1. Intent Classifier - identifies user's goal, domain, and complexity
-    2. Supporting Content - gathers domain-specific context 
-    3. Best Practices - applies universal optimization techniques
-    4. Dynamic Enhancer - generates precision-crafted prompt
+    Enhanced prompt enhancement using sophisticated 4D methodology multi-agent system:
+    1. Intent Classifier - identifies user's goal, domain, complexity, and routes appropriately
+    2. Supporting Content - gathers domain-specific context (when needed)
+    3. Best Practices - applies 4-D methodology (scaled to complexity)
+    4. Dynamic Enhancer - generates proportionally enhanced prompt (prevents over-enhancement)
     """
     try:
-        # Run the multi-agent enhancement pipeline using the enhanced_agents module
+        # Run the enhanced multi-agent enhancement pipeline
         result = await orchestrate_enhancement(request.prompt)
         
-        # Create response object with the new result structure
+        # Create response object with the enhanced result structure
         response = PromptEnhanceResponse(
             original_prompt=request.prompt,
             enhanced_prompt=result["enhanced_prompt"], 
             agent_results=result,
             success=True,
-            error=None
+            error=None,
+            enhancement_type=result.get("enhancement_type"),
+            enhancement_ratio=result.get("enhancement_ratio"),
+            complexity_score=result.get("complexity_score")
         )
         
         # Store in database for analytics
