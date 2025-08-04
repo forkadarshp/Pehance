@@ -1131,24 +1131,66 @@ async def orchestrate_enhancement(user_prompt: str, mode: str = "single"):
 
 
 def create_enhanced_greeting_response(user_prompt: str, intent_data: IntentClassification) -> str:
-    """Create an enhanced greeting response for single mode"""
+    """Create an enhanced greeting response for single mode with personality and helpfulness"""
     
+    # Context-aware greeting templates with more personality
     greeting_templates = {
-        "hi": "Hello! I'm here to help you create powerful, effective prompts. What would you like to build, write, or explore today? I can help enhance any request - from creative writing and technical projects to business strategies and personal goals.",
+        "hi": "Hello! 👋 I'm your AI prompt enhancement specialist. I transform simple ideas into powerful, precise prompts that unlock exceptional AI performance. Whether you're looking to create compelling content, solve technical challenges, or craft business strategies, I'm here to help you get remarkable results. What exciting project can we work on together?",
         
-        "hello": "Hello there! Welcome to precision prompt engineering. I specialize in transforming your ideas into clear, actionable prompts that unlock AI's full potential. What project or challenge can I help you tackle?",
+        "hello": "Hello there! 🌟 Welcome to precision prompt engineering! I specialize in taking your creative sparks and turning them into crystal-clear, actionable prompts that deliver outstanding AI responses. From storytelling and coding to business planning and research, I can help enhance any request. What would you like to explore today?",
         
-        "hey": "Hey! Ready to supercharge your prompts? I can help you craft compelling instructions for any AI task - whether you're writing, coding, strategizing, or creating. What's on your mind?",
+        "hey": "Hey! 🚀 Ready to supercharge your AI interactions? I'm here to transform your ideas into perfectly crafted prompts that get incredible results. Whether you're writing, coding, strategizing, or creating something entirely new, I'll help you communicate with AI in the most effective way possible. What's sparking your imagination?",
         
-        "good morning": "Good morning! Let's start your day with some powerful prompt engineering. I'm here to help transform any idea or request into a precision-crafted prompt that gets exceptional results. What would you like to work on?",
+        "good morning": "Good morning! ☀️ What a perfect time to start creating something amazing! I'm your prompt enhancement specialist, ready to help you craft clear, compelling instructions that unlock AI's full potential. Whether you're tackling creative projects, technical challenges, or business goals, let's make today productive. What's first on your agenda?",
         
-        "good afternoon": "Good afternoon! Perfect time to enhance your prompts and boost your productivity. I can help refine any request - from creative projects to technical solutions to business strategies. What can I help you create?",
+        "good afternoon": "Good afternoon! ⚡ Perfect timing to boost your productivity with some expert prompt engineering! I help transform any idea or request into a precision-crafted prompt that delivers exceptional AI results. From creative writing and technical solutions to business strategies and research, I'm here to help you achieve your goals. What exciting challenge can we tackle together?",
         
-        "good evening": "Good evening! Let's make your evening productive with some expert prompt enhancement. Whether you're working on creative projects, technical challenges, or planning tomorrow's tasks, I'm here to help. What's your focus tonight?"
+        "good evening": "Good evening! 🌙 Let's make your evening productive and inspiring! I specialize in enhancing prompts to help you get the absolute best from AI systems. Whether you're working on creative projects, solving technical puzzles, planning for tomorrow, or exploring new ideas, I'm here to help you communicate more effectively with AI. What would you like to create tonight?",
+        
+        "howdy": "Howdy! 🤠 Great to meet you! I'm your friendly prompt enhancement expert, here to help you get extraordinary results from AI. I take your ideas and transform them into clear, powerful prompts that deliver exactly what you need. Ready to turn your next request into something special? What are you working on?",
+        
+        "greetings": "Greetings! 🎯 I'm delighted to help you master the art of AI communication! As your prompt enhancement specialist, I transform everyday requests into precision-engineered prompts that unlock remarkable AI capabilities. Whether you're creating, analyzing, building, or exploring, I'm here to help you achieve exceptional results. What inspiring project shall we enhance together?"
     }
     
-    # Find closest match or use default
-    prompt_lower = user_prompt.lower().strip()
-    enhanced_response = greeting_templates.get(prompt_lower, greeting_templates["hi"])
+    # Time-based contextual additions
+    import datetime
+    current_hour = datetime.datetime.now().hour
     
-    return enhanced_response
+    time_context = ""
+    if 5 <= current_hour < 12:
+        time_context = " Let's start your day with some powerful AI enhancement!"
+    elif 12 <= current_hour < 17:
+        time_context = " Perfect afternoon energy for creating something amazing!"
+    elif 17 <= current_hour < 21:
+        time_context = " Great evening vibes for productive creativity!"
+    else:
+        time_context = " Even late hours are perfect for inspired work!"
+    
+    # Find closest match or use intelligent fallback
+    prompt_lower = user_prompt.lower().strip()
+    
+    # Direct match
+    if prompt_lower in greeting_templates:
+        base_response = greeting_templates[prompt_lower]
+    # Partial matching for variations
+    elif any(greeting in prompt_lower for greeting in ["morning", "afternoon", "evening"]):
+        if "morning" in prompt_lower:
+            base_response = greeting_templates["good morning"]
+        elif "afternoon" in prompt_lower:
+            base_response = greeting_templates["good afternoon"] 
+        else:
+            base_response = greeting_templates["good evening"]
+    elif any(greeting in prompt_lower for greeting in ["hi", "hello", "hey", "howdy"]):
+        # Use the first matching greeting
+        for greeting in ["hi", "hello", "hey", "howdy"]:
+            if greeting in prompt_lower:
+                base_response = greeting_templates[greeting]
+                break
+    else:
+        # Intelligent fallback with context awareness
+        base_response = f"Hello! 🌟 I'm your AI prompt enhancement specialist, ready to help you create powerful, effective prompts that get exceptional results. Whether you're working on creative projects, technical solutions, business strategies, or anything else, I can help transform your ideas into precision-crafted instructions.{time_context} What would you like to work on?"
+    
+    # Add helpful next steps
+    next_steps = "\n\n💡 **Quick Start Ideas:**\n• Share a creative writing project you'd like help with\n• Describe a technical problem you're trying to solve\n• Tell me about a business challenge you're facing\n• Ask me to enhance any existing prompt you have"
+    
+    return base_response + next_steps
