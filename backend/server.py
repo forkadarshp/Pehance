@@ -100,6 +100,7 @@ async def test_models():
             # Tier 4: Specialized
             ModelConfig.ADVANCED_REASONING,
             ModelConfig.CREATIVE_MODEL,
+            ModelConfig.ADVANCED_COMPLEX,
             # Safety
             ModelConfig.SAFETY_MODEL,
             ModelConfig.SAFETY_FALLBACK,
