@@ -892,11 +892,9 @@ async def orchestrate_enhancement(user_prompt: str, mode: str = "single"):
             context_model = await select_model_for_task("context", intent_data.input_complexity_score)
             print(f"Using context model: {context_model}")
             
-            context_agent = Agent(
-                name="Supporting Content Agent",
-                instructions=supporting_content_agent.instructions,
-                model=context_model
-            )
+            context_agent = await create_supporting_content_agent()
+            # Override model if needed
+            context_agent.model = context_model
             
             support_prompt = f"""
             Intent Analysis: {intent_data.dict()}
