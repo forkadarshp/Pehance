@@ -377,6 +377,64 @@ const App = () => {
             {/* Input Section */}
             <div>
               <div className="card-sophisticated animate-gentle-slide-up">
+                {/* Mode Toggle Section */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: 'var(--spacing-xl)',
+                  padding: 'var(--spacing-lg)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                  borderRadius: 'var(--radius-lg)',
+                  border: '1px solid var(--color-warm-gray-700)'
+                }}>
+                  <div>
+                    <h4 className="typography-heading-medium" style={{ marginBottom: 'var(--spacing-xs)' }}>
+                      Enhancement Mode
+                    </h4>
+                    <p className="typography-body" style={{ color: 'var(--color-warm-gray-400)' }}>
+                      {mode === "single" 
+                        ? "Single Turn: Always provides enhanced prompts directly" 
+                        : "Multi Turn: Allows clarification questions when needed"}
+                    </p>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)' }}>
+                    <span className={`typography-body ${mode === "single" ? "accent-text" : "typography-body"}`} style={{ fontWeight: '600' }}>
+                      Single
+                    </span>
+                    <div 
+                      onClick={() => setMode(mode === "single" ? "multi" : "single")}
+                      style={{
+                        width: '56px',
+                        height: '28px',
+                        backgroundColor: mode === "single" ? 'var(--color-accent)' : 'var(--color-warm-gray-600)',
+                        borderRadius: '14px',
+                        position: 'relative',
+                        cursor: 'pointer',
+                        transition: 'all var(--transition-duration-normal) var(--transition-smooth)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)'
+                      }}
+                      className="hover-lift"
+                    >
+                      <div style={{
+                        width: '24px',
+                        height: '24px',
+                        backgroundColor: 'var(--color-soft-white)',
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        top: '2px',
+                        left: mode === "single" ? '2px' : '30px',
+                        transition: 'all var(--transition-duration-normal) var(--transition-smooth)',
+                        boxShadow: 'var(--shadow-subtle)'
+                      }}></div>
+                    </div>
+                    <span className={`typography-body ${mode === "multi" ? "accent-text" : "typography-body"}`} style={{ fontWeight: '600' }}>
+                      Multi
+                    </span>
+                  </div>
+                </div>
+                
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
