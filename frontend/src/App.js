@@ -858,7 +858,52 @@ const App = () => {
                           </div>
                           <div className="typography-caption">Agent Steps</div>
                         </div>
+                        <div className="surface-raised" style={{ padding: 'var(--spacing-lg)' }}>
+                          <div className="accent-text" style={{ 
+                            fontSize: '1.2rem',
+                            fontWeight: '600',
+                            marginBottom: 'var(--spacing-xs)',
+                            textTransform: 'capitalize'
+                          }}>
+                            {enhancementMetrics.mode}
+                          </div>
+                          <div className="typography-caption">Mode Used</div>
+                        </div>
                       </div>
+                      
+                      {/* Model Information */}
+                      {enhancementMetrics.modelsUsed && (
+                        <div style={{
+                          marginTop: 'var(--spacing-lg)',
+                          paddingTop: 'var(--spacing-lg)',
+                          borderTop: '1px solid rgba(255, 255, 255, 0.05)'
+                        }}>
+                          <div className="typography-caption" style={{ 
+                            marginBottom: 'var(--spacing-sm)',
+                            textAlign: 'center',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.1em'
+                          }}>
+                            AI Models Used
+                          </div>
+                          <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 'var(--spacing-sm)',
+                            justifyContent: 'center'
+                          }}>
+                            {Object.entries(enhancementMetrics.modelsUsed).filter(([_, model]) => model).map(([type, model]) => (
+                              <span key={type} className="status-indicator" style={{
+                                backgroundColor: 'var(--color-warm-gray-700)',
+                                border: '1px solid var(--color-warm-gray-600)',
+                                fontSize: '0.75rem'
+                              }}>
+                                {type}: {model}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
