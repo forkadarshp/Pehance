@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-## user_problem_statement: "Improve the backend prompts to actually give some sensible prompts for user input like 'hi'. The current system is giving overly complex responses with 135.3x enhancement ratios. Implement the 4D methodology (Deconstruct, Diagnose, Develop, Deliver) to provide proportional responses based on input complexity."
+## user_problem_statement: "Integrate mix of different models rather than just using one static model - llama3-8b-8192. Implement Primary Model: llama-3.3-70b-versatile for better reasoning, Fast Model: llama-3.1-8b-instant for simple intent classification, Safety Model: meta-llama/llama-guard-4-12b for enhanced guardrails. Fix current issue where any question asks follow up (should be single turn default with enhanced prompt output). Add multi turn mode with chat interface toggle. Enhanced responses for basic greetings. Use production grade intent classifer agent prompts."
 
 ## backend:
   - task: "Implement Enhanced 4D Methodology with Anti-Over-Enhancement"
