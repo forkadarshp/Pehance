@@ -27,3 +27,4 @@ groq>=0.11.0
 agents>=1.0.0
 litellm>=1.40.0
 httpx>=0.24.0
+distro>=1.8.0
