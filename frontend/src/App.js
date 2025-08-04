@@ -129,7 +129,10 @@ const App = () => {
     const startTime = Date.now();
 
     try {
-      const response = await axios.post(`${API}/enhance`, { prompt });
+      const response = await axios.post(`${API}/enhance`, { 
+        prompt,
+        mode: mode  // Include mode in request
+      });
       const endTime = Date.now();
       const processingTime = ((endTime - startTime) / 1000).toFixed(1);
       
@@ -143,7 +146,9 @@ const App = () => {
         confidenceScore: response.data.agent_results.intent_analysis.confidence,
         agentSteps: response.data.agent_results.process_steps?.length || 4,
         enhancementType: response.data.enhancement_type || 'standard_enhancement',
-        complexityScore: response.data.complexity_score || response.data.agent_results.complexity_score || 0.5
+        complexityScore: response.data.complexity_score || response.data.agent_results.complexity_score || 0.5,
+        mode: response.data.mode || mode,
+        modelsUsed: response.data.agent_results.models_used || null
       };
       
       setEnhancementMetrics(metrics);
