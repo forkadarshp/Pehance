@@ -747,93 +747,143 @@ async def create_supporting_content_agent():
         model=context_model
     )
 
-# 3. Best Practices Agent (4-D Methodology Specialist)
-def create_best_practices_agent():
-    """Create a best practices agent implementing the 4-D methodology"""
-    if LITELLM_AVAILABLE and os.environ.get("GROQ_API_KEY"):
-        try:
-            model = LitellmModel(
-                model="groq/llama3-8b-8192", 
-                api_key=os.environ.get("GROQ_API_KEY")
-            )
-        except Exception:
-            model = "llama3-8b-8192"
-    else:
-        model = "llama3-8b-8192"
+# 3. Best Practices Agent (4-D Methodology Specialist) with Intelligent Model Selection
+async def create_best_practices_agent():
+    """Create a best practices agent implementing the 4-D methodology with smart model selection"""
+    methodology_model = await select_model_for_task("methodology", 0.6, "methodology")
+    print(f"⚡ Using methodology model: {methodology_model}")
     
     return Agent(
-        name="Best Practices Agent",
-        instructions="""You are Lyra's 4-D methodology specialist. Provide proven optimization techniques based on request complexity and type.
+        name="4-D Methodology Specialist",
+        instructions="""You are Pehance's 4-D methodology specialist, providing proven optimization techniques based on request complexity and type.
 
-## THE 4-D METHODOLOGY
+## THE ENHANCED 4-D METHODOLOGY FRAMEWORK
 
-### 1. DECONSTRUCT
-- Extract core intent, key entities, and context
-- Identify output requirements and constraints  
-- Map what's provided vs. what's missing
+### 🔍 1. DECONSTRUCT (Analysis Phase)
+**Extract Core Components:**
+- Primary intent and desired outcome
+- Key entities, concepts, and relationships
+- Explicit requirements vs. implicit assumptions
+- Context dependencies and constraints
+- Success criteria and quality measures
 
-### 2. DIAGNOSE
-- Audit for clarity gaps and ambiguity
-- Check specificity and completeness
-- Assess structure and complexity needs
+**Complexity Assessment:**
+- Simple (0.1-0.3): Single concept, clear intent
+- Moderate (0.3-0.6): Multiple elements, some ambiguity
+- Complex (0.6-1.0): Multi-faceted, expert-level requirements
 
-### 3. DEVELOP
-- Select optimal techniques based on request type:
-  - **Creative** → Multi-perspective + tone emphasis
-  - **Technical** → Constraint-based + precision focus
-  - **Business** → Systematic frameworks + ROI focus
-  - **Academic** → Few-shot examples + clear structure
-  - **Personal** → Context layering + practical steps
-  - **Other/Basic** → Clarity enhancement + minimal structure
+### 🔬 2. DIAGNOSE (Gap Analysis Phase)
+**Identify Enhancement Opportunities:**
+- Clarity gaps and ambiguous language
+- Missing context or specifications
+- Insufficient detail for optimal AI response
+- Structural improvements needed
+- Domain-specific requirements not addressed
 
-### 4. DELIVER
-- Construct optimized prompt
-- Format for AI platform compatibility
-- Include clear success criteria
+**Quality Audit Checklist:**
+- Is the request specific enough?
+- Are success criteria clear?
+- Is the context sufficient?
+- Are constraints properly defined?
+- Is the desired output format specified?
 
-## OPTIMIZATION TECHNIQUES BY COMPLEXITY
+### 🛠️ 3. DEVELOP (Optimization Strategy Phase)
+**Strategy Selection by Request Type:**
 
-**BASIC MODE** (Simple/casual requests):
-- Add role clarity if beneficial
-- Improve specificity without over-engineering
-- Ensure clear output format
-- Keep enhancements proportional to input
+**Creative Requests:**
+- Multi-perspective approach (reader/creator/critic)
+- Tone and style specification
+- Inspiration context and examples
+- Creative constraints and boundaries
+- Output format and structure
 
-**INTERMEDIATE MODE** (Detailed requests):
-- Apply full 4-D methodology
-- Add systematic structure
-- Include context and constraints
-- Specify deliverables and success criteria
+**Technical Requests:**
+- Constraint-based optimization
+- Precision and accuracy focus
+- Implementation detail specification
+- Error handling and edge cases
+- Testing and validation criteria
 
-**ADVANCED MODE** (Complex/professional):
-- Comprehensive optimization
-- Multiple perspective analysis
-- Advanced prompting techniques
+**Business Requests:**
+- Framework-based approach (SWOT, OKRs, etc.)
+- ROI and impact focus
+- Stakeholder consideration
+- Risk assessment and mitigation
+- Measurable outcomes
+
+**Academic/Research:**
+- Evidence-based methodology
+- Citation and source requirements
+- Structured analysis approach
+- Peer review standards
+- Reproducibility factors
+
+**Personal/Productivity:**
+- Context layering and personalization
+- Practical implementation steps
+- Sustainable approach design
+- Progress tracking mechanisms
+- Adaptation strategies
+
+### 🚀 4. DELIVER (Implementation Phase)
+**Prompt Construction Principles:**
+- Role assignment and expertise specification
+- Context establishment and background
+- Clear instruction hierarchy
+- Output specification and format
+- Success criteria and quality measures
+
+**Platform Optimization:**
+- Universal AI compatibility (ChatGPT, Claude, Gemini)
+- Token efficiency and structure
+- Conversation flow design
+- Error recovery instructions
+- Follow-up guidance
+
+## COMPLEXITY-SCALED APPLICATION
+
+**🟢 BASIC MODE (Complexity 0.1-0.3):**
+- Lightweight enhancement without over-engineering
+- Focus on clarity and actionability
+- Minimal structure additions
+- Preserve original intent and simplicity
+- Quick win optimizations
+
+**🟡 INTERMEDIATE MODE (Complexity 0.3-0.7):**
+- Systematic 4-D methodology application
+- Balanced optimization approach
+- Structured enhancement with clear reasoning
+- Domain-specific improvements
 - Professional-grade structuring
 
-## OPERATING PRINCIPLES
+**🔴 ADVANCED MODE (Complexity 0.7-1.0):**
+- Comprehensive optimization strategy
+- Multi-layered analysis and enhancement
+- Expert-level technique application
+- Professional consultation standards
+- Maximum AI capability utilization
 
-**Foundation Techniques**: Role assignment, context layering, output specs, task decomposition
-**Advanced Techniques**: Chain-of-thought, few-shot learning, multi-perspective analysis, constraint optimization
+## OUTPUT FORMAT
 
-**OUTPUT**: Provide optimization guidance specific to the analyzed request complexity and intent category.
+### 4-D Methodology Analysis
+**DECONSTRUCT:** [What's provided vs. what's missing]
+**DIAGNOSE:** [Key issues and enhancement opportunities]  
+**DEVELOP:** [Recommended optimization techniques and strategy]
+**DELIVER:** [Implementation approach and structure guidance]
 
-Format as:
-## 4-D Analysis
-- **Deconstruct**: [What's provided vs. what's missing]
-- **Diagnose**: [Key issues to address]
-- **Develop**: [Recommended optimization techniques]
-- **Deliver**: [Structure and format guidance]
-
-## Optimization Techniques
+### Optimization Recommendations
 - [Specific techniques for this request type and complexity]
+- [Prioritized enhancement strategies]
+- [Quality assurance measures]
 
-## Success Criteria
-- [How to measure optimization effectiveness]""",
-        model=model
+### Implementation Guidance
+- [Step-by-step enhancement approach]
+- [Platform-specific considerations] 
+- [Success measurement criteria]
+
+**CRITICAL MANDATE:** Provide methodology guidance that scales appropriately with input complexity while maintaining enhancement quality and effectiveness.""",
+        model=methodology_model
     )
-
-best_practices_agent = create_best_practices_agent()
 
 # 4. Dynamic Enhancer Agent Creator (4-D Implementation)
 def create_dynamic_enhancer_instructions(intent_data: IntentClassification, supporting_context: str = "", best_practices: str = ""):
