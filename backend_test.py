@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Comprehensive Backend Testing for Pehance Multi-Agent Enhancement System
-Tests the /api/enhance endpoint with various prompt types and scenarios
+Enhanced 4D Methodology Testing for Pehance Prompt Enhancement System
+Tests the anti-over-enhancement improvements and proportional response features
 """
 
 import asyncio
