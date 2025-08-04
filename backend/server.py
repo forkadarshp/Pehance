@@ -226,7 +226,8 @@ async def enhance_prompt(request: PromptEnhanceRequest):
             mode=request.mode,
             enhancement_type=result.get("enhancement_type"),
             enhancement_ratio=result.get("enhancement_ratio"),
-            complexity_score=result.get("complexity_score")
+            complexity_score=result.get("complexity_score"),
+            models_used=result.get("models_used")
         )
         
         # Store in database for analytics
