@@ -153,10 +153,14 @@ async def enhance_prompt(request: PromptEnhanceRequest):
     2. Supporting Content - gathers domain-specific context (when needed)
     3. Best Practices - applies 4-D methodology (scaled to complexity)
     4. Dynamic Enhancer - generates proportionally enhanced prompt (prevents over-enhancement)
+    
+    Supports two modes:
+    - single: Always provides enhanced prompt directly (no follow-up questions)
+    - multi: Allows conversational follow-ups when needed
     """
     try:
-        # Run the enhanced multi-agent enhancement pipeline
-        result = await orchestrate_enhancement(request.prompt)
+        # Run the enhanced multi-agent enhancement pipeline with mode awareness
+        result = await orchestrate_enhancement(request.prompt, mode=request.mode)
         
         # Create response object with the enhanced result structure
         response = PromptEnhanceResponse(
@@ -165,6 +169,7 @@ async def enhance_prompt(request: PromptEnhanceRequest):
             agent_results=result,
             success=True,
             error=None,
+            mode=request.mode,
             enhancement_type=result.get("enhancement_type"),
             enhancement_ratio=result.get("enhancement_ratio"),
             complexity_score=result.get("complexity_score")
