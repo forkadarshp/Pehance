@@ -80,7 +80,7 @@ class IntentClassification(BaseModel):
 # --- Utility Functions ---
 
 def parse_intent_json(text: str) -> IntentClassification:
-    """Parse JSON response from intent classifier with fallbacks"""
+    """Parse JSON response from intent classifier with enhanced 4D methodology fields"""
     try:
         # Try to find JSON in the response
         text = text.strip()
@@ -97,20 +97,31 @@ def parse_intent_json(text: str) -> IntentClassification:
                 intent_category=data.get("intent_category", "other"),
                 confidence=float(data.get("confidence", 0.5)),
                 specific_domain=data.get("specific_domain"),
-                complexity_level=data.get("complexity_level", "intermediate"),
-                requires_context=bool(data.get("requires_context", True))
+                complexity_level=data.get("complexity_level", "basic"),
+                requires_context=bool(data.get("requires_context", True)),
+                # NEW: Enhanced fields with smart defaults
+                input_complexity_score=float(data.get("input_complexity_score", 0.5)),
+                enhancement_recommended=bool(data.get("enhancement_recommended", True)),
+                suggested_action=data.get("suggested_action", "standard_enhancement"),
+                conversation_starter=data.get("conversation_starter"),
+                input_type=data.get("input_type", "minimal")
             )
     except (json.JSONDecodeError, ValueError, KeyError) as e:
         print(f"Failed to parse intent JSON: {e}")
         print(f"Raw text: {text}")
     
-    # Fallback to default classification
+    # Fallback to default classification with conservative enhancement
     return IntentClassification(
         intent_category="other",
         confidence=0.5,
         specific_domain=None,
-        complexity_level="intermediate",
-        requires_context=True
+        complexity_level="basic",
+        requires_context=False,
+        input_complexity_score=0.3,
+        enhancement_recommended=False,
+        suggested_action="request_clarification",
+        conversation_starter="I'd be happy to help! Could you provide more details about what you'd like me to help you with?",
+        input_type="incomplete"
     )
 
 # --- Guardrail Definition ---
