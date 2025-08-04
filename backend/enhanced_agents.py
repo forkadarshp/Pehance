@@ -475,6 +475,18 @@ supporting_content_agent = Agent(
     model="llama3-8b-8192"
 )
 
+# 2.5. Intent Classifier Agent Creator
+async def create_intent_classifier_agent():
+    """Create an intent classifier agent with smart model selection"""
+    classification_model = await select_model_for_task("intent_classification", 0.5, "classifier")
+    print(f"Using classification model: {classification_model}")
+    
+    return Agent(
+        name="Enhanced Intent Classifier",
+        instructions=intent_classifier_agent.instructions,  # Reuse existing instructions
+        model=classification_model
+    )
+
 # 3. Best Practices Agent (4-D Methodology Specialist)
 def create_best_practices_agent():
     """Create a best practices agent implementing the 4-D methodology"""
