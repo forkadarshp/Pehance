@@ -771,16 +771,9 @@ async def orchestrate_enhancement(user_prompt: str, mode: str = "single"):
     # Step 1: Enhanced Intent Classification with 4D methodology using smart model selection
     print(f"🎯 Analyzing user input with 4D methodology (Mode: {mode})...")
     
-    # Select optimal model for classification
-    classification_model = await select_model_for_task("intent_classification", 0.5, "classifier")
-    print(f"Using classification model: {classification_model}")
-    
-    # Create intent classifier with selected model
-    intent_classifier = Agent(
-        name="Enhanced Intent Classifier",
-        instructions=intent_classifier_agent.instructions,  # Reuse existing instructions
-        model=classification_model
-    )
+    # Create intent classifier with smart model selection
+    intent_classifier = await create_intent_classifier_agent()
+    classification_model = intent_classifier.model  # Store the model for tracking
     
     intent_result = await rate_limited_request(Runner.run, intent_classifier, user_prompt)
     intent_data = parse_intent_json(intent_result.final_output)
