@@ -37,9 +37,10 @@ class ModelConfig:
     REASONING_MODEL = "llama-3.3-70b-versatile"  # 394 tokens/sec, 70B parameters
     REASONING_ALT = "deepseek-r1-distill-llama-70b"  # 400 tokens/sec, strong reasoning
     
-    # TIER 4: Specialized Models
+    # TIER 4: Specialized Models - Advanced Tasks
     ADVANCED_REASONING = "meta-llama/llama-4-maverick-17b-128e-instruct"  # 562 tokens/sec, advanced features
     CREATIVE_MODEL = "qwen-qwq-32b"  # 400 tokens/sec, strong creative capabilities
+    ADVANCED_COMPLEX = "moonshotai/kimi-k2-instruct"  # For complex enhancements and advanced tasks
     
     # SAFETY & GUARDRAIL MODELS
     SAFETY_MODEL = "meta-llama/llama-guard-4-12b"  # Specialized safety model
