@@ -13,26 +13,24 @@ const App = () => {
   const [intentAnalysis, setIntentAnalysis] = useState(null);
   const [processingStage, setProcessingStage] = useState("");
   const [copySuccess, setCopySuccess] = useState(false);
-  const [showTooltip, setShowTooltip] = useState("");
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
   const [typingAnimation, setTypingAnimation] = useState("");
   const [enhancementMetrics, setEnhancementMetrics] = useState(null);
-  const [mode, setMode] = useState("single"); // New state for mode toggle
-  const [modelStatus, setModelStatus] = useState(null); // New state for model status
+  const [mode, setMode] = useState("single");
+  const [modelStatus, setModelStatus] = useState(null);
+  const [showChatInterface, setShowChatInterface] = useState(false);
   
   const enhancedTextRef = useRef(null);
   const heroRef = useRef(null);
   const inputSectionRef = useRef(null);
 
-  // Intersection observer for elegant staggered animations
+  // Intersection observer for animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('animate-elegant-reveal');
-            setIsVisible(true);
+            entry.target.classList.add('animate-fade-in-up');
           }
         });
       },
@@ -45,7 +43,7 @@ const App = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Load model status on component mount
+  // Check model status
   useEffect(() => {
     const checkModelStatus = async () => {
       try {
@@ -59,9 +57,18 @@ const App = () => {
     checkModelStatus();
   }, []);
 
-  // Professional textarea auto-resize
+  // Handle mode changes
+  useEffect(() => {
+    if (mode === "multi") {
+      setShowChatInterface(true);
+    } else {
+      setShowChatInterface(false);
+    }
+  }, [mode]);
+
+  // Auto-resize textarea
   const adjustTextareaHeight = (element) => {
-    const minHeight = 200;
+    const minHeight = 180;
     const maxHeight = 400;
     
     element.style.height = 'auto';
@@ -69,10 +76,10 @@ const App = () => {
     element.style.height = newHeight + 'px';
   };
 
-  // Refined typewriter effect
+  // Typewriter effect
   const typewriterEffect = (text, callback) => {
     let index = 0;
-    const speed = 20;
+    const speed = 15;
     setTypingAnimation("");
     
     const type = () => {
@@ -104,7 +111,7 @@ const App = () => {
     setCurrentStageIndex(0);
     setEnhancementMetrics(null);
 
-    // Sophisticated processing stages
+    // Processing stages
     const stages = [
       { text: "Analyzing intent and context", icon: "⚡", duration: 2000 },
       { text: "Gathering domain insights", icon: "🎯", duration: 2200 },
@@ -131,7 +138,7 @@ const App = () => {
     try {
       const response = await axios.post(`${API}/enhance`, { 
         prompt,
-        mode: mode  // Include mode in request
+        mode: mode
       });
       const endTime = Date.now();
       const processingTime = ((endTime - startTime) / 1000).toFixed(1);
@@ -205,182 +212,196 @@ const App = () => {
     setEnhancementMetrics(null);
   };
 
-  const getIntentBadgeColor = (category) => {
-    return "accent-bg";
-  };
-
-  const getComplexityIcon = (level) => {
-    const icons = {
-      basic: { icon: "⚡", label: "Basic" },
-      intermediate: { icon: "🎯", label: "Intermediate" }, 
-      advanced: { icon: "🚀", label: "Advanced" }
-    };
-    return icons[level] || icons.basic;
-  };
+  if (showChatInterface) {
+    return <ChatInterface mode={mode} setMode={setMode} setShowChatInterface={setShowChatInterface} />;
+  }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: 'var(--color-warm-gray-900)',
-      color: 'var(--color-warm-gray-200)'
-    }}>
-      {/* Understated Navigation */}
-      <nav style={{
-        padding: 'var(--spacing-xl)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        backgroundColor: 'var(--color-warm-gray-800)'
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-obsidian)' }}>
+      {/* Header */}
+      <header style={{
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        background: 'linear-gradient(180deg, var(--color-charcoal) 0%, var(--color-obsidian) 100%)',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <div className="container-sophisticated" style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
+        {/* Background Pattern */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url("https://images.unsplash.com/photo-1644088379091-d574269d422f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwyfHxuZXVyYWwlMjBuZXR3b3JrfGVufDB8fHx8MTc1NDMzNDU1M3ww&ixlib=rb-4.1.0&q=85")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.03,
+          filter: 'blur(1px)'
+        }}></div>
+        
+        <nav className="container" style={{ position: 'relative', zIndex: 2 }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 'var(--spacing-lg)'
+            justifyContent: 'space-between',
+            padding: 'var(--space-8) 0'
           }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              backgroundColor: 'var(--color-accent)',
-              borderRadius: 'var(--radius-lg)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: 'var(--shadow-subtle)'
-            }}>
-              <span style={{
-                color: 'var(--color-soft-white)',
-                fontWeight: '800',
-                fontSize: '1.5rem'
-              }}>P</span>
-            </div>
-            <div>
-              <h1 className="typography-heading-large" style={{
-                color: 'var(--color-soft-white)',
-                fontWeight: '800'
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-6)' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                background: 'linear-gradient(135deg, var(--color-amber-primary) 0%, var(--color-amber-dark) 100%)',
+                borderRadius: 'var(--radius-2xl)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 'var(--shadow-lg)',
+                position: 'relative'
               }}>
-                Pehance
-              </h1>
-              <p className="typography-caption" style={{
-                color: 'var(--color-warm-gray-500)',
-                fontWeight: '600',
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em'
-              }}>
-                Precision Prompt Engineering
-              </p>
-            </div>
-          </div>
-          
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-lg)'
-          }}>
-            <div className="status-indicator status-success">
-              <span style={{
-                width: '8px',
-                height: '8px',
-                backgroundColor: 'var(--color-success)',
-                borderRadius: '50%',
-                display: 'inline-block'
-              }}></span>
-              System Active
+                <span style={{
+                  color: 'var(--color-slate-900)',
+                  fontWeight: '800',
+                  fontSize: '1.75rem',
+                  fontFamily: 'var(--font-display)'
+                }}>P</span>
+                <div style={{
+                  position: 'absolute',
+                  top: '2px',
+                  right: '2px',
+                  width: '12px',
+                  height: '12px',
+                  background: 'var(--color-emerald)',
+                  borderRadius: '50%',
+                  border: '2px solid var(--color-charcoal)'
+                }}></div>
+              </div>
+              <div>
+                <h1 className="heading-lg" style={{ color: 'var(--color-pure-white)', marginBottom: 'var(--space-1)' }}>
+                  Pehance
+                </h1>
+                <p className="text-sm" style={{
+                  color: 'var(--color-amber-primary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.15em',
+                  fontWeight: '600'
+                }}>
+                  Precision Prompt Engineering
+                </p>
+              </div>
             </div>
             
-            {modelStatus && (
-              <div 
-                className="status-indicator"
-                style={{
-                  backgroundColor: 'var(--color-warm-gray-700)',
-                  border: '1px solid var(--color-warm-gray-600)',
-                  cursor: 'help'
-                }}
-                title={`Models Available: ${Object.values(modelStatus).filter(m => m.available).length}/${Object.keys(modelStatus).length}`}
-              >
-                <span style={{
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-6)' }}>
+              <div className="status status-success animate-pulse">
+                <div style={{
                   width: '8px',
                   height: '8px',
-                  backgroundColor: Object.values(modelStatus).some(m => m.available) ? 'var(--color-accent)' : 'var(--color-error)',
-                  borderRadius: '50%',
-                  display: 'inline-block'
-                }}></span>
-                AI Models: {Object.values(modelStatus).filter(m => m.available).length}/{Object.keys(modelStatus).length}
+                  backgroundColor: 'var(--color-emerald)',
+                  borderRadius: '50%'
+                }}></div>
+                System Active
               </div>
-            )}
+              
+              {modelStatus && (
+                <div className="status" style={{
+                  background: 'rgba(59, 130, 246, 0.1)',
+                  color: 'var(--color-blue)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)'
+                }}>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: Object.values(modelStatus).some(m => m.available) ? 'var(--color-blue)' : 'var(--color-error)',
+                    borderRadius: '50%'
+                  }}></div>
+                  AI Models: {Object.values(modelStatus).filter(m => m.available).length}/{Object.keys(modelStatus).length}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
-      {/* Sophisticated Hero Section */}
-      <section ref={heroRef} style={{
-        padding: 'var(--spacing-3xl) 0',
-        textAlign: 'center'
-      }}>
-        <div className="container-sophisticated">
-          <div style={{ marginBottom: 'var(--spacing-3xl)' }}>
-            {/* Status Badge */}
-            <div className="status-indicator status-processing animate-subtle-fade-in" style={{
+      {/* Hero Section */}
+      <section ref={heroRef} style={{ padding: 'var(--space-24) 0 var(--space-20) 0', position: 'relative' }}>
+        <div className="container">
+          <div style={{
+            maxWidth: '900px',
+            margin: '0 auto',
+            textAlign: 'center',
+            position: 'relative'
+          }}>
+            {/* Floating Badge */}
+            <div className="animate-float" style={{
               display: 'inline-flex',
-              marginBottom: 'var(--spacing-2xl)'
+              marginBottom: 'var(--space-8)',
+              padding: 'var(--space-3) var(--space-6)',
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%)',
+              border: '1px solid rgba(245, 158, 11, 0.2)',
+              borderRadius: 'var(--radius-full)',
+              color: 'var(--color-amber-primary)',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              letterSpacing: '0.05em'
             }}>
-              <span style={{
-                width: '8px',
-                height: '8px',
-                backgroundColor: 'var(--color-accent)',
-                borderRadius: '50%',
-                display: 'inline-block'
-              }}></span>
-              AI-Powered Enhancement
+              <span style={{ marginRight: 'var(--space-2)' }}>✨</span>
+              AI-Powered Enhancement Engine
             </div>
             
-            {/* Main Headline - Typography as Hero */}
-            <h2 className="typography-display-large animate-gentle-slide-up" style={{
-              marginBottom: 'var(--spacing-xl)',
-              textAlign: 'balance'
+            {/* Main Headline */}
+            <h1 className="display-xl animate-fade-in-up" style={{
+              marginBottom: 'var(--space-8)',
+              background: 'linear-gradient(135deg, var(--color-pure-white) 0%, var(--color-slate-300) 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
             }}>
               Precision
               <br />
-              <span className="accent-text">Prompt Engineering</span>
-            </h2>
+              <span style={{
+                background: 'linear-gradient(135deg, var(--color-amber-primary) 0%, var(--color-amber-light) 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>Prompt Engineering</span>
+            </h1>
             
-            {/* Refined Subtitle */}
-            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-              <p className="typography-body-large animate-gentle-slide-up animate-stagger-2" style={{
-                marginBottom: 'var(--spacing-lg)',
-                textAlign: 'balance'
+            {/* Subtitle */}
+            <div className="animate-fade-in-up delay-200" style={{ marginBottom: 'var(--space-12)' }}>
+              <p className="text-xl" style={{
+                maxWidth: '700px',
+                margin: '0 auto var(--space-8)',
+                lineHeight: '1.8',
+                color: 'var(--color-slate-300)'
               }}>
                 Transform ordinary prompts into precision-crafted instructions that unlock AI's full potential through our advanced multi-agent intelligence system.
               </p>
               
-              {/* Process Indicators - Understated */}
+              {/* Process Indicators */}
               <div style={{
                 display: 'flex',
                 flexWrap: 'wrap',
                 justifyContent: 'center',
-                gap: 'var(--spacing-md)',
-                marginTop: 'var(--spacing-xl)'
+                gap: 'var(--space-4)'
               }}>
                 {[
-                  "Intent Analysis",
-                  "Context Research", 
-                  "Best Practices",
-                  "Dynamic Enhancement"
+                  { name: "Intent Analysis", icon: "🎯" },
+                  { name: "Context Research", icon: "🔍" }, 
+                  { name: "Best Practices", icon: "⚡" },
+                  { name: "Dynamic Enhancement", icon: "✨" }
                 ].map((step, index) => (
-                  <span 
+                  <div 
                     key={index}
-                    className="status-indicator animate-subtle-fade-in"
+                    className={`status animate-fade-in-up delay-${300 + (index * 100)}`}
                     style={{
-                      animationDelay: `${(index + 3) * 100}ms`,
-                      backgroundColor: 'var(--color-warm-gray-800)',
-                      color: 'var(--color-warm-gray-300)',
-                      border: '1px solid var(--color-warm-gray-700)'
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: 'var(--color-slate-400)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      fontSize: '0.8rem'
                     }}
                   >
-                    {step}
-                  </span>
+                    <span style={{ fontSize: '1rem' }}>{step.icon}</span>
+                    {step.name}
+                  </div>
                 ))}
               </div>
             </div>
@@ -388,158 +409,99 @@ const App = () => {
         </div>
       </section>
 
-      {/* Main Interface */}
-      <section ref={inputSectionRef} style={{
-        padding: '0 0 var(--spacing-3xl) 0'
-      }}>
-        <div className="container-sophisticated">
-          <div className="grid-sophisticated grid-asymmetric">
+      {/* Main Content */}
+      <section ref={inputSectionRef} style={{ padding: '0 0 var(--space-24) 0' }}>
+        <div className="container">
+          <div className="grid grid-asymmetric">
             
-            {/* Input Section */}
-            <div>
-              <div className="card-sophisticated animate-gentle-slide-up">
-                {/* Mode Toggle Section */}
+            {/* Input Column */}
+            <div className="animate-slide-in-left">
+              <div className="card" style={{ marginBottom: 'var(--space-8)' }}>
+                {/* Mode Toggle */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  marginBottom: 'var(--spacing-xl)',
-                  padding: 'var(--spacing-lg)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                  borderRadius: 'var(--radius-lg)',
-                  border: '1px solid var(--color-warm-gray-700)'
+                  marginBottom: 'var(--space-8)',
+                  padding: 'var(--space-6)',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  borderRadius: 'var(--radius-xl)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)'
                 }}>
                   <div>
-                    <h4 className="typography-heading-medium" style={{ marginBottom: 'var(--spacing-xs)' }}>
+                    <h3 className="heading-md" style={{ marginBottom: 'var(--space-2)' }}>
                       Enhancement Mode
-                    </h4>
-                    <p className="typography-body" style={{ color: 'var(--color-warm-gray-400)' }}>
+                    </h3>
+                    <p className="text-sm" style={{ color: 'var(--color-slate-400)' }}>
                       {mode === "single" 
-                        ? "Single Turn: Always provides enhanced prompts directly" 
-                        : "Multi Turn: Allows clarification questions when needed"}
+                        ? "Single Turn: Direct prompt enhancement" 
+                        : "Multi Turn: Conversational enhancement"}
                     </p>
                   </div>
                   
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)' }}>
-                    <span className={`typography-body ${mode === "single" ? "accent-text" : "typography-body"}`} style={{ fontWeight: '600' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+                    <span className={`text-sm ${mode === "single" ? "text-accent" : ""}`} style={{ fontWeight: '600' }}>
                       Single
                     </span>
-                    <div 
+                    <button 
                       onClick={() => setMode(mode === "single" ? "multi" : "single")}
                       style={{
-                        width: '56px',
-                        height: '28px',
-                        backgroundColor: mode === "single" ? 'var(--color-accent)' : 'var(--color-warm-gray-600)',
-                        borderRadius: '14px',
+                        width: '64px',
+                        height: '32px',
+                        background: mode === "single" ? 'var(--color-amber-primary)' : 'var(--color-slate-600)',
+                        borderRadius: 'var(--radius-full)',
                         position: 'relative',
+                        border: 'none',
                         cursor: 'pointer',
-                        transition: 'all var(--transition-duration-normal) var(--transition-smooth)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
+                        transition: 'var(--transition-all)'
                       }}
                       className="hover-lift"
                     >
                       <div style={{
-                        width: '24px',
-                        height: '24px',
-                        backgroundColor: 'var(--color-soft-white)',
+                        width: '28px',
+                        height: '28px',
+                        background: 'var(--color-pure-white)',
                         borderRadius: '50%',
                         position: 'absolute',
                         top: '2px',
-                        left: mode === "single" ? '2px' : '30px',
-                        transition: 'all var(--transition-duration-normal) var(--transition-smooth)',
-                        boxShadow: 'var(--shadow-subtle)'
+                        left: mode === "single" ? '2px' : '34px',
+                        transition: 'var(--transition-all)',
+                        boxShadow: 'var(--shadow-md)'
                       }}></div>
-                    </div>
-                    <span className={`typography-body ${mode === "multi" ? "accent-text" : "typography-body"}`} style={{ fontWeight: '600' }}>
+                    </button>
+                    <span className={`text-sm ${mode === "multi" ? "text-accent" : ""}`} style={{ fontWeight: '600' }}>
                       Multi
                     </span>
                   </div>
                 </div>
                 
+                {/* Input Header */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  marginBottom: 'var(--spacing-xl)'
+                  marginBottom: 'var(--space-6)'
                 }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--spacing-md)'
-                  }}>
-                    <h3 className="typography-heading-medium">
-                      Original Prompt
-                    </h3>
-                    <div 
-                      className="hover-lift"
-                      style={{
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: '50%',
-                        border: '2px solid var(--color-warm-gray-500)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        color: 'var(--color-warm-gray-500)',
-                        cursor: 'help',
-                        transition: 'all var(--transition-duration-normal) var(--transition-smooth)'
-                      }}
-                      onMouseEnter={() => setShowTooltip("input")}
-                      onMouseLeave={() => setShowTooltip("")}
-                    >
-                      ?
-                    </div>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--spacing-md)'
-                  }}>
-                    <span className="typography-caption" style={{
-                      backgroundColor: 'var(--color-warm-gray-700)',
-                      padding: 'var(--spacing-xs) var(--spacing-sm)',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--color-warm-gray-600)'
+                  <h3 className="heading-md">Original Prompt</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                    <div className="status" style={{
+                      background: 'rgba(100, 116, 139, 0.1)',
+                      color: 'var(--color-slate-400)',
+                      border: '1px solid rgba(100, 116, 139, 0.2)',
+                      fontSize: '0.75rem'
                     }}>
                       {prompt.length}/2000
-                    </span>
+                    </div>
                     {prompt.length > 0 && (
-                      <span className="status-indicator status-success animate-subtle-fade-in">
+                      <div className="status status-success animate-scale-in">
                         Ready
-                      </span>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Professional Tooltip */}
-                {showTooltip === "input" && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '80px',
-                    left: '0',
-                    zIndex: 30,
-                    backgroundColor: 'var(--color-warm-gray-800)',
-                    border: '1px solid var(--color-warm-gray-700)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: 'var(--spacing-lg)',
-                    maxWidth: '320px',
-                    boxShadow: 'var(--shadow-elevated)'
-                  }}>
-                    <div className="typography-body">
-                      <div className="typography-heading-medium" style={{ 
-                        marginBottom: 'var(--spacing-sm)',
-                        color: 'var(--color-soft-white)'
-                      }}>
-                        💡 Pro Tip
-                      </div>
-                      Enter any prompt you'd like to enhance. Our AI agents will analyze intent, research context, and optimize it for maximum effectiveness.
-                    </div>
-                  </div>
-                )}
-                
-                <div style={{ position: 'relative' }}>
+                {/* Textarea */}
+                <div className="surface" style={{ position: 'relative', marginBottom: 'var(--space-6)' }}>
                   <textarea
                     value={prompt}
                     onChange={(e) => {
@@ -553,127 +515,110 @@ const App = () => {
 • Help me build a scalable React application with modern best practices
 • Create a comprehensive marketing strategy for a SaaS startup
 • Develop a research methodology for studying climate change impact"
-                    className="input-sophisticated typography-code"
+                    className="input textarea text-mono"
                     style={{ 
-                      minHeight: '200px',
+                      minHeight: '180px',
                       maxHeight: '400px',
+                      border: 'none',
+                      background: 'transparent',
                       resize: 'none',
-                      overflow: 'hidden'
+                      padding: 'var(--space-6)'
                     }}
                   />
+                  
+                  {/* Input Stats */}
                   <div style={{
                     position: 'absolute',
-                    bottom: 'var(--spacing-md)',
-                    right: 'var(--spacing-md)',
+                    bottom: 'var(--space-4)',
+                    right: 'var(--space-4)',
                     display: 'flex',
-                    gap: 'var(--spacing-md)'
+                    gap: 'var(--space-2)'
                   }}>
-                    <span className="typography-caption" style={{
-                      backgroundColor: 'var(--color-warm-gray-800)',
-                      padding: 'var(--spacing-xs)',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--color-warm-gray-700)'
+                    <div className="status" style={{
+                      background: 'rgba(30, 41, 59, 0.8)',
+                      border: '1px solid rgba(100, 116, 139, 0.3)',
+                      fontSize: '0.75rem'
                     }}>
                       {prompt.split('\n').length} lines
-                    </span>
-                    <span className="typography-caption" style={{
-                      backgroundColor: 'var(--color-warm-gray-800)',
-                      padding: 'var(--spacing-xs)',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--color-warm-gray-700)'
+                    </div>
+                    <div className="status" style={{
+                      background: 'rgba(30, 41, 59, 0.8)',
+                      border: '1px solid rgba(100, 116, 139, 0.3)',
+                      fontSize: '0.75rem'
                     }}>
                       {prompt.split(' ').filter(word => word.length > 0).length} words
-                    </span>
+                    </div>
                   </div>
                 </div>
                 
-                <div style={{
-                  display: 'flex',
-                  gap: 'var(--spacing-lg)',
-                  marginTop: 'var(--spacing-xl)'
-                }}>
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
                   <button
                     onClick={handleEnhance}
                     disabled={isLoading || !prompt.trim()}
-                    className="button-primary press-feedback"
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 'var(--spacing-md)',
-                      padding: 'var(--spacing-lg) var(--spacing-xl)'
-                    }}
+                    className="btn btn-primary press-scale"
+                    style={{ flex: 1, gap: 'var(--space-3)' }}
                   >
                     {isLoading ? (
                       <>
                         <div style={{
                           width: '20px',
                           height: '20px',
-                          border: '2px solid rgba(255, 255, 255, 0.3)',
-                          borderTop: '2px solid var(--color-soft-white)',
+                          border: '2px solid rgba(15, 23, 42, 0.3)',
+                          borderTop: '2px solid var(--color-slate-900)',
                           borderRadius: '50%',
                           animation: 'spin 1s linear infinite'
                         }}></div>
-                        <span>Enhancing...</span>
+                        Enhancing...
                       </>
                     ) : (
                       <>
                         <span style={{ fontSize: '1.2rem' }}>✨</span>
-                        <span>Enhance Prompt</span>
+                        Enhance Prompt
                       </>
                     )}
                   </button>
                   
                   <button
                     onClick={handleClear}
-                    className="button-secondary hover-lift press-feedback"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--spacing-sm)',
-                      padding: 'var(--spacing-lg) var(--spacing-xl)'
-                    }}
+                    className="btn btn-secondary hover-lift press-scale"
+                    style={{ gap: 'var(--space-2)' }}
                   >
                     <span>🗑️</span>
-                    <span>Clear</span>
+                    Clear
                   </button>
                 </div>
 
-                {/* Professional Processing Stage */}
+                {/* Processing Stage */}
                 {processingStage && (
-                  <div style={{
-                    marginTop: 'var(--spacing-xl)',
-                    padding: 'var(--spacing-xl)',
-                    backgroundColor: 'rgba(217, 119, 6, 0.1)',
-                    border: '2px solid rgba(217, 119, 6, 0.2)',
-                    borderRadius: 'var(--radius-lg)',
-                    boxShadow: 'var(--shadow-subtle)'
-                  }} className="animate-subtle-fade-in">
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--spacing-lg)'
-                    }}>
+                  <div className="animate-scale-in" style={{
+                    marginTop: 'var(--space-6)',
+                    padding: 'var(--space-6)',
+                    background: 'rgba(245, 158, 11, 0.1)',
+                    border: '2px solid rgba(245, 158, 11, 0.2)',
+                    borderRadius: 'var(--radius-xl)',
+                    boxShadow: 'var(--shadow-lg)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
                       <div style={{
                         width: '32px',
                         height: '32px',
-                        border: '3px solid var(--color-accent)',
+                        border: '3px solid var(--color-amber-primary)',
                         borderTop: '3px solid transparent',
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite'
                       }}></div>
                       <div style={{ flex: 1 }}>
-                        <div className="typography-heading-medium accent-text" style={{ marginBottom: 'var(--spacing-sm)' }}>
+                        <div className="heading-md text-accent" style={{ marginBottom: 'var(--space-2)' }}>
                           {processingStage}
                         </div>
-                        <div className="progress-sophisticated" style={{ height: '4px', marginBottom: 'var(--spacing-sm)' }}>
+                        <div className="progress" style={{ height: '6px', marginBottom: 'var(--space-2)' }}>
                           <div 
                             className="progress-bar"
                             style={{ width: `${((currentStageIndex + 1) / 4) * 100}%` }}
                           ></div>
                         </div>
-                        <div className="typography-caption">
+                        <div className="text-sm">
                           Step {currentStageIndex + 1} of 4
                         </div>
                       </div>
@@ -683,25 +628,21 @@ const App = () => {
 
                 {/* Error Display */}
                 {error && (
-                  <div style={{
-                    marginTop: 'var(--spacing-xl)',
-                    padding: 'var(--spacing-xl)',
-                    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                  <div className="animate-scale-in" style={{
+                    marginTop: 'var(--space-6)',
+                    padding: 'var(--space-6)',
+                    background: 'rgba(220, 38, 38, 0.1)',
                     border: '2px solid rgba(220, 38, 38, 0.2)',
-                    borderRadius: 'var(--radius-lg)',
-                    boxShadow: 'var(--shadow-subtle)'
-                  }} className="animate-subtle-fade-in">
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--spacing-lg)'
-                    }}>
+                    borderRadius: 'var(--radius-xl)',
+                    boxShadow: 'var(--shadow-lg)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
                       <span style={{ fontSize: '1.5rem' }}>⚠️</span>
                       <div>
-                        <div className="typography-heading-medium" style={{ color: 'var(--color-error)', marginBottom: 'var(--spacing-xs)' }}>
+                        <div className="heading-md" style={{ color: 'var(--color-error)', marginBottom: 'var(--space-1)' }}>
                           {error}
                         </div>
-                        <div className="typography-body" style={{ color: 'var(--color-error)' }}>
+                        <div className="text-sm" style={{ color: 'var(--color-error)' }}>
                           Please check your connection and try again
                         </div>
                       </div>
@@ -710,108 +651,85 @@ const App = () => {
                 )}
               </div>
 
-              {/* Intent Analysis Card */}
+              {/* Intent Analysis */}
               {intentAnalysis && (
-                <div className="card-sophisticated animate-gentle-slide-up" style={{ marginTop: 'var(--spacing-xl)' }}>
+                <div className="card animate-fade-in-up">
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    marginBottom: 'var(--spacing-xl)'
+                    marginBottom: 'var(--space-8)'
                   }}>
-                    <h4 className="typography-heading-medium">
-                      Analysis Results
-                    </h4>
-                    <span className="status-indicator status-success">
+                    <h3 className="heading-md">Analysis Results</h3>
+                    <div className="status status-success">
                       Verified ✓
-                    </span>
+                    </div>
                   </div>
                   
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: 'var(--spacing-xl)'
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                    gap: 'var(--space-6)'
                   }}>
                     <div>
-                      <div className="typography-caption" style={{ 
-                        marginBottom: 'var(--spacing-sm)',
+                      <div className="text-sm" style={{ 
+                        marginBottom: 'var(--space-2)',
                         textTransform: 'uppercase',
                         letterSpacing: '0.1em'
                       }}>
                         Intent Category
                       </div>
-                      <div className="accent-bg hover-lift" style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        padding: 'var(--spacing-md) var(--spacing-lg)',
-                        borderRadius: 'var(--radius-lg)',
-                        color: 'var(--color-soft-white)',
+                      <div className="btn-ghost" style={{
+                        background: 'var(--color-amber-primary)',
+                        color: 'var(--color-slate-900)',
+                        borderRadius: 'var(--radius-xl)',
                         fontWeight: '600',
-                        fontSize: '1.125rem',
                         textTransform: 'capitalize',
-                        boxShadow: 'var(--shadow-subtle)'
+                        pointerEvents: 'none'
                       }}>
                         {intentAnalysis.intent_category}
                       </div>
                     </div>
                     
                     <div>
-                      <div className="typography-caption" style={{ 
-                        marginBottom: 'var(--spacing-sm)',
+                      <div className="text-sm" style={{ 
+                        marginBottom: 'var(--space-2)',
                         textTransform: 'uppercase',
                         letterSpacing: '0.1em'
                       }}>
                         Confidence Score
                       </div>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 'var(--spacing-md)'
-                      }}>
-                        <div className="progress-sophisticated" style={{ 
-                          flex: 1,
-                          height: '12px'
-                        }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                        <div className="progress" style={{ flex: 1, height: '12px' }}>
                           <div 
                             className="progress-bar"
                             style={{ width: `${intentAnalysis.confidence * 100}%` }}
                           ></div>
                         </div>
-                        <span className="accent-text" style={{
-                          fontWeight: '600',
-                          fontSize: '1.125rem',
-                          minWidth: '3rem'
-                        }}>
+                        <span className="text-accent" style={{ fontWeight: '600', minWidth: '3rem' }}>
                           {Math.round(intentAnalysis.confidence * 100)}%
                         </span>
                       </div>
                     </div>
                     
                     <div>
-                      <div className="typography-caption" style={{ 
-                        marginBottom: 'var(--spacing-sm)',
+                      <div className="text-sm" style={{ 
+                        marginBottom: 'var(--space-2)',
                         textTransform: 'uppercase',
                         letterSpacing: '0.1em'
                       }}>
                         Domain Expertise
                       </div>
-                      <div style={{
-                        color: 'var(--color-warm-gray-200)',
-                        fontWeight: '600',
-                        fontSize: '1.125rem',
-                        textTransform: 'capitalize',
-                        backgroundColor: 'var(--color-warm-gray-700)',
-                        padding: 'var(--spacing-sm) var(--spacing-md)',
-                        borderRadius: 'var(--radius-lg)',
-                        border: '1px solid var(--color-warm-gray-600)'
+                      <div className="btn-ghost" style={{
+                        textTransform: 'capitalize'
                       }}>
                         {intentAnalysis.specific_domain || 'General'}
                       </div>
                     </div>
                     
                     <div>
-                      <div className="typography-caption" style={{ 
-                        marginBottom: 'var(--spacing-sm)',
+                      <div className="text-sm" style={{ 
+                        marginBottom: 'var(--space-2)',
                         textTransform: 'uppercase',
                         letterSpacing: '0.1em'
                       }}>
@@ -820,18 +738,15 @@ const App = () => {
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 'var(--spacing-sm)',
+                        gap: 'var(--space-2)',
                         fontWeight: '600',
-                        fontSize: '1.125rem',
-                        textTransform: 'capitalize',
-                        color: 'var(--color-warm-gray-200)'
+                        textTransform: 'capitalize'
                       }}>
                         <span style={{ fontSize: '1.5rem' }}>
-                          {getComplexityIcon(intentAnalysis.complexity_level).icon}
+                          {intentAnalysis.complexity_level === 'advanced' ? '🚀' : 
+                           intentAnalysis.complexity_level === 'intermediate' ? '🎯' : '⚡'}
                         </span>
-                        <span>
-                          {getComplexityIcon(intentAnalysis.complexity_level).label}
-                        </span>
+                        <span>{intentAnalysis.complexity_level || 'Basic'}</span>
                       </div>
                     </div>
                   </div>
@@ -839,141 +754,104 @@ const App = () => {
                   {/* Enhancement Metrics */}
                   {enhancementMetrics && (
                     <div style={{
-                      marginTop: 'var(--spacing-xl)',
-                      paddingTop: 'var(--spacing-xl)',
-                      borderTop: '1px solid var(--color-warm-gray-700)'
+                      marginTop: 'var(--space-8)',
+                      paddingTop: 'var(--space-8)',
+                      borderTop: '1px solid rgba(255, 255, 255, 0.1)'
                     }}>
                       <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                        gap: 'var(--spacing-lg)',
+                        gap: 'var(--space-4)',
                         textAlign: 'center'
                       }}>
-                        <div className="surface-raised" style={{ padding: 'var(--spacing-lg)' }}>
-                          <div className="accent-text" style={{ 
+                        <div className="card-elevated" style={{ padding: 'var(--space-4)' }}>
+                          <div className="text-accent" style={{ 
                             fontSize: '1.5rem',
                             fontWeight: '600',
-                            marginBottom: 'var(--spacing-xs)'
+                            marginBottom: 'var(--space-1)'
                           }}>
                             {enhancementMetrics.improvementRatio}x
                           </div>
-                          <div className="typography-caption">Enhancement Ratio</div>
+                          <div className="text-sm">Enhancement Ratio</div>
                         </div>
-                        <div className="surface-raised" style={{ padding: 'var(--spacing-lg)' }}>
-                          <div className="accent-text" style={{ 
+                        <div className="card-elevated" style={{ padding: 'var(--space-4)' }}>
+                          <div className="text-accent" style={{ 
                             fontSize: '1.5rem',
                             fontWeight: '600',
-                            marginBottom: 'var(--spacing-xs)'
+                            marginBottom: 'var(--space-1)'
                           }}>
                             {enhancementMetrics.processingTime}s
                           </div>
-                          <div className="typography-caption">Processing Time</div>
+                          <div className="text-sm">Processing Time</div>
                         </div>
-                        <div className="surface-raised" style={{ padding: 'var(--spacing-lg)' }}>
-                          <div className="accent-text" style={{ 
+                        <div className="card-elevated" style={{ padding: 'var(--space-4)' }}>
+                          <div className="text-accent" style={{ 
                             fontSize: '1.5rem',
                             fontWeight: '600',
-                            marginBottom: 'var(--spacing-xs)'
+                            marginBottom: 'var(--space-1)'
                           }}>
                             {enhancementMetrics.agentSteps}
                           </div>
-                          <div className="typography-caption">Agent Steps</div>
+                          <div className="text-sm">Agent Steps</div>
                         </div>
-                        <div className="surface-raised" style={{ padding: 'var(--spacing-lg)' }}>
-                          <div className="accent-text" style={{ 
-                            fontSize: '1.2rem',
+                        <div className="card-elevated" style={{ padding: 'var(--space-4)' }}>
+                          <div className="text-accent" style={{ 
+                            fontSize: '1rem',
                             fontWeight: '600',
-                            marginBottom: 'var(--spacing-xs)',
+                            marginBottom: 'var(--space-1)',
                             textTransform: 'capitalize'
                           }}>
                             {enhancementMetrics.mode}
                           </div>
-                          <div className="typography-caption">Mode Used</div>
+                          <div className="text-sm">Mode Used</div>
                         </div>
                       </div>
-                      
-                      {/* Model Information */}
-                      {enhancementMetrics.modelsUsed && (
-                        <div style={{
-                          marginTop: 'var(--spacing-lg)',
-                          paddingTop: 'var(--spacing-lg)',
-                          borderTop: '1px solid rgba(255, 255, 255, 0.05)'
-                        }}>
-                          <div className="typography-caption" style={{ 
-                            marginBottom: 'var(--spacing-sm)',
-                            textAlign: 'center',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.1em'
-                          }}>
-                            AI Models Used
-                          </div>
-                          <div style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 'var(--spacing-sm)',
-                            justifyContent: 'center'
-                          }}>
-                            {Object.entries(enhancementMetrics.modelsUsed).filter(([_, model]) => model).map(([type, model]) => (
-                              <span key={type} className="status-indicator" style={{
-                                backgroundColor: 'var(--color-warm-gray-700)',
-                                border: '1px solid var(--color-warm-gray-600)',
-                                fontSize: '0.75rem'
-                              }}>
-                                {type}: {model}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
               )}
             </div>
 
-            {/* Output Section */}
-            <div>
+            {/* Output Column */}
+            <div className="animate-slide-in-right delay-200">
               {enhancedPrompt ? (
-                <div className="card-sophisticated animate-gentle-slide-up animate-stagger-2">
+                <div className="card">
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    marginBottom: 'var(--spacing-xl)'
+                    marginBottom: 'var(--space-6)'
                   }}>
-                    <h3 className="typography-heading-medium">
-                      Enhanced Prompt
-                    </h3>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--spacing-md)'
-                    }}>
-                      <span className="typography-caption" style={{
-                        backgroundColor: 'var(--color-warm-gray-700)',
-                        padding: 'var(--spacing-xs) var(--spacing-sm)',
-                        borderRadius: 'var(--radius-sm)',
-                        border: '1px solid var(--color-warm-gray-600)'
+                    <h3 className="heading-md">Enhanced Prompt</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                      <div className="status" style={{
+                        background: 'rgba(100, 116, 139, 0.1)',
+                        color: 'var(--color-slate-400)',
+                        border: '1px solid rgba(100, 116, 139, 0.2)',
+                        fontSize: '0.75rem'
                       }}>
                         {enhancedPrompt.length} chars
-                      </span>
-                      <span className="status-indicator status-success">
+                      </div>
+                      <div className="status status-success">
                         ✓ Enhanced
-                      </span>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="surface-inset" style={{
-                    padding: 'var(--spacing-xl)',
+                  <div className="surface" style={{
+                    padding: 'var(--space-6)',
                     maxHeight: '400px',
-                    overflowY: 'auto'
+                    overflowY: 'auto',
+                    marginBottom: 'var(--space-6)'
                   }}>
                     <pre 
                       ref={enhancedTextRef}
-                      className="typography-code"
+                      className="text-mono"
                       style={{
                         whiteSpace: 'pre-wrap',
-                        color: 'var(--color-warm-gray-200)'
+                        color: 'var(--color-slate-200)',
+                        fontSize: '0.9rem',
+                        lineHeight: '1.7'
                       }}
                     >
                       {typingAnimation || enhancedPrompt}
@@ -983,78 +861,64 @@ const App = () => {
                         display: 'inline-block',
                         width: '2px',
                         height: '20px',
-                        backgroundColor: 'var(--color-accent)',
+                        backgroundColor: 'var(--color-amber-primary)',
                         marginLeft: '2px',
-                        animation: 'subtlePulse 1s infinite'
+                        animation: 'pulse 1s infinite'
                       }}></span>
                     )}
                   </div>
                   
-                  <div style={{ marginTop: 'var(--spacing-xl)' }}>
-                    <button
-                      onClick={handleCopy}
-                      className={`hover-lift press-feedback ${copySuccess ? 'button-primary' : 'button-primary'}`}
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 'var(--spacing-md)',
-                        padding: 'var(--spacing-lg)',
-                        backgroundColor: copySuccess ? 'var(--color-success)' : undefined
-                      }}
-                    >
-                      <div style={{
-                        width: '20px',
-                        height: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        {copySuccess ? (
-                          <span style={{ fontSize: '1.2rem' }}>✓</span>
-                        ) : (
-                          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '100%', height: '100%' }}>
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                        )}
-                      </div>
-                      <span style={{ fontWeight: '600' }}>
-                        {copySuccess ? 'Copied Successfully!' : 'Copy to Clipboard'}
-                      </span>
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleCopy}
+                    className={`btn ${copySuccess ? 'btn-primary' : 'btn-primary'} hover-lift press-scale`}
+                    style={{
+                      width: '100%',
+                      gap: 'var(--space-3)',
+                      background: copySuccess ? 'var(--color-emerald)' : undefined
+                    }}
+                  >
+                    <div style={{ width: '20px', height: '20px' }}>
+                      {copySuccess ? (
+                        <span style={{ fontSize: '1.2rem' }}>✓</span>
+                      ) : (
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '100%', height: '100%' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      )}
+                    </div>
+                    {copySuccess ? 'Copied Successfully!' : 'Copy to Clipboard'}
+                  </button>
                 </div>
               ) : (
-                <div className="card-sophisticated">
-                  <h3 className="typography-heading-medium" style={{ marginBottom: 'var(--spacing-xl)' }}>
+                <div className="card">
+                  <h3 className="heading-md" style={{ marginBottom: 'var(--space-8)' }}>
                     Enhanced Prompt
                   </h3>
                   
-                  <div className="surface-inset" style={{
-                    padding: 'var(--spacing-3xl)',
+                  <div className="surface" style={{
+                    padding: 'var(--space-16)',
                     textAlign: 'center'
                   }}>
                     <div style={{
                       width: '120px',
                       height: '120px',
-                      margin: '0 auto var(--spacing-xl)',
-                      color: 'var(--color-warm-gray-600)'
+                      margin: '0 auto var(--space-8)',
+                      color: 'var(--color-slate-600)'
                     }}>
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '100%', height: '100%' }}>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
-                    <p className="typography-heading-medium" style={{
-                      marginBottom: 'var(--spacing-md)',
-                      color: 'var(--color-warm-gray-400)'
+                    <p className="heading-md" style={{
+                      marginBottom: 'var(--space-4)',
+                      color: 'var(--color-slate-400)'
                     }}>
                       Your enhanced prompt will appear here
                     </p>
-                    <p className="typography-body" style={{
+                    <p className="text-base" style={{
                       maxWidth: '400px',
                       margin: '0 auto',
-                      color: 'var(--color-warm-gray-600)'
+                      color: 'var(--color-slate-500)'
                     }}>
                       Enter a prompt above and click "Enhance" to experience the power of AI-driven optimization
                     </p>
@@ -1066,28 +930,28 @@ const App = () => {
         </div>
       </section>
 
-      {/* Sophisticated Footer */}
+      {/* Footer */}
       <footer style={{
-        padding: 'var(--spacing-3xl) 0',
-        backgroundColor: 'var(--color-warm-gray-800)',
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+        padding: 'var(--space-24) 0',
+        background: 'linear-gradient(180deg, var(--color-obsidian) 0%, var(--color-charcoal) 100%)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
       }}>
-        <div className="container-sophisticated">
-          <div className="card-sophisticated" style={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        <div className="container">
+          <div className="card" style={{ 
+            background: 'rgba(255, 255, 255, 0.02)',
             border: '1px solid rgba(255, 255, 255, 0.05)'
           }}>
-            <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-2xl)' }}>
-              <h4 className="typography-heading-large" style={{
-                marginBottom: 'var(--spacing-lg)',
-                color: 'var(--color-soft-white)'
+            <div style={{ textAlign: 'center', marginBottom: 'var(--space-12)' }}>
+              <h2 className="heading-xl" style={{
+                marginBottom: 'var(--space-6)',
+                color: 'var(--color-pure-white)'
               }}>
                 Multi-Agent Enhancement Pipeline
-              </h4>
-              <p className="typography-body-large" style={{
+              </h2>
+              <p className="text-lg" style={{
                 maxWidth: '600px',
                 margin: '0 auto',
-                textAlign: 'balance'
+                lineHeight: '1.8'
               }}>
                 Four specialized AI agents work in harmony to create the ultimate prompt enhancement experience through advanced machine learning and natural language processing
               </p>
@@ -1096,54 +960,53 @@ const App = () => {
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: 'var(--spacing-xl)'
+              gap: 'var(--space-8)'
             }}>
               {[
                 { 
                   title: "Intent Classification", 
                   description: "Deep semantic analysis of your prompt's goal, domain expertise, and complexity requirements",
-                  icon: "🎯"
+                  icon: "🎯",
+                  color: "var(--color-rose)"
                 },
                 { 
                   title: "Context Research", 
                   description: "Advanced knowledge gathering with domain-specific insights and current best practices",
-                  icon: "🔍"
+                  icon: "🔍",
+                  color: "var(--color-blue)"
                 },
                 { 
                   title: "Best Practices", 
                   description: "Universal optimization techniques and enhancement methodologies for maximum effectiveness",
-                  icon: "⚡"
+                  icon: "⚡",
+                  color: "var(--color-violet)"
                 },
                 { 
                   title: "Dynamic Enhancement", 
                   description: "Precision-crafted prompt generation with contextual awareness and intelligent optimization",
-                  icon: "✨"
+                  icon: "✨",
+                  color: "var(--color-emerald)"
                 }
               ].map((step, index) => (
                 <div 
                   key={index} 
-                  className="surface-raised hover-lift animate-subtle-fade-in"
-                  style={{
-                    padding: 'var(--spacing-xl)',
-                    textAlign: 'center',
-                    animationDelay: `${index * 100}ms`
-                  }}
+                  className={`card-elevated hover-lift animate-fade-in-up delay-${index * 100}`}
+                  style={{ textAlign: 'center' }}
                 >
                   <div style={{
                     fontSize: '2.5rem',
-                    marginBottom: 'var(--spacing-lg)'
+                    marginBottom: 'var(--space-6)',
+                    filter: `drop-shadow(0 0 20px ${step.color}40)`
                   }}>
                     {step.icon}
                   </div>
-                  <h5 className="typography-heading-medium" style={{
-                    marginBottom: 'var(--spacing-md)',
-                    color: 'var(--color-soft-white)'
+                  <h3 className="heading-md" style={{
+                    marginBottom: 'var(--space-4)',
+                    color: 'var(--color-pure-white)'
                   }}>
                     {step.title}
-                  </h5>
-                  <p className="typography-body" style={{
-                    lineHeight: '1.6'
-                  }}>
+                  </h3>
+                  <p className="text-base" style={{ lineHeight: '1.6' }}>
                     {step.description}
                   </p>
                 </div>
@@ -1151,73 +1014,53 @@ const App = () => {
             </div>
             
             <div style={{
-              marginTop: 'var(--spacing-2xl)',
-              paddingTop: 'var(--spacing-xl)',
-              borderTop: '1px solid var(--color-warm-gray-700)',
+              marginTop: 'var(--space-12)',
+              paddingTop: 'var(--space-8)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              gap: 'var(--spacing-lg)',
+              gap: 'var(--space-6)',
               textAlign: 'center'
             }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--spacing-md)'
-              }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
                 <div style={{
-                  width: '32px',
-                  height: '32px',
-                  backgroundColor: 'var(--color-accent)',
-                  borderRadius: 'var(--radius-lg)',
+                  width: '40px',
+                  height: '40px',
+                  background: 'linear-gradient(135deg, var(--color-amber-primary) 0%, var(--color-amber-dark) 100%)',
+                  borderRadius: 'var(--radius-xl)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
                   <span style={{
-                    color: 'var(--color-soft-white)',
+                    color: 'var(--color-slate-900)',
                     fontWeight: '800',
-                    fontSize: '1.125rem'
+                    fontSize: '1.25rem'
                   }}>P</span>
                 </div>
                 <div>
-                  <span className="typography-body" style={{ color: 'var(--color-warm-gray-400)' }}>
+                  <div className="text-base" style={{ color: 'var(--color-slate-400)' }}>
                     Powered by Advanced AI Intelligence
-                  </span>
-                  <div className="typography-caption">
+                  </div>
+                  <div className="text-sm">
                     Next-generation prompt optimization technology
                   </div>
                 </div>
               </div>
+              
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 'var(--spacing-lg)',
+                gap: 'var(--space-6)',
                 flexWrap: 'wrap',
                 justifyContent: 'center'
               }}>
-                <div className="typography-caption" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-xs)'
-                }}>
-                  <span className="status-indicator" style={{
-                    backgroundColor: 'var(--color-warm-gray-700)',
-                    border: '1px solid var(--color-warm-gray-600)',
-                    fontSize: '0.75rem'
-                  }}>v2.0.0</span>
-                  <span>•</span>
-                  <span>🚀 Production Ready</span>
+                <div className="status">
+                  v2.0.0 • 🚀 Production Ready
                 </div>
-                <div className="typography-caption" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-xs)'
-                }}>
-                  <span>⚡ High Performance</span>
-                  <span>•</span>
-                  <span>🔒 Enterprise Grade</span>
+                <div className="status">
+                  ⚡ High Performance • 🔒 Enterprise Grade
                 </div>
               </div>
             </div>
@@ -1225,13 +1068,34 @@ const App = () => {
         </div>
       </footer>
 
-      {/* Add spinning animation keyframe */}
+      {/* Spinning animation */}
       <style jsx>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
       `}</style>
+    </div>
+  );
+};
+
+// Chat Interface Component (placeholder for now)
+const ChatInterface = ({ mode, setMode, setShowChatInterface }) => {
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-obsidian)', padding: 'var(--space-8)' }}>
+      <div className="container">
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-8)' }}>
+          <h1 className="heading-xl">Chat Interface</h1>
+          <p className="text-lg">Multi-turn conversation mode coming soon...</p>
+          <button 
+            onClick={() => setShowChatInterface(false)}
+            className="btn btn-secondary"
+            style={{ marginTop: 'var(--space-4)' }}
+          >
+            Back to Single Turn
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
