@@ -47,6 +47,7 @@ class StatusCheckCreate(BaseModel):
 # Pehance Models
 class PromptEnhanceRequest(BaseModel):
     prompt: str
+    mode: str = "single"  # "single" or "multi" - defaults to single turn
 
 class PromptEnhanceResponse(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -56,6 +57,7 @@ class PromptEnhanceResponse(BaseModel):
     success: bool
     error: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+    mode: str = "single"  # Mode used for enhancement
     # NEW: Additional fields for 4D methodology tracking
     enhancement_type: Optional[str] = None  # clarification_request, basic_enhancement, standard_enhancement, advanced_enhancement
     enhancement_ratio: Optional[float] = None
