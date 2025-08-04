@@ -535,93 +535,156 @@ Enhancement should be proportional to this complexity level."""
 
 async def orchestrate_enhancement(user_prompt: str):
     """
-    Orchestrates the multi-agent enhancement process using 4-D methodology:
-    1. Classify intent with smart complexity detection
-    2. Generate supporting content only when beneficial 
-    3. Apply 4-D methodology based on complexity level
+    Enhanced orchestration implementing 4D methodology with smart routing:
+    1. Classify intent with precision complexity detection
+    2. Route to appropriate enhancement pathway
+    3. Apply proportional enhancement based on complexity
+    4. Prevent over-enhancement syndrome
     """
     
-    # Step 1: Classify Intent with rate limiting
-    print("🎯 Analyzing user input...")
+    # Step 1: Enhanced Intent Classification with 4D methodology
+    print("🎯 Analyzing user input with 4D methodology...")
     intent_result = await rate_limited_request(Runner.run, intent_classifier_agent, user_prompt)
     intent_data = parse_intent_json(intent_result.final_output)
     
     print(f"Intent: {intent_data.intent_category} ({intent_data.confidence:.1%} confidence)")
     print(f"Domain: {intent_data.specific_domain or 'None specified'}")
-    print(f"Complexity: {intent_data.complexity_level}")
-    print(f"Context needed: {intent_data.requires_context}")
+    print(f"Complexity Score: {intent_data.input_complexity_score:.2f}")
+    print(f"Input Type: {intent_data.input_type}")
+    print(f"Suggested Action: {intent_data.suggested_action}")
     
-    # Step 2: Smart Context Generation (only for intermediate/advanced)
-    supporting_context = ""
-    research_performed = False
+    # Step 2: Smart Enhancement Routing Based on 4D Analysis
+    if intent_data.suggested_action == "request_clarification":
+        print("📝 Routing to clarification response (preventing over-enhancement)")
+        
+        # Return a conversational response asking for more details
+        clarification_response = intent_data.conversation_starter or \
+            "I'd be happy to help enhance your prompt! Could you share more details about what you'd like to create or improve? The more specific you are, the better I can tailor the enhancement to your needs."
+        
+        return {
+            "enhanced_prompt": clarification_response,
+            "intent_analysis": intent_data.dict(),
+            "enhancement_type": "clarification_request",
+            "supporting_context_length": 0,
+            "methodology_guidance_length": 0,
+            "domain_research_performed": False,
+            "4d_methodology_applied": True,  # 4D was applied to determine clarification needed
+            "process_steps": ["intent_classification", "clarification_routing"],
+            "enhancement_ratio": round(len(clarification_response) / len(user_prompt), 1),
+            "complexity_score": intent_data.input_complexity_score
+        }
     
-    if intent_data.requires_context and intent_data.complexity_level in ["intermediate", "advanced"]:
-        print("🔍 Gathering domain-specific context...")
+    elif intent_data.suggested_action == "basic_enhancement":
+        print("⚡ Applying basic enhancement (proportional to input complexity)")
         
-        support_prompt = f"""
-        Intent Analysis: {intent_data.dict()}
-        Original User Input: "{user_prompt}"
+        # For basic enhancement, skip context gathering but apply light improvement
+        basic_instructions = create_basic_enhancement_instructions(intent_data, user_prompt)
         
-        Provide focused, relevant context for this {intent_data.intent_category} request in the {intent_data.specific_domain or 'general'} domain.
+        basic_enhancer = Agent(
+            name="Basic Prompt Enhancer",
+            instructions=basic_instructions,
+            model="llama3-8b-8192"
+        )
         
-        Match context depth to complexity level: {intent_data.complexity_level}
-        """
+        enhancement_result = await rate_limited_request(Runner.run, basic_enhancer, user_prompt)
         
-        support_result = await rate_limited_request(Runner.run, supporting_content_agent, support_prompt)
-        supporting_context = support_result.final_output
-        research_performed = True
-        print(f"Context gathered: {len(supporting_context)} characters")
+        return {
+            "enhanced_prompt": enhancement_result.final_output,
+            "intent_analysis": intent_data.dict(),
+            "enhancement_type": "basic_enhancement",
+            "supporting_context_length": 0,
+            "methodology_guidance_length": 0,
+            "domain_research_performed": False,
+            "4d_methodology_applied": True,
+            "process_steps": ["intent_classification", "basic_enhancement"],
+            "enhancement_ratio": round(len(enhancement_result.final_output) / len(user_prompt), 1),
+            "complexity_score": intent_data.input_complexity_score
+        }
+    
     else:
-        print("📝 Skipping context gathering for basic/simple request")
-    
-    # Step 3: 4-D Methodology Guidance (only for intermediate/advanced)
-    best_practices_context = ""
-    methodology_applied = False
-    
-    if intent_data.complexity_level in ["intermediate", "advanced"]:
-        print("⚡ Applying 4-D methodology guidance...")
-        methodology_prompt = f"""
-        Intent Analysis: {intent_data.dict()}
-        Original User Input: "{user_prompt}"
+        # Standard or Advanced Enhancement - use existing sophisticated pipeline
+        print(f"🚀 Applying {intent_data.suggested_action} with full multi-agent system")
         
-        Apply 4-D methodology analysis for this {intent_data.complexity_level} complexity {intent_data.intent_category} request.
-        """
+        # Step 3: Smart Context Generation (only for standard/advanced)
+        supporting_context = ""
+        research_performed = False
         
-        methodology_result = await rate_limited_request(Runner.run, best_practices_agent, methodology_prompt) 
-        best_practices_context = methodology_result.final_output
-        methodology_applied = True
-        print(f"4-D methodology guidance: {len(best_practices_context)} characters")
-    else:
-        print("📝 Using basic enhancement mode - minimal 4-D methodology")
-    
-    # Step 4: Create Sophisticated Dynamic Enhancer
-    print("✨ Crafting optimized prompt...")
-    dynamic_instructions = create_dynamic_enhancer_instructions(intent_data, supporting_context, best_practices_context)
-    
-    enhancer_agent = Agent(
-        name="Lyra - Prompt Enhancement Specialist",
-        instructions=dynamic_instructions,
-        model="llama3-8b-8192",
-        input_guardrails=[InputGuardrail(guardrail_function=safety_guardrail)]
-    )
-    
-    # Step 5: Generate Enhanced Prompt with 4-D methodology
-    enhancement_result = await rate_limited_request(Runner.run, enhancer_agent, user_prompt)
-    
-    # Determine process steps based on what was actually performed
-    process_steps = ["intent_classification"]
-    if research_performed:
-        process_steps.append("domain_context_research")
-    if methodology_applied:
-        process_steps.append("4d_methodology_application")
-    process_steps.append("prompt_optimization")
-    
-    return {
-        "enhanced_prompt": enhancement_result.final_output,
-        "intent_analysis": intent_data.dict(),
-        "supporting_context_length": len(supporting_context),
-        "methodology_guidance_length": len(best_practices_context),
-        "domain_research_performed": research_performed,
-        "4d_methodology_applied": methodology_applied,
-        "process_steps": process_steps
-    }
+        if intent_data.requires_context and intent_data.input_complexity_score > 0.4:
+            print("🔍 Gathering domain-specific context...")
+            
+            support_prompt = f"""
+            Intent Analysis: {intent_data.dict()}
+            Original User Input: "{user_prompt}"
+            
+            Provide focused, relevant context for this {intent_data.intent_category} request in the {intent_data.specific_domain or 'general'} domain.
+            
+            Match context depth to complexity level: {intent_data.complexity_level}
+            Complexity Score: {intent_data.input_complexity_score:.2f}
+            """
+            
+            support_result = await rate_limited_request(Runner.run, supporting_content_agent, support_prompt)
+            supporting_context = support_result.final_output
+            research_performed = True
+            print(f"Context gathered: {len(supporting_context)} characters")
+        else:
+            print("📝 Skipping context gathering - input complexity doesn't warrant it")
+        
+        # Step 4: 4-D Methodology Guidance (scaled to complexity)
+        best_practices_context = ""
+        methodology_applied = False
+        
+        if intent_data.input_complexity_score > 0.5:
+            print("⚡ Applying 4-D methodology guidance...")
+            methodology_prompt = f"""
+            Intent Analysis: {intent_data.dict()}
+            Original User Input: "{user_prompt}"
+            
+            Apply 4-D methodology analysis for this {intent_data.complexity_level} complexity {intent_data.intent_category} request.
+            Complexity Score: {intent_data.input_complexity_score:.2f}
+            
+            Scale the depth of analysis to match the input complexity.
+            """
+            
+            methodology_result = await rate_limited_request(Runner.run, best_practices_agent, methodology_prompt) 
+            best_practices_context = methodology_result.final_output
+            methodology_applied = True
+            print(f"4-D methodology guidance: {len(best_practices_context)} characters")
+        else:
+            print("📝 Using proportional enhancement - minimal 4-D methodology")
+        
+        # Step 5: Create Sophisticated Dynamic Enhancer with Anti-Over-Enhancement
+        print("✨ Crafting proportionally optimized prompt...")
+        dynamic_instructions = create_dynamic_enhancer_instructions(intent_data, supporting_context, best_practices_context)
+        
+        enhancer_agent = Agent(
+            name="Lyra - Proportional Enhancement Specialist",
+            instructions=dynamic_instructions,
+            model="llama3-8b-8192",
+            input_guardrails=[InputGuardrail(guardrail_function=safety_guardrail)]
+        )
+        
+        # Step 6: Generate Enhanced Prompt with Proportionality Controls
+        enhancement_result = await rate_limited_request(Runner.run, enhancer_agent, user_prompt)
+        
+        # Determine process steps based on what was actually performed
+        process_steps = ["intent_classification"]
+        if research_performed:
+            process_steps.append("domain_context_research")
+        if methodology_applied:
+            process_steps.append("4d_methodology_application")
+        process_steps.append("proportional_prompt_optimization")
+        
+        enhancement_ratio = round(len(enhancement_result.final_output) / len(user_prompt), 1)
+        
+        return {
+            "enhanced_prompt": enhancement_result.final_output,
+            "intent_analysis": intent_data.dict(),
+            "enhancement_type": intent_data.suggested_action,
+            "supporting_context_length": len(supporting_context),
+            "methodology_guidance_length": len(best_practices_context),
+            "domain_research_performed": research_performed,
+            "4d_methodology_applied": methodology_applied,
+            "process_steps": process_steps,
+            "enhancement_ratio": enhancement_ratio,
+            "complexity_score": intent_data.input_complexity_score
+        }
