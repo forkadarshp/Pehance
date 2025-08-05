@@ -426,6 +426,12 @@ const AppContent = () => {
 
   return (
     <div className="app-container moving-background">
+      {/* Scroll Progress Bar */}
+      <div 
+        className="scroll-progress" 
+        style={{ width: `${scrollProgress}%` }}
+      ></div>
+      
       {/* Professional Header */}
       <header className="app-header">
         <div className="header-background"></div>
