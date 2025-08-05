@@ -1051,82 +1051,118 @@ const AppContent = () => {
             {/* Output Column */}
             <div className="output-column animate-slide-in-right delay-200">
               {enhancedPrompt || typingAnimation ? (
-                <div className="output-card card enhanced-output-card">
-                  <div className="output-header enhanced-output-header">
-                    <div className="output-title-group">
-                      <h3 className="heading-md">Enhanced Prompt</h3>
-                      <div className="enhancement-badge">
-                        {enhancementMetrics && (
-                          <span className="enhancement-ratio">
-                            {enhancementMetrics.improvementRatio}x Enhanced
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="output-actions enhanced-output-actions">
-                      <div className="output-stats enhanced-output-stats">
-                        <div className="stat-group">
-                          <span className="output-stat">
-                            <span className="stat-icon">📝</span>
-                            {enhancedPrompt.length || typingAnimation.length} chars
-                          </span>
-                          <span className="output-stat">
-                            <span className="stat-icon">📄</span>
-                            {(enhancedPrompt || typingAnimation).split(' ').filter(w => w.length > 0).length} words
-                          </span>
+                formattedOutput ? (
+                  /* Enhanced Output Display */
+                  <EnhancedOutputDisplay
+                    content={formattedOutput.content}
+                    format={formattedOutput.format}
+                    metadata={formattedOutput.metadata}
+                    codeBlocks={formattedOutput.codeBlocks}
+                    isLoading={isLoading}
+                    onFormatChange={handleFormatChange}
+                  />
+                ) : (
+                  /* Standard Output Display */
+                  <div className="output-card card enhanced-output-card">
+                    <div className="output-header enhanced-output-header">
+                      <div className="output-title-group">
+                        <h3 className="heading-md">Enhanced Prompt</h3>
+                        <div className="enhancement-badge">
+                          {enhancementMetrics && (
+                            <span className="enhancement-ratio">
+                              {enhancementMetrics.improvementRatio}x Enhanced
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <button
-                        onClick={handleCopy}
-                        className="btn btn-ghost enhanced-copy-btn hover-lift press-scale"
-                        disabled={!enhancedPrompt}
-                      >
-                        {copySuccess ? (
-                          <>
-                            <span className="btn-icon success">✅</span>
-                            <span>Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="btn-icon">📋</span>
-                            <span>Copy</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="output-content surface enhanced-output-content">
-                    <div 
-                      ref={enhancedTextRef}
-                      className="output-text text-mono enhanced-output-text"
-                    >
-                      {typingAnimation || enhancedPrompt}
-                      {typingAnimation && !enhancedPrompt && (
-                        <span className="typing-cursor animate-pulse">|</span>
-                      )}
-                    </div>
-                    
-                    {/* Quality Indicators */}
-                    {enhancedPrompt && enhancementMetrics && (
-                      <div className="quality-indicators">
-                        <div className="quality-item">
-                          <span className="quality-label">Enhancement Quality</span>
-                          <div className="quality-bar">
-                            <div 
-                              className="quality-fill" 
-                              style={{ width: `${Math.min(enhancementMetrics.improvementRatio * 10, 100)}%` }}
-                            ></div>
+                      <div className="output-actions enhanced-output-actions">
+                        <div className="output-stats enhanced-output-stats">
+                          <div className="stat-group">
+                            <span className="output-stat">
+                              <span className="stat-icon">📝</span>
+                              {enhancedPrompt.length || typingAnimation.length} chars
+                            </span>
+                            <span className="output-stat">
+                              <span className="stat-icon">📄</span>
+                              {(enhancedPrompt || typingAnimation).split(' ').filter(w => w.length > 0).length} words
+                            </span>
                           </div>
                         </div>
-                        <div className="quality-item">
-                          <span className="quality-label">Processing Time</span>
-                          <span className="quality-value">{enhancementMetrics.processingTime}s</span>
+                        
+                        {/* Format Selector */}
+                        <div className="format-selector">
+                          <select
+                            value={outputFormat}
+                            onChange={(e) => handleFormatChange(e.target.value)}
+                            className="format-select"
+                            disabled={isLoading}
+                          >
+                            <option value="auto_detect">🎯 Auto Detect</option>
+                            <option value="rich_text">📝 Rich Text</option>
+                            <option value="code_blocks">💻 Code Blocks</option>
+                            <option value="markdown">📄 Markdown</option>
+                            <option value="plain_text">📋 Plain Text</option>
+                          </select>
                         </div>
+                        
+                        <button
+                          onClick={handleCopy}
+                          className="btn btn-ghost enhanced-copy-btn hover-lift press-scale"
+                          disabled={!enhancedPrompt}
+                        >
+                          {copySuccess ? (
+                            <>
+                              <span className="btn-icon success">✅</span>
+                              <span>Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="btn-icon">📋</span>
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
                       </div>
-                    )}
+                    </div>
+                    
+                    <div className="output-content surface enhanced-output-content">
+                      <div 
+                        ref={enhancedTextRef}
+                        className="output-text text-mono enhanced-output-text"
+                      >
+                        {typingAnimation || enhancedPrompt}
+                        {typingAnimation && !enhancedPrompt && (
+                          <span className="typing-cursor animate-pulse">|</span>
+                        )}
+                      </div>
+                      
+                      {/* Quality Indicators */}
+                      {enhancedPrompt && enhancementMetrics && (
+                        <div className="quality-indicators">
+                          <div className="quality-item">
+                            <span className="quality-label">Enhancement Quality</span>
+                            <div className="quality-bar">
+                              <div 
+                                className="quality-fill" 
+                                style={{ width: `${Math.min(enhancementMetrics.improvementRatio * 10, 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                          <div className="quality-item">
+                            <span className="quality-label">Processing Time</span>
+                            <span className="quality-value">{enhancementMetrics.processingTime}s</span>
+                          </div>
+                          {enhancementMetrics.multimodal && (
+                            <div className="quality-item">
+                              <span className="quality-icon">🎯</span>
+                              <span className="quality-label">Multi-modal Enhanced</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )
               ) : (
                 <div className="placeholder-card card enhanced-placeholder">
                   <div className="placeholder-content">
