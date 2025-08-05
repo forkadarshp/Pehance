@@ -567,20 +567,26 @@ const AppContent = () => {
             
             {/* Input Column */}
             <div className="input-column animate-slide-in-left">
-              <div className="input-card card">
+              <div className="input-card card enhanced-card">
                 {/* Mode Toggle */}
-                <div className="mode-selector">
+                <div className="mode-selector enhanced-mode-selector">
                   <div className="mode-info">
-                    <h3 className="heading-md">Enhancement Mode</h3>
-                    <p className="text-sm">
+                    <div className="mode-header">
+                      <h3 className="heading-md">Enhancement Mode</h3>
+                      <div className="mode-badge">
+                        {mode === "single" ? "Single Turn" : "Multi Turn"}
+                      </div>
+                    </div>
+                    <p className="text-sm mode-description">
                       {mode === "single" 
-                        ? "Single Turn: Direct comprehensive enhancement" 
-                        : "Multi Turn: Interactive conversational refinement"}
+                        ? "Direct comprehensive enhancement - One prompt, maximum impact" 
+                        : "Interactive conversational refinement - Collaborate with AI"}
                     </p>
                   </div>
                   
-                  <div className="mode-toggle-group">
+                  <div className="mode-toggle-group enhanced-toggle">
                     <span className={`mode-label ${mode === "single" ? "active" : ""}`}>
+                      <span className="mode-icon">⚡</span>
                       Single
                     </span>
                     <button 
@@ -590,57 +596,74 @@ const AppContent = () => {
                       <div className="toggle-thumb"></div>
                     </button>
                     <span className={`mode-label ${mode === "multi" ? "active" : ""}`}>
+                      <span className="mode-icon">💬</span>
                       Multi
                     </span>
                   </div>
                 </div>
                 
                 {/* Input Section */}
-                <div className="input-section">
-                  <div className="input-header">
-                    <h3 className="heading-md">Your Prompt</h3>
-                    <div className="input-stats">
+                <div className="input-section enhanced-input-section">
+                  <div className="input-header enhanced-input-header">
+                    <div className="input-title-group">
+                      <h3 className="heading-md">Your Prompt</h3>
+                      <div className="input-subtitle">Transform your idea into precision-crafted output</div>
+                    </div>
+                    <div className="input-stats enhanced-stats">
                       <div className="stat-item">
                         <span className="stat-value">{prompt.length}</span>
-                        <span className="stat-label">characters</span>
+                        <span className="stat-label">chars</span>
                       </div>
+                      <div className="stat-divider"></div>
                       <div className="stat-item">
                         <span className="stat-value">{prompt.split(' ').filter(w => w.length > 0).length}</span>
                         <span className="stat-label">words</span>
                       </div>
                       {prompt.length > 0 && (
-                        <div className="stat-ready animate-scale-in">
-                          Ready ✓
-                        </div>
+                        <>
+                          <div className="stat-divider"></div>
+                          <div className="stat-ready animate-scale-in">
+                            <span className="ready-icon">✓</span>
+                            Ready
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
 
-                  <div className="textarea-container surface">
+                  <div className="textarea-container surface enhanced-textarea">
                     <textarea
                       value={prompt}
                       onChange={(e) => {
                         setPrompt(e.target.value);
                         adjustTextareaHeight(e.target);
                       }}
-                      placeholder="Enter your prompt here...
+                      placeholder="Enter your idea, question, or concept here...
 
-✨ Examples to try:
+✨ Perfect examples to try:
 • Write a compelling story about artificial intelligence and human creativity
 • Help me build a scalable React application with modern best practices  
 • Create a comprehensive marketing strategy for a SaaS startup
-• Develop a research methodology for studying climate change impact"
-                      className="input textarea text-mono"
-                      style={{ minHeight: '120px', maxHeight: '300px' }}
+• Develop a research methodology for studying climate change impact
+• Design a user onboarding flow for a mobile app"
+                      className="input textarea text-mono enhanced-textarea-input"
+                      style={{ minHeight: '140px', maxHeight: '320px' }}
                     />
+                    <div className="textarea-overlay">
+                      <div className="character-limit">
+                        <span className={prompt.length > 1800 ? 'limit-warning' : ''}>
+                          {prompt.length}/2000
+                        </span>
+                      </div>
+                    </div>
                   </div>
                   
-                  {/* Action Buttons */}
-                  <div className="action-buttons">
+                  {/* Enhanced Action Buttons */}
+                  <div className="action-buttons enhanced-actions">
                     <button
                       onClick={handleEnhance}
                       disabled={isLoading || !prompt.trim()}
-                      className="btn btn-primary press-scale light-trail"
+                      className="btn btn-primary enhanced-primary press-scale light-trail"
                     >
                       {isLoading ? (
                         <>
@@ -651,13 +674,14 @@ const AppContent = () => {
                         <>
                           <span className="btn-icon">✨</span>
                           <span>Enhance Prompt</span>
+                          <span className="btn-shortcut">⏎</span>
                         </>
                       )}
                     </button>
                     
                     <button
                       onClick={handleClear}
-                      className="btn btn-secondary hover-lift press-scale"
+                      className="btn btn-secondary enhanced-secondary hover-lift press-scale"
                     >
                       <span className="btn-icon">🗑️</span>
                       <span>Clear</span>
