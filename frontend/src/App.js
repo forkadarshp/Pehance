@@ -141,59 +141,35 @@ const AppContent = () => {
           const isHeroSection = element === heroRef.current;
           const isInputSection = element === inputSectionRef.current;
           
-          // Remove all animation classes first
-          element.classList.remove(
-            'animate-fade-in-up', 'animate-fade-out-down',
-            'animate-slide-in-left', 'animate-slide-out-left',
-            'animate-slide-in-right', 'animate-slide-out-right'
-          );
-          
           if (entry.isIntersecting) {
             // Element is entering viewport
-            if (scrollDirection === 'down') {
-              // Scrolling down - elements appear
-              if (isHeroSection) {
-                element.classList.add('animate-fade-in-up');
-              } else if (isInputSection) {
-                // Add staggered animations to input section children
-                const inputColumn = element.querySelector('.input-column');
-                const outputColumn = element.querySelector('.output-column');
-                
-                if (inputColumn) {
-                  inputColumn.classList.remove('animate-slide-out-left');
-                  inputColumn.classList.add('animate-slide-in-left');
-                }
-                if (outputColumn) {
-                  outputColumn.classList.remove('animate-slide-out-right');
-                  setTimeout(() => {
-                    outputColumn.classList.add('animate-slide-in-right');
-                  }, 200);
-                }
+            if (isHeroSection) {
+              element.classList.remove('animate-fade-out-down');
+              element.classList.add('animate-fade-in-up');
+            } else if (isInputSection) {
+              // Add staggered animations to input section children
+              const inputColumn = element.querySelector('.input-column');
+              const outputColumn = element.querySelector('.output-column');
+              
+              if (inputColumn) {
+                inputColumn.classList.remove('animate-slide-out-left');
+                inputColumn.style.opacity = '1';
+                inputColumn.style.transform = 'translateX(0)';
+                inputColumn.classList.add('animate-slide-in-left');
               }
-            } else {
-              // Scrolling up - elements appear (reverse entry)
-              if (isHeroSection) {
-                element.classList.add('animate-fade-in-up');
-              } else if (isInputSection) {
-                const inputColumn = element.querySelector('.input-column');
-                const outputColumn = element.querySelector('.output-column');
-                
-                if (inputColumn) {
-                  inputColumn.classList.remove('animate-slide-out-left');
-                  inputColumn.classList.add('animate-slide-in-left');
-                }
-                if (outputColumn) {
-                  outputColumn.classList.remove('animate-slide-out-right');
-                  setTimeout(() => {
-                    outputColumn.classList.add('animate-slide-in-right');
-                  }, 200);
-                }
+              if (outputColumn) {
+                outputColumn.classList.remove('animate-slide-out-right');
+                setTimeout(() => {
+                  outputColumn.style.opacity = '1';
+                  outputColumn.style.transform = 'translateX(0)';
+                  outputColumn.classList.add('animate-slide-in-right');
+                }, 200);
               }
             }
           } else {
             // Element is leaving viewport
             if (scrollDirection === 'up') {
-              // Scrolling up - elements disappear
+              // Scrolling up - elements disappear with animation
               if (isInputSection) {
                 const inputColumn = element.querySelector('.input-column');
                 const outputColumn = element.querySelector('.output-column');
@@ -201,14 +177,25 @@ const AppContent = () => {
                 if (outputColumn) {
                   outputColumn.classList.remove('animate-slide-in-right');
                   outputColumn.classList.add('animate-slide-out-right');
+                  setTimeout(() => {
+                    outputColumn.style.opacity = '0';
+                    outputColumn.style.transform = 'translateX(24px)';
+                  }, 300);
                 }
                 if (inputColumn) {
                   setTimeout(() => {
                     inputColumn.classList.remove('animate-slide-in-left');
                     inputColumn.classList.add('animate-slide-out-left');
+                    setTimeout(() => {
+                      inputColumn.style.opacity = '0';
+                      inputColumn.style.transform = 'translateX(-24px)';
+                    }, 300);
                   }, 100);
                 }
-              } else if (isHeroSection) {
+              }
+            } else if (scrollDirection === 'down') {
+              // Scrolling down past hero - hero can fade out
+              if (isHeroSection) {
                 element.classList.remove('animate-fade-in-up');
                 element.classList.add('animate-fade-out-down');
               }
@@ -217,8 +204,8 @@ const AppContent = () => {
         });
       },
       { 
-        threshold: [0.1, 0.25, 0.5, 0.75], 
-        rootMargin: '0px 0px -20px 0px' 
+        threshold: [0.1, 0.3, 0.6], 
+        rootMargin: '0px 0px -50px 0px' 
       }
     );
 
