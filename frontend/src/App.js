@@ -64,25 +64,136 @@ const AppContent = () => {
   const heroRef = useRef(null);
   const inputSectionRef = useRef(null);
   const processingIntervalRef = useRef(null);
+  
+  // Scroll tracking for bidirectional animations
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [scrollDirection, setScrollDirection] = useState('down');
 
-  // Intersection observer for animations
+  // Bidirectional scroll detection and animations
+  useEffect(() => {
+    let ticking = false;
+    
+    const updateScrollDirection = () => {
+      const scrollY = window.scrollY;
+      
+      if (Math.abs(scrollY - lastScrollY) < 10) {
+        ticking = false;
+        return;
+      }
+      
+      setScrollDirection(scrollY > lastScrollY ? 'down' : 'up');
+      setLastScrollY(scrollY);
+      ticking = false;
+    };
+
+    const requestTick = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateScrollDirection);
+        ticking = true;
+      }
+    };
+
+    const handleScroll = () => requestTick();
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  // Enhanced intersection observer for bidirectional animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
+          const element = entry.target;
+          const isHeroSection = element === heroRef.current;
+          const isInputSection = element === inputSectionRef.current;
+          
+          // Remove all animation classes first
+          element.classList.remove(
+            'animate-fade-in-up', 'animate-fade-out-down',
+            'animate-slide-in-left', 'animate-slide-out-left',
+            'animate-slide-in-right', 'animate-slide-out-right'
+          );
+          
           if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in-up');
+            // Element is entering viewport
+            if (scrollDirection === 'down') {
+              // Scrolling down - elements appear
+              if (isHeroSection) {
+                element.classList.add('animate-fade-in-up');
+              } else if (isInputSection) {
+                // Add staggered animations to input section children
+                const inputColumn = element.querySelector('.input-column');
+                const outputColumn = element.querySelector('.output-column');
+                
+                if (inputColumn) {
+                  inputColumn.classList.remove('animate-slide-out-left');
+                  inputColumn.classList.add('animate-slide-in-left');
+                }
+                if (outputColumn) {
+                  outputColumn.classList.remove('animate-slide-out-right');
+                  setTimeout(() => {
+                    outputColumn.classList.add('animate-slide-in-right');
+                  }, 200);
+                }
+              }
+            } else {
+              // Scrolling up - elements appear (reverse entry)
+              if (isHeroSection) {
+                element.classList.add('animate-fade-in-up');
+              } else if (isInputSection) {
+                const inputColumn = element.querySelector('.input-column');
+                const outputColumn = element.querySelector('.output-column');
+                
+                if (inputColumn) {
+                  inputColumn.classList.remove('animate-slide-out-left');
+                  inputColumn.classList.add('animate-slide-in-left');
+                }
+                if (outputColumn) {
+                  outputColumn.classList.remove('animate-slide-out-right');
+                  setTimeout(() => {
+                    outputColumn.classList.add('animate-slide-in-right');
+                  }, 200);
+                }
+              }
+            }
+          } else {
+            // Element is leaving viewport
+            if (scrollDirection === 'up') {
+              // Scrolling up - elements disappear
+              if (isInputSection) {
+                const inputColumn = element.querySelector('.input-column');
+                const outputColumn = element.querySelector('.output-column');
+                
+                if (outputColumn) {
+                  outputColumn.classList.remove('animate-slide-in-right');
+                  outputColumn.classList.add('animate-slide-out-right');
+                }
+                if (inputColumn) {
+                  setTimeout(() => {
+                    inputColumn.classList.remove('animate-slide-in-left');
+                    inputColumn.classList.add('animate-slide-out-left');
+                  }, 100);
+                }
+              } else if (isHeroSection) {
+                element.classList.remove('animate-fade-in-up');
+                element.classList.add('animate-fade-out-down');
+              }
+            }
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      { 
+        threshold: [0.1, 0.25, 0.5, 0.75], 
+        rootMargin: '0px 0px -20px 0px' 
+      }
     );
 
     if (heroRef.current) observer.observe(heroRef.current);
     if (inputSectionRef.current) observer.observe(inputSectionRef.current);
 
     return () => observer.disconnect();
-  }, []);
+  }, [scrollDirection]);
 
   // Check model status
   useEffect(() => {
