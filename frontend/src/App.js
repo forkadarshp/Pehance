@@ -6,6 +6,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
 import ProcessingStatus from "./components/ProcessingStatus";
 import ModelStatusBoard from "./components/ModelStatusBoard";
+import ImageUpload from "./components/ImageUpload";
+import EnhancedOutputDisplay from "./components/EnhancedOutputDisplay";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
