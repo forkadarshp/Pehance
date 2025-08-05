@@ -72,6 +72,7 @@ class ModelConfig:
         "deepseek-r1-distill-llama-70b": ["reasoning", "large_context"],
         "llama-3.1-8b-instant": ["fast_response", "json_mode"],
         "gemma2-9b-it": ["balanced", "cost_effective"],
+        "qwen/qwen3-32b": ["advanced_reasoning", "creative", "multilingual", "latest_model"],
         "qwen-qwq-32b": ["creative", "preview"],
         "moonshotai/kimi-k2-instruct": ["advanced_reasoning", "complex_tasks"],
         "meta-llama/llama-guard-4-12b": ["safety", "content_filtering"]
