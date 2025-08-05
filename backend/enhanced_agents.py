@@ -156,7 +156,7 @@ async def select_model_for_task(task_type: str, complexity_score: float = 0.5, a
         
         # CREATIVE TASKS - Use models with strong creative capabilities including advanced models
         elif task_type in ["creative_enhancement", "creative"] or (task_type == "enhancement" and complexity_score > 0.6):
-            preferred_models = [ModelConfig.CREATIVE_MODEL, ModelConfig.ADVANCED_COMPLEX, ModelConfig.REASONING_MODEL, ModelConfig.ADVANCED_REASONING, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
+            preferred_models = [ModelConfig.CREATIVE_MODEL, ModelConfig.CREATIVE_ALT, ModelConfig.ADVANCED_COMPLEX, ModelConfig.REASONING_MODEL, ModelConfig.ADVANCED_REASONING, ModelConfig.BALANCED_MODEL, ModelConfig.LEGACY_FALLBACK]
         
         # CONTEXT AND SUPPORTING CONTENT - Use balanced performance models
         elif task_type in ["context", "supporting_content", "methodology"]:
