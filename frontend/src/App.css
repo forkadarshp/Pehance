@@ -251,6 +251,17 @@ body {
   }
 }
 
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
 @keyframes slideInLeft {
   from {
     opacity: 0;
@@ -262,6 +273,17 @@ body {
   }
 }
 
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
 @keyframes slideInRight {
   from {
     opacity: 0;
@@ -270,6 +292,17 @@ body {
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(24px);
   }
 }
 
