@@ -109,6 +109,29 @@ const AppContent = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
+  // Initialize elements to hidden state on page load
+  useEffect(() => {
+    // Reset all elements to initial state on page load
+    if (heroRef.current) {
+      heroRef.current.classList.remove('animate-fade-in-up', 'animate-fade-out-down');
+    }
+    if (inputSectionRef.current) {
+      const inputColumn = inputSectionRef.current.querySelector('.input-column');
+      const outputColumn = inputSectionRef.current.querySelector('.output-column');
+      
+      if (inputColumn) {
+        inputColumn.classList.remove('animate-slide-in-left', 'animate-slide-out-left');
+        inputColumn.style.opacity = '0';
+        inputColumn.style.transform = 'translateX(-24px)';
+      }
+      if (outputColumn) {
+        outputColumn.classList.remove('animate-slide-in-right', 'animate-slide-out-right');
+        outputColumn.style.opacity = '0';
+        outputColumn.style.transform = 'translateX(24px)';
+      }
+    }
+  }, []);
+
   // Enhanced intersection observer for bidirectional animations
   useEffect(() => {
     const observer = new IntersectionObserver(
