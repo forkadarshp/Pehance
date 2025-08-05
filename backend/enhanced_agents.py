@@ -49,6 +49,7 @@ class ModelConfig:
     
     # LEGACY FALLBACK
     LEGACY_FALLBACK = "llama3-8b-8192"  # Ultimate fallback
+    FALLBACK_MODEL = LEGACY_FALLBACK  # Alias for backward compatibility
     
     # MODEL PERFORMANCE METRICS (tokens per second)
     MODEL_PERFORMANCE = {
