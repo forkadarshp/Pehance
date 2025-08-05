@@ -50,6 +50,30 @@ class StatusCheckCreate(BaseModel):
 class PromptEnhanceRequest(BaseModel):
     prompt: str
     mode: str = "single"  # "single" or "multi" - defaults to single turn
+    image_data: Optional[str] = None  # Base64 encoded image
+    preferred_format: Optional[str] = "auto_detect"  # Output format preference
+
+class ImageUploadRequest(BaseModel):
+    image_data: str  # Base64 encoded image
+    analysis_type: str = "comprehensive"  # comprehensive, text_extraction, quick_description
+
+class ImageProcessResponse(BaseModel):
+    success: bool
+    description: str
+    extracted_text: Optional[str] = None
+    analysis: Dict[str, Any] = {}
+    suggestions: List[str] = []
+
+class ResponseFormatRequest(BaseModel):
+    content: str
+    target_format: str = "auto_detect"  # rich_text, code_blocks, markdown, plain_text, auto_detect
+    enhance_quality: bool = True
+
+class ResponseFormatResponse(BaseModel):
+    formatted_content: str
+    detected_format: str
+    metadata: Dict[str, Any] = {}
+    code_blocks: List[Dict] = []
 
 class PromptEnhanceResponse(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
