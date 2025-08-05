@@ -387,20 +387,28 @@ body {
   animation: slideOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Initial animation states for smooth entrance */
-.input-column, .output-column {
-  opacity: 0;
-  transform: translateX(-24px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.output-column {
-  transform: translateX(24px);
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Improved responsive behavior for scroll elements */
+.input-column, .output-column {
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .main-content {
-  opacity: 0;
-  transform: translateY(16px);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
