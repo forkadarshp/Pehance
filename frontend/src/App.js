@@ -69,6 +69,7 @@ const AppContent = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [scrollDirection, setScrollDirection] = useState('down');
   const [currentSection, setCurrentSection] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   // Bidirectional scroll detection and animations
   useEffect(() => {
@@ -76,6 +77,8 @@ const AppContent = () => {
     
     const updateScrollDirection = () => {
       const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
       
       if (Math.abs(scrollY - lastScrollY) < 10) {
         ticking = false;
@@ -86,12 +89,16 @@ const AppContent = () => {
       setLastScrollY(scrollY);
       
       // Update current section based on scroll position
-      const windowHeight = window.innerHeight;
       if (scrollY < windowHeight * 0.5) {
         setCurrentSection(0); // Hero section
       } else {
         setCurrentSection(1); // Main content section
       }
+      
+      // Calculate scroll progress percentage
+      const scrollableHeight = documentHeight - windowHeight;
+      const progress = Math.min((scrollY / scrollableHeight) * 100, 100);
+      setScrollProgress(progress);
       
       ticking = false;
     };
