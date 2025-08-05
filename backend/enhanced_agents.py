@@ -39,7 +39,8 @@ class ModelConfig:
     
     # TIER 4: Specialized Models - Advanced Tasks
     ADVANCED_REASONING = "meta-llama/llama-4-maverick-17b-128e-instruct"  # 562 tokens/sec, advanced features
-    CREATIVE_MODEL = "qwen-qwq-32b"  # 400 tokens/sec, strong creative capabilities
+    CREATIVE_MODEL = "qwen/qwen3-32b"  # 400 tokens/sec, latest Qwen model with enhanced capabilities
+    CREATIVE_ALT = "qwen-qwq-32b"  # 400 tokens/sec, strong creative capabilities (preview)
     ADVANCED_COMPLEX = "moonshotai/kimi-k2-instruct"  # For complex enhancements and advanced tasks
     
     # SAFETY & GUARDRAIL MODELS
