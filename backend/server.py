@@ -224,7 +224,198 @@ async def test_groq(request: PromptEnhanceRequest):
         logger.error(f"Groq test failed: {e}")
         raise HTTPException(status_code=500, detail=f"Groq API error: {str(e)}")
 
-# Pehance Enhancement Endpoint
+# Image processing endpoint
+@api_router.post("/process-image", response_model=ImageProcessResponse)
+async def process_image_endpoint(request: ImageUploadRequest):
+    """
+    Process uploaded image and extract meaningful information for prompt enhancement
+    """
+    try:
+        # Validate image data
+        is_valid, error_msg = ImageAgent.validate_image_base64(request.image_data)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
+        
+        # Process the image
+        result = await process_image(request.image_data, request.analysis_type)
+        
+        # Generate suggestions based on the analysis
+        suggestions = []
+        if result.analysis.get("requires_user_description"):
+            suggestions = [
+                "Describe what you see in the image to get better enhancement",
+                "Tell me what you want to accomplish with this image content",
+                "Mention any specific text or elements you'd like me to focus on"
+            ]
+        elif result.extracted_text:
+            suggestions = [
+                "Enhance this extracted text into a comprehensive prompt",
+                "Create a tutorial based on this content",
+                "Transform this into step-by-step instructions"
+            ]
+        else:
+            suggestions = [
+                "Create a detailed prompt based on this image analysis",
+                "Generate creative content inspired by this image",
+                "Build documentation from this visual content"
+            ]
+        
+        return ImageProcessResponse(
+            success=True,
+            description=result.description,
+            extracted_text=result.extracted_text,
+            analysis=result.analysis,
+            suggestions=suggestions
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Image processing failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Image processing error: {str(e)}")
+
+# Response formatting endpoint
+@api_router.post("/format-response", response_model=ResponseFormatResponse)
+async def format_response_endpoint(request: ResponseFormatRequest):
+    """
+    Format response content with enhanced styling and structure
+    """
+    try:
+        # Format the response
+        result = await format_response(
+            request.content,
+            request.target_format,
+            request.enhance_quality
+        )
+        
+        return ResponseFormatResponse(
+            formatted_content=result.formatted_content,
+            detected_format=result.detected_format.value,
+            metadata=result.metadata,
+            code_blocks=result.code_blocks
+        )
+        
+    except Exception as e:
+        logger.error(f"Response formatting failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Response formatting error: {str(e)}")
+
+# Enhanced multi-modal prompt enhancement endpoint
+@api_router.post("/enhance-multimodal", response_model=PromptEnhanceResponse)
+async def enhance_multimodal_prompt(request: PromptEnhanceRequest):
+    """
+    Enhanced prompt enhancement with multi-modal support (text + image)
+    """
+    try:
+        combined_prompt = request.prompt
+        image_analysis = None
+        
+        # Process image if provided
+        if request.image_data:
+            print("🖼️ Processing image input...")
+            
+            # Validate and process image
+            is_valid, error_msg = ImageAgent.validate_image_base64(request.image_data)
+            if not is_valid:
+                raise HTTPException(status_code=400, detail=f"Invalid image: {error_msg}")
+            
+            # Process image to extract meaningful information
+            image_result = await process_image(request.image_data, "comprehensive")
+            image_analysis = {
+                "description": image_result.description,
+                "extracted_text": image_result.extracted_text,
+                "analysis": image_result.analysis
+            }
+            
+            # Combine text prompt with image analysis
+            if image_result.description:
+                if request.prompt.strip():
+                    combined_prompt = f"""User Request: {request.prompt}
+
+Image Analysis: {image_result.description}
+
+{f"Extracted Text from Image: {image_result.extracted_text}" if image_result.extracted_text else ""}
+
+Please enhance this prompt taking into account both the user's text request and the visual information provided in the image."""
+                else:
+                    combined_prompt = f"""Based on this image analysis: {image_result.description}
+
+{f"Extracted Text: {image_result.extracted_text}" if image_result.extracted_text else ""}
+
+Please create an enhanced prompt that helps the user accomplish their goals with this image content."""
+        
+        # Run the enhanced multi-agent enhancement pipeline
+        result = await orchestrate_enhancement(combined_prompt, mode=request.mode)
+        
+        # Format the response if preferred format is specified
+        enhanced_prompt = result["enhanced_prompt"]
+        format_metadata = {}
+        
+        if request.preferred_format and request.preferred_format != "auto_detect":
+            print(f"🎨 Formatting response as: {request.preferred_format}")
+            format_result = await format_response(enhanced_prompt, request.preferred_format, True)
+            enhanced_prompt = format_result.formatted_content
+            format_metadata = {
+                "formatted": True,
+                "format_type": format_result.detected_format.value,
+                "format_metadata": format_result.metadata
+            }
+        
+        # Create response object with multi-modal enhancements
+        response = PromptEnhanceResponse(
+            original_prompt=request.prompt,
+            enhanced_prompt=enhanced_prompt,
+            agent_results={
+                **result,
+                "image_analysis": image_analysis,
+                "format_metadata": format_metadata,
+                "multimodal": request.image_data is not None
+            },
+            success=True,
+            error=None,
+            mode=request.mode,
+            enhancement_type=result.get("enhancement_type"),
+            enhancement_ratio=result.get("enhancement_ratio"),
+            complexity_score=result.get("complexity_score"),
+            models_used=result.get("models_used")
+        )
+        
+        # Store in database for analytics
+        await db.prompt_enhancements.insert_one(response.dict())
+        
+        return response
+        
+    except InputGuardrailTripwireTriggered as e:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Content safety check failed: {str(e)}"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Multi-modal enhancement error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+# Content format detection endpoint
+@api_router.post("/detect-format")
+async def detect_content_format_endpoint(content: str):
+    """
+    Auto-detect the most appropriate format for content
+    """
+    try:
+        detected_format = detect_content_format(content)
+        return {
+            "detected_format": detected_format,
+            "confidence": "high",  # Could be enhanced with confidence scoring
+            "suggestions": {
+                "rich_text": "Best for instructional and explanatory content",
+                "code_blocks": "Best for technical content with code",
+                "markdown": "Best for structured documentation",
+                "plain_text": "Best for simple, unformatted content"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Format detection failed: {e}")
+        raise HTTPException(status_code=500, detail="Format detection error")
 @api_router.post("/enhance", response_model=PromptEnhanceResponse)
 async def enhance_prompt(request: PromptEnhanceRequest):
     """
