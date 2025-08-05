@@ -862,6 +862,7 @@ const AppContent = () => {
                     </button>
                   </div>
                 </div>
+                )}
 
                 {/* Processing Status */}
                 <ProcessingStatus
