@@ -502,15 +502,24 @@ const AppContent = () => {
             
             {/* Main Headline */}
             <h1 className="hero-title display-2xl">
-              Just One Prompt!
+              One Single Prompt
+              <br />
+              <span className="title-accent">Is All It Takes</span>
             </h1>
             
             {/* Subtitle */}
             <div className="hero-subtitle animate-fade-in-up delay-200">
               <p className="text-xl">
-                Transform your ideas into precision-crafted prompts using our sophisticated AI multi-agent system. 
-                Professional-grade enhancement with real-time processing insights.
+                Our core philosophy: Transform any idea into a precision-crafted prompt with just one input. 
+                Professional-grade enhancement powered by sophisticated AI multi-agent intelligence.
               </p>
+              
+              {/* Self-Made Badge */}
+              <div className="self-made-badge animate-fade-in-up delay-300">
+                <span className="badge-sparkle">✨</span>
+                <span className="badge-text">This website was created using Pehance itself</span>
+                <span className="badge-icon">🚀</span>
+              </div>
               
               {/* Process Steps */}
               <div className="process-steps">
