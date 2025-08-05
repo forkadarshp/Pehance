@@ -30,6 +30,14 @@ const AppContent = () => {
   const [currentModel, setCurrentModel] = useState("");
   const [processingTime, setProcessingTime] = useState(0);
   
+  // Multi-modal state
+  const [inputMode, setInputMode] = useState("text"); // "text", "image", "both"
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [imageAnalysis, setImageAnalysis] = useState(null);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [outputFormat, setOutputFormat] = useState("auto_detect");
+  const [formattedOutput, setFormattedOutput] = useState(null);
+  
   // Enhanced processing stages with detailed agent information
   const stages = [
     { 
