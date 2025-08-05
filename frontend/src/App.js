@@ -826,47 +826,97 @@ const AppContent = () => {
             {/* Output Column */}
             <div className="output-column animate-slide-in-right delay-200">
               {enhancedPrompt || typingAnimation ? (
-                <div className="output-card card">
-                  <div className="output-header">
-                    <h3 className="heading-md">Enhanced Prompt</h3>
-                    <div className="output-actions">
-                      <div className="output-stats">
-                        <span className="output-stat">
-                          {enhancedPrompt.length || typingAnimation.length} chars
-                        </span>
-                        <span className="output-stat">
-                          {(enhancedPrompt || typingAnimation).split(' ').filter(w => w.length > 0).length} words
-                        </span>
+                <div className="output-card card enhanced-output-card">
+                  <div className="output-header enhanced-output-header">
+                    <div className="output-title-group">
+                      <h3 className="heading-md">Enhanced Prompt</h3>
+                      <div className="enhancement-badge">
+                        {enhancementMetrics && (
+                          <span className="enhancement-ratio">
+                            {enhancementMetrics.improvementRatio}x Enhanced
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="output-actions enhanced-output-actions">
+                      <div className="output-stats enhanced-output-stats">
+                        <div className="stat-group">
+                          <span className="output-stat">
+                            <span className="stat-icon">📝</span>
+                            {enhancedPrompt.length || typingAnimation.length} chars
+                          </span>
+                          <span className="output-stat">
+                            <span className="stat-icon">📄</span>
+                            {(enhancedPrompt || typingAnimation).split(' ').filter(w => w.length > 0).length} words
+                          </span>
+                        </div>
                       </div>
                       <button
                         onClick={handleCopy}
-                        className="btn btn-ghost hover-lift press-scale"
+                        className="btn btn-ghost enhanced-copy-btn hover-lift press-scale"
                         disabled={!enhancedPrompt}
                       >
-                        {copySuccess ? '✅ Copied!' : '📋 Copy'}
+                        {copySuccess ? (
+                          <>
+                            <span className="btn-icon success">✅</span>
+                            <span>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="btn-icon">📋</span>
+                            <span>Copy</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
                   
-                  <div className="output-content surface">
+                  <div className="output-content surface enhanced-output-content">
                     <div 
                       ref={enhancedTextRef}
-                      className="output-text text-mono"
+                      className="output-text text-mono enhanced-output-text"
                     >
                       {typingAnimation || enhancedPrompt}
                       {typingAnimation && !enhancedPrompt && (
                         <span className="typing-cursor animate-pulse">|</span>
                       )}
                     </div>
+                    
+                    {/* Quality Indicators */}
+                    {enhancedPrompt && enhancementMetrics && (
+                      <div className="quality-indicators">
+                        <div className="quality-item">
+                          <span className="quality-label">Enhancement Quality</span>
+                          <div className="quality-bar">
+                            <div 
+                              className="quality-fill" 
+                              style={{ width: `${Math.min(enhancementMetrics.improvementRatio * 10, 100)}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        <div className="quality-item">
+                          <span className="quality-label">Processing Time</span>
+                          <span className="quality-value">{enhancementMetrics.processingTime}s</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
-                <div className="placeholder-card card">
+                <div className="placeholder-card card enhanced-placeholder">
                   <div className="placeholder-content">
-                    <div className="placeholder-icon">✨</div>
+                    <div className="placeholder-animation">
+                      <div className="placeholder-icon">✨</div>
+                      <div className="placeholder-particles">
+                        <span className="particle">⚡</span>
+                        <span className="particle">🎯</span>
+                        <span className="particle">🚀</span>
+                      </div>
+                    </div>
                     <h3 className="placeholder-title">Enhanced Prompt Will Appear Here</h3>
                     <p className="placeholder-text">
-                      Enter your prompt and click "Enhance Prompt" to see the AI-powered enhancement with real-time processing insights.
+                      Enter your prompt and click "Enhance Prompt" to witness the transformation. 
+                      Our AI agents will analyze, research, and craft a precision-enhanced version.
                     </p>
                     <div className="placeholder-features">
                       <div className="feature-item">
@@ -880,6 +930,10 @@ const AppContent = () => {
                       <div className="feature-item">
                         <span className="feature-icon">🤖</span>
                         <span>Multi-Agent System</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-icon">✨</span>
+                        <span>Professional Enhancement</span>
                       </div>
                     </div>
                   </div>
