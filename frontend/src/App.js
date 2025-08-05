@@ -358,8 +358,8 @@ const AppContent = () => {
   };
 
   const handleEnhance = async () => {
-    if (!prompt.trim()) {
-      setError("Please enter a prompt to enhance");
+    if (!prompt.trim() && !uploadedImage) {
+      setError("Please enter a prompt or upload an image to enhance");
       setTimeout(() => setError(""), 4000);
       return;
     }
@@ -374,6 +374,7 @@ const AppContent = () => {
     setEnhancementMetrics(null);
     setCurrentModel("");
     setProcessingTime(0);
+    setFormattedOutput(null);
 
     // Start processing timer
     const startTime = Date.now();
@@ -403,10 +404,20 @@ const AppContent = () => {
     setTimeout(advanceStage, stages[0].duration);
 
     try {
-      const response = await axios.post(`${API}/enhance`, { 
-        prompt,
-        mode: mode
-      });
+      // Use multi-modal endpoint if image is uploaded
+      const endpoint = uploadedImage ? '/enhance-multimodal' : '/enhance';
+      const requestData = {
+        prompt: prompt || "",
+        mode: mode,
+        preferred_format: outputFormat
+      };
+
+      // Add image data if available
+      if (uploadedImage) {
+        requestData.image_data = uploadedImage.base64;
+      }
+
+      const response = await axios.post(`${API}${endpoint}`, requestData);
       
       clearInterval(processingIntervalRef.current);
       const endTime = Date.now();
@@ -418,7 +429,7 @@ const AppContent = () => {
       const metrics = {
         originalLength: prompt.length,
         enhancedLength: response.data.enhanced_prompt.length,
-        improvementRatio: response.data.enhancement_ratio || (response.data.enhanced_prompt.length / prompt.length).toFixed(1),
+        improvementRatio: response.data.enhancement_ratio || (response.data.enhanced_prompt.length / (prompt.length || 1)).toFixed(1),
         processingTime: totalProcessingTime,
         confidenceScore: response.data.agent_results?.intent_analysis?.confidence || 0.85,
         agentSteps: response.data.agent_results?.process_steps?.length || 4,
@@ -430,14 +441,30 @@ const AppContent = () => {
           context: 'llama-3.3-70b-versatile', 
           methodology: 'moonshotai/kimi-k2-instruct',
           enhancement: 'llama-3.3-70b-versatile'
-        }
+        },
+        multimodal: !!uploadedImage,
+        imageAnalysis: response.data.agent_results?.image_analysis || null
       };
       
       setEnhancementMetrics(metrics);
       
+      // Check if response is already formatted
+      const isFormatted = response.data.agent_results?.format_metadata?.formatted;
+      const enhancedContent = response.data.enhanced_prompt;
+      
+      if (isFormatted) {
+        // Response is already formatted
+        setFormattedOutput({
+          content: enhancedContent,
+          format: response.data.agent_results.format_metadata.format_type,
+          metadata: response.data.agent_results.format_metadata.format_metadata || {},
+          codeBlocks: response.data.agent_results.format_metadata.code_blocks || []
+        });
+      }
+      
       setTimeout(() => {
-        typewriterEffect(response.data.enhanced_prompt, () => {
-          setEnhancedPrompt(response.data.enhanced_prompt);
+        typewriterEffect(enhancedContent, () => {
+          setEnhancedPrompt(enhancedContent);
           setIntentAnalysis(response.data.agent_results?.intent_analysis || {
             intent_category: 'creative',
             confidence: 0.85,
