@@ -68,6 +68,7 @@ const AppContent = () => {
   // Scroll tracking for bidirectional animations
   const [lastScrollY, setLastScrollY] = useState(0);
   const [scrollDirection, setScrollDirection] = useState('down');
+  const [currentSection, setCurrentSection] = useState(0);
 
   // Bidirectional scroll detection and animations
   useEffect(() => {
@@ -83,6 +84,15 @@ const AppContent = () => {
       
       setScrollDirection(scrollY > lastScrollY ? 'down' : 'up');
       setLastScrollY(scrollY);
+      
+      // Update current section based on scroll position
+      const windowHeight = window.innerHeight;
+      if (scrollY < windowHeight * 0.5) {
+        setCurrentSection(0); // Hero section
+      } else {
+        setCurrentSection(1); // Main content section
+      }
+      
       ticking = false;
     };
 
