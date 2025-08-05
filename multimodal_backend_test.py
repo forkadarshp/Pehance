@@ -570,7 +570,7 @@ class MultiModalBackendTester:
             try:
                 response = requests.post(
                     f"{API_BASE}/detect-format",
-                    json=test_case["content"],
+                    params={"content": test_case["content"]},
                     timeout=15
                 )
                 
