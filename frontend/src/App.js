@@ -864,6 +864,56 @@ const AppContent = () => {
                 </div>
                 )}
 
+                {/* Image Input Section */}
+                {(inputMode === "image" || inputMode === "both") && (
+                  <ImageUpload
+                    onImageUpload={handleImageUpload}
+                    isProcessing={isProcessingImage}
+                    className="multimodal-image-upload"
+                  />
+                )}
+
+                {/* Image Analysis Display */}
+                {imageAnalysis && (
+                  <div className="image-analysis-card card animate-fade-in-up">
+                    <div className="analysis-header">
+                      <h3 className="heading-md">Image Analysis</h3>
+                      <div className="analysis-badge">
+                        <span className="badge-icon">🔍</span>
+                        <span>AI Analyzed</span>
+                      </div>
+                    </div>
+                    
+                    <div className="analysis-content">
+                      <div className="analysis-description">
+                        <h4>Visual Analysis:</h4>
+                        <p>{imageAnalysis.description}</p>
+                      </div>
+                      
+                      {imageAnalysis.extractedText && (
+                        <div className="extracted-text">
+                          <h4>Extracted Text:</h4>
+                          <pre className="text-content">{imageAnalysis.extractedText}</pre>
+                        </div>
+                      )}
+                      
+                      {imageAnalysis.suggestions && imageAnalysis.suggestions.length > 0 && (
+                        <div className="suggestions">
+                          <h4>Enhancement Suggestions:</h4>
+                          <ul className="suggestion-list">
+                            {imageAnalysis.suggestions.map((suggestion, index) => (
+                              <li key={index} className="suggestion-item">
+                                <span className="suggestion-icon">💡</span>
+                                {suggestion}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Processing Status */}
                 <ProcessingStatus
                   stage={processingStage}
