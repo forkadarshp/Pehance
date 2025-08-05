@@ -57,6 +57,7 @@ class ModelConfig:
         "meta-llama/llama-4-maverick-17b-128e-instruct": 562,
         "gemma2-9b-it": 500,
         "deepseek-r1-distill-llama-70b": 400,
+        "qwen/qwen3-32b": 400,  # Latest Qwen model with enhanced capabilities
         "qwen-qwq-32b": 400,
         "moonshotai/kimi-k2-instruct": 380,
         "llama-3.3-70b-versatile": 394,
