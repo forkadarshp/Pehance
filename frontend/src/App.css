@@ -133,6 +133,7 @@
   padding: 0;
 }
 
+/* Enhanced smooth scrolling with better performance */
 html {
   line-height: 1.6;
   -webkit-text-size-adjust: 100%;
@@ -141,6 +142,7 @@ html {
   font-family: var(--font-body);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   scroll-behavior: smooth;
+  overflow-x: hidden; /* Prevent horizontal scroll issues */
 }
 
 body {
@@ -153,6 +155,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   transition: var(--transition-colors);
+  overflow-x: hidden; /* Ensure no horizontal scrolling */
+  scroll-padding-top: 80px; /* Account for fixed header */
 }
 
 /* Professional Typography Hierarchy */
