@@ -10,6 +10,8 @@ from typing import List, Dict, Any, Optional
 import uuid
 from datetime import datetime
 from enhanced_agents import orchestrate_enhancement, InputGuardrailTripwireTriggered
+from image_agent import process_image, ImageAgent
+from response_agent import format_response, detect_content_format, OutputFormat
 
 # Configure logging first
 logging.basicConfig(
