@@ -523,6 +523,15 @@ const AppContent = () => {
     setEnhancementMetrics(null);
     setCurrentModel("");
     setProcessingTime(0);
+    
+    // Clear multi-modal state
+    setUploadedImage(null);
+    setImageAnalysis(null);
+    setIsProcessingImage(false);
+    setFormattedOutput(null);
+    setOutputFormat("auto_detect");
+    setInputMode("text");
+    
     if (processingIntervalRef.current) {
       clearInterval(processingIntervalRef.current);
     }
