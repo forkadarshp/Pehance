@@ -387,6 +387,55 @@ body {
   animation: slideOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* Initial animation states for smooth entrance */
+.input-column, .output-column {
+  opacity: 0;
+  transform: translateX(-24px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.output-column {
+  transform: translateX(24px);
+}
+
+.main-content {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Smooth scroll indicator */
+.scroll-indicator {
+  position: fixed;
+  top: 50%;
+  right: 2rem;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 100;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-indicator:hover {
+  opacity: 1;
+}
+
+.scroll-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.scroll-dot.active {
+  background: var(--color-brand-primary);
+  transform: scale(1.2);
+}
+
 .animate-scale-in {
   animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
