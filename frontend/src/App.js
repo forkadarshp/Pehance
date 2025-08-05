@@ -286,7 +286,76 @@ const AppContent = () => {
     type();
   };
 
-  const handleEnhance = async () => {
+  // Handle image upload and processing
+  const handleImageUpload = async (imageBase64, fileName) => {
+    if (!imageBase64) {
+      setUploadedImage(null);
+      setImageAnalysis(null);
+      return;
+    }
+
+    setUploadedImage({ base64: imageBase64, fileName });
+    setIsProcessingImage(true);
+    setImageAnalysis(null);
+
+    try {
+      const response = await axios.post(`${API}/process-image`, {
+        image_data: imageBase64,
+        analysis_type: "comprehensive"
+      });
+
+      if (response.data.success) {
+        setImageAnalysis({
+          description: response.data.description,
+          extractedText: response.data.extracted_text,
+          analysis: response.data.analysis,
+          suggestions: response.data.suggestions
+        });
+        
+        // If there's extracted text and no current prompt, use it as a starting point
+        if (response.data.extracted_text && !prompt.trim()) {
+          setPrompt(response.data.extracted_text);
+        }
+      }
+    } catch (err) {
+      console.error("Image processing failed:", err);
+      setError("Failed to process image. Please try again.");
+      setTimeout(() => setError(""), 4000);
+    } finally {
+      setIsProcessingImage(false);
+    }
+  };
+
+  // Handle output format changes
+  const handleFormatChange = async (newFormat) => {
+    if (!enhancedPrompt) return;
+    
+    setOutputFormat(newFormat);
+    
+    try {
+      const response = await axios.post(`${API}/format-response`, {
+        content: enhancedPrompt,
+        target_format: newFormat,
+        enhance_quality: true
+      });
+
+      setFormattedOutput({
+        content: response.data.formatted_content,
+        format: response.data.detected_format,
+        metadata: response.data.metadata,
+        codeBlocks: response.data.code_blocks
+      });
+    } catch (err) {
+      console.error("Response formatting failed:", err);
+      // Fallback to original content
+      setFormattedOutput({
+        content: enhancedPrompt,
+        format: "plain_text",
+        metadata: { error: "Formatting failed", fallback: true },
+        codeBlocks: []
+      });
+    }
+  };
     if (!prompt.trim()) {
       setError("Please enter a prompt to enhance");
       setTimeout(() => setError(""), 4000);
