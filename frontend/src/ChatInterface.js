@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { useTheme } from "./contexts/ThemeContext";
+import ThemeToggle from "./components/ThemeToggle";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const ChatInterface = ({ onBack }) => {
+  const { theme } = useTheme();
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const [modelStatus, setModelStatus] = useState(null);
+  const [currentModel, setCurrentModel] = useState("");
+  const [processingAgent, setProcessingAgent] = useState("");
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -34,6 +39,8 @@ const ChatInterface = ({ onBack }) => {
     };
     
     checkModelStatus();
+    const interval = setInterval(checkModelStatus, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   // Initialize chat with welcome message
@@ -42,25 +49,34 @@ const ChatInterface = ({ onBack }) => {
       {
         id: 1,
         type: 'assistant',
-        content: `Welcome to Pehance's conversational prompt enhancement! 
+        content: `Welcome to Pehance's Interactive Enhancement Mode! 🎯
 
-I'm here to help you craft the perfect prompt through an interactive conversation. I can:
+I'm your AI prompt engineering assistant, powered by our advanced multi-agent system. Here's how I can help:
 
-• **Ask clarifying questions** when your prompt needs more context
-• **Suggest improvements** step by step
-• **Provide multiple variations** for you to choose from
-• **Explain my reasoning** behind each enhancement
+**🔍 Intelligent Analysis**
+• Analyze your prompts for intent and complexity
+• Identify areas for improvement and optimization
+• Provide detailed feedback and suggestions
 
-**How it works:**
-1. Share your initial prompt or idea
-2. I'll analyze it and may ask follow-up questions
-3. Together we'll refine it to perfection
-4. You'll get a professionally enhanced prompt
+**💬 Interactive Refinement**
+• Ask clarifying questions when needed
+• Guide you through step-by-step improvements
+• Offer multiple enhancement variations
 
-What would you like help with today?`,
+**🤖 Multi-Agent Processing**
+• Classification Agent: Intent analysis
+• Context Agent: Domain-specific insights  
+• Methodology Agent: Best practices application
+• Enhancement Agent: Final optimization
+
+**Let's get started!** Share your prompt idea, and I'll help you craft the perfect enhanced version through our conversation.`,
         timestamp: new Date(),
         metadata: {
-          type: 'welcome'
+          type: 'welcome',
+          models_used: {
+            classification: 'llama-3.1-8b-instant',
+            enhancement: 'llama-3.3-70b-versatile'
+          }
         }
       }
     ]);
@@ -79,6 +95,28 @@ What would you like help with today?`,
     setMessages(prev => [...prev, userMessage]);
     setInputMessage("");
     setIsTyping(true);
+    setProcessingAgent("Classification Agent");
+    setCurrentModel("llama-3.1-8b-instant");
+
+    // Simulate processing stages
+    const stages = [
+      { agent: "Classification Agent", model: "llama-3.1-8b-instant", delay: 1000 },
+      { agent: "Context Agent", model: "llama-3.3-70b-versatile", delay: 1500 },
+      { agent: "Enhancement Agent", model: "moonshotai/kimi-k2-instruct", delay: 2000 }
+    ];
+
+    let stageIndex = 0;
+    const advanceStage = () => {
+      if (stageIndex < stages.length - 1) {
+        stageIndex++;
+        const stage = stages[stageIndex];
+        setProcessingAgent(stage.agent);
+        setCurrentModel(stage.model);
+        setTimeout(advanceStage, stage.delay);
+      }
+    };
+
+    setTimeout(advanceStage, stages[0].delay);
 
     try {
       const response = await axios.post(`${API}/enhance`, {
@@ -98,7 +136,12 @@ What would you like help with today?`,
           intent_analysis: response.data.agent_results?.intent_analysis,
           enhancement_ratio: response.data.enhancement_ratio,
           complexity_score: response.data.complexity_score,
-          processing_time: response.data.processing_time || 0
+          processing_time: response.data.processing_time || 0,
+          models_used: response.data.agent_results?.models_used || {
+            classification: 'llama-3.1-8b-instant',
+            context: 'llama-3.3-70b-versatile',
+            enhancement: 'moonshotai/kimi-k2-instruct'
+          }
         }
       };
 
@@ -119,6 +162,8 @@ Please try rephrasing your prompt or check your connection.`,
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
+      setProcessingAgent("");
+      setCurrentModel("");
     }
   };
 
@@ -143,188 +188,115 @@ Please try rephrasing your prompt or check your connection.`,
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: 'var(--color-obsidian)',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      {/* Header */}
-      <header style={{
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        background: 'linear-gradient(180deg, var(--color-charcoal) 0%, var(--color-obsidian) 100%)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10
-      }}>
-        <nav className="container" style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: 'var(--space-6) 0'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-6)' }}>
-            <button
-              onClick={onBack}
-              className="btn btn-ghost hover-lift"
-              style={{ 
-                padding: 'var(--space-2) var(--space-3)',
-                fontSize: '1.2rem'
-              }}
-            >
-              ← Back
-            </button>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, var(--color-amber-primary) 0%, var(--color-amber-dark) 100%)',
-                borderRadius: 'var(--radius-xl)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative'
-              }}>
-                <span style={{
-                  color: 'var(--color-slate-900)',
-                  fontWeight: '800',
-                  fontSize: '1.25rem'
-                }}>P</span>
-                <div style={{
-                  position: 'absolute',
-                  top: '2px',
-                  right: '2px',
-                  width: '8px',
-                  height: '8px',
-                  background: 'var(--color-emerald)',
-                  borderRadius: '50%',
-                  border: '1px solid var(--color-charcoal)'
-                }}></div>
-              </div>
-              <div>
-                <h1 className="heading-md" style={{ color: 'var(--color-pure-white)', marginBottom: '2px' }}>
-                  Pehance Chat
-                </h1>
-                <p className="text-sm" style={{ color: 'var(--color-amber-primary)' }}>
-                  Multi-Turn Enhancement
-                </p>
+    <div className="chat-container">
+      {/* Enhanced Header */}
+      <header className="chat-header">
+        <div className="header-background"></div>
+        <nav className="container">
+          <div className="chat-nav-content">
+            <div className="nav-left">
+              <button
+                onClick={onBack}
+                className="btn btn-ghost hover-lift back-button"
+              >
+                ← Back to Single Mode
+              </button>
+              
+              <div className="chat-brand">
+                <div className="brand-logo animate-glow">
+                  <div className="logo-icon">P</div>
+                  <div className="status-indicator"></div>
+                </div>
+                <div className="chat-info">
+                  <h1 className="chat-title">Pehance Interactive</h1>
+                  <p className="chat-subtitle">Multi-Turn Enhancement Mode</p>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-            <div className="status status-processing">
-              <div style={{
-                width: '6px',
-                height: '6px',
-                backgroundColor: 'var(--color-amber-primary)',
-                borderRadius: '50%'
-              }}></div>
-              Multi-Turn Mode
-            </div>
             
-            {modelStatus && (
-              <div className="status" style={{
-                background: 'rgba(59, 130, 246, 0.1)',
-                color: 'var(--color-blue)',
-                border: '1px solid rgba(59, 130, 246, 0.2)'
-              }}>
-                Models: {Object.values(modelStatus).filter(m => m.available).length}/{Object.keys(modelStatus).length}
+            <div className="nav-right">
+              <ThemeToggle className="hover-lift" />
+              
+              {/* Processing Status */}
+              {isTyping && (
+                <div className="processing-indicator animate-scale-in">
+                  <div className="processing-spinner"></div>
+                  <div className="processing-info">
+                    <div className="processing-agent">{processingAgent}</div>
+                    <div className="processing-model">{currentModel}</div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="chat-status">
+                <div className="status-dot animate-pulse"></div>
+                <span>Multi-Turn Active</span>
               </div>
-            )}
+              
+              {modelStatus && (
+                <div className="model-summary">
+                  <span className="model-count">
+                    {Object.values(modelStatus).filter(m => m.available).length}/{Object.keys(modelStatus).length}
+                  </span>
+                  <span className="model-label">Models</span>
+                </div>
+              )}
+            </div>
           </div>
         </nav>
       </header>
 
       {/* Chat Messages */}
-      <main style={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column',
-        maxHeight: 'calc(100vh - 200px)'
-      }}>
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: 'var(--space-8) 0'
-        }}>
-          <div className="container" style={{ maxWidth: '900px' }}>
+      <main className="chat-main">
+        <div className="chat-messages">
+          <div className="container chat-container-content">
             {messages.map((message) => (
               <div
                 key={message.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start',
-                  marginBottom: 'var(--space-6)',
-                  animation: 'fadeInUp 0.3s ease-out'
-                }}
+                className={`message-wrapper ${message.type}`}
               >
-                <div style={{
-                  maxWidth: '70%',
-                  minWidth: '200px'
-                }}>
-                  <div
-                    className="card hover-lift"
-                    style={{
-                      background: message.type === 'user' 
-                        ? 'linear-gradient(135deg, var(--color-amber-primary) 0%, var(--color-amber-dark) 100%)'
-                        : 'var(--color-charcoal)',
-                      color: message.type === 'user' ? 'var(--color-slate-900)' : 'var(--color-slate-200)',
-                      padding: 'var(--space-6)',
-                      position: 'relative',
-                      border: message.type === 'assistant' ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
-                    }}
-                  >
+                <div className="message-container">
+                  <div className={`message-bubble ${message.type}`}>
                     {/* Message Content */}
-                    <div style={{
-                      whiteSpace: 'pre-wrap',
-                      lineHeight: '1.6',
-                      fontSize: message.type === 'user' ? '1rem' : '0.95rem',
-                      fontFamily: message.type === 'assistant' ? 'var(--font-mono)' : 'inherit'
-                    }}>
+                    <div className="message-content">
                       {message.content}
                     </div>
 
                     {/* Message Metadata */}
                     {message.metadata && !message.metadata.type && (
-                      <div style={{
-                        marginTop: 'var(--space-4)',
-                        paddingTop: 'var(--space-4)',
-                        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 'var(--space-2)',
-                        fontSize: '0.75rem'
-                      }}>
-                        {message.metadata.enhancement_type && (
-                          <div className="status" style={{
-                            background: 'rgba(139, 92, 246, 0.1)',
-                            color: 'var(--color-violet)',
-                            border: '1px solid rgba(139, 92, 246, 0.2)',
-                            fontSize: '0.7rem'
-                          }}>
-                            {message.metadata.enhancement_type}
-                          </div>
-                        )}
-                        {message.metadata.enhancement_ratio && (
-                          <div className="status" style={{
-                            background: 'rgba(16, 185, 129, 0.1)',
-                            color: 'var(--color-emerald)',
-                            border: '1px solid rgba(16, 185, 129, 0.2)',
-                            fontSize: '0.7rem'
-                          }}>
-                            {message.metadata.enhancement_ratio}x
-                          </div>
-                        )}
-                        {message.metadata.intent_analysis && (
-                          <div className="status" style={{
-                            background: 'rgba(244, 63, 94, 0.1)',
-                            color: 'var(--color-rose)',
-                            border: '1px solid rgba(244, 63, 94, 0.2)',
-                            fontSize: '0.7rem'
-                          }}>
-                            {Math.round(message.metadata.intent_analysis.confidence * 100)}% confident
+                      <div className="message-metadata">
+                        <div className="metadata-row">
+                          {message.metadata.enhancement_type && (
+                            <div className="metadata-tag enhancement-type">
+                              {message.metadata.enhancement_type.replace('_', ' ')}
+                            </div>
+                          )}
+                          {message.metadata.enhancement_ratio && (
+                            <div className="metadata-tag enhancement-ratio">
+                              {message.metadata.enhancement_ratio}x enhanced
+                            </div>
+                          )}
+                          {message.metadata.intent_analysis && (
+                            <div className="metadata-tag confidence">
+                              {Math.round(message.metadata.intent_analysis.confidence * 100)}% confident
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Models Used */}
+                        {message.metadata.models_used && (
+                          <div className="models-used-section">
+                            <div className="models-label">AI Models Used:</div>
+                            <div className="models-list">
+                              {Object.entries(message.metadata.models_used).map(([step, model]) => 
+                                model && (
+                                  <div key={step} className="model-tag">
+                                    <span className="model-step">{step}</span>
+                                    <span className="model-name">{model}</span>
+                                  </div>
+                                )
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -334,15 +306,7 @@ Please try rephrasing your prompt or check your connection.`,
                     {message.type === 'assistant' && !message.metadata?.type && (
                       <button
                         onClick={() => copyToClipboard(message.content)}
-                        className="btn btn-ghost"
-                        style={{
-                          position: 'absolute',
-                          top: 'var(--space-2)',
-                          right: 'var(--space-2)',
-                          padding: 'var(--space-1)',
-                          fontSize: '0.75rem',
-                          opacity: 0.7
-                        }}
+                        className="copy-button btn btn-ghost"
                         title="Copy to clipboard"
                       >
                         📋
@@ -350,12 +314,7 @@ Please try rephrasing your prompt or check your connection.`,
                     )}
 
                     {/* Timestamp */}
-                    <div style={{
-                      marginTop: 'var(--space-2)',
-                      fontSize: '0.75rem',
-                      opacity: 0.6,
-                      textAlign: message.type === 'user' ? 'right' : 'left'
-                    }}>
+                    <div className="message-timestamp">
                       {formatTime(message.timestamp)}
                     </div>
                   </div>
@@ -363,46 +322,30 @@ Please try rephrasing your prompt or check your connection.`,
               </div>
             ))}
 
-            {/* Typing Indicator */}
+            {/* Enhanced Typing Indicator */}
             {isTyping && (
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-start',
-                marginBottom: 'var(--space-6)'
-              }}>
-                <div className="card" style={{
-                  background: 'var(--color-charcoal)',
-                  padding: 'var(--space-4) var(--space-6)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--space-3)'
-                }}>
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      backgroundColor: 'var(--color-amber-primary)',
-                      borderRadius: '50%',
-                      animation: 'pulse 1.4s ease-in-out infinite'
-                    }}></div>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      backgroundColor: 'var(--color-amber-primary)',
-                      borderRadius: '50%',
-                      animation: 'pulse 1.4s ease-in-out infinite 0.2s'
-                    }}></div>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      backgroundColor: 'var(--color-amber-primary)',
-                      borderRadius: '50%',
-                      animation: 'pulse 1.4s ease-in-out infinite 0.4s'
-                    }}></div>
+              <div className="message-wrapper assistant">
+                <div className="message-container">
+                  <div className="typing-indicator">
+                    <div className="typing-content">
+                      <div className="typing-dots">
+                        <div className="typing-dot"></div>
+                        <div className="typing-dot"></div>
+                        <div className="typing-dot"></div>
+                      </div>
+                      <div className="typing-text">
+                        <div className="typing-title">Pehance is thinking...</div>
+                        {processingAgent && (
+                          <div className="typing-details">
+                            <span className="typing-agent">{processingAgent}</span>
+                            {currentModel && (
+                              <span className="typing-model">using {currentModel}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-sm" style={{ color: 'var(--color-slate-400)' }}>
-                    Pehance is thinking...
-                  </span>
                 </div>
               </div>
             )}
@@ -411,104 +354,472 @@ Please try rephrasing your prompt or check your connection.`,
           </div>
         </div>
 
-        {/* Input Area */}
-        <div style={{
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          background: 'var(--color-charcoal)',
-          padding: 'var(--space-6) 0'
-        }}>
-          <div className="container" style={{ maxWidth: '900px' }}>
-            <div style={{
-              display: 'flex',
-              gap: 'var(--space-4)',
-              alignItems: 'flex-end'
-            }}>
-              <div style={{ flex: 1 }}>
+        {/* Enhanced Input Area */}
+        <div className="chat-input-area">
+          <div className="container chat-container-content">
+            <div className="input-wrapper">
+              <div className="input-container">
                 <textarea
                   ref={inputRef}
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
-                  className="input textarea"
-                  style={{
-                    minHeight: '60px',
-                    maxHeight: '200px',
-                    resize: 'none',
-                    fontSize: '1rem',
-                    lineHeight: '1.5'
-                  }}
+                  className="chat-input"
                   disabled={isTyping}
+                  rows={1}
                 />
-              </div>
-              <button
-                onClick={handleSendMessage}
-                disabled={isTyping || !inputMessage.trim()}
-                className="btn btn-primary press-scale"
-                style={{
-                  padding: 'var(--space-4) var(--space-6)',
-                  minHeight: '60px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--space-2)'
-                }}
-              >
-                {isTyping ? (
-                  <>
-                    <div style={{
-                      width: '16px',
-                      height: '16px',
-                      border: '2px solid rgba(15, 23, 42, 0.3)',
-                      borderTop: '2px solid var(--color-slate-900)',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite'
-                    }}></div>
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <span style={{ fontSize: '1.1rem' }}>📤</span>
-                    Send
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Quick Actions */}
-            <div style={{
-              marginTop: 'var(--space-4)',
-              display: 'flex',
-              gap: 'var(--space-2)',
-              flexWrap: 'wrap'
-            }}>
-              {[
-                "Help me improve this prompt",
-                "What questions should I ask?",
-                "Make it more specific",
-                "Add examples",
-                "Clear conversation"
-              ].map((action, index) => (
                 <button
-                  key={index}
-                  onClick={() => action === "Clear conversation" 
-                    ? setMessages(messages.slice(0, 1)) 
-                    : setInputMessage(action)}
-                  className="btn btn-ghost"
-                  style={{
-                    fontSize: '0.8rem',
-                    padding: 'var(--space-2) var(--space-3)',
-                    opacity: 0.8
-                  }}
+                  onClick={handleSendMessage}
+                  disabled={isTyping || !inputMessage.trim()}
+                  className="send-button btn btn-primary press-scale light-trail"
                 >
-                  {action}
+                  {isTyping ? (
+                    <>
+                      <div className="btn-spinner"></div>
+                      <span>Sending...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="send-icon">📤</span>
+                      <span>Send</span>
+                    </>
+                  )}
                 </button>
-              ))}
+              </div>
+
+              {/* Quick Actions */}
+              <div className="quick-actions">
+                {[
+                  "Help me improve this prompt",
+                  "What questions should I ask?", 
+                  "Make it more specific",
+                  "Add examples",
+                  "Start fresh"
+                ].map((action, index) => (
+                  <button
+                    key={index}
+                    onClick={() => action === "Start fresh" 
+                      ? setMessages(messages.slice(0, 1)) 
+                      : setInputMessage(action)}
+                    className="quick-action btn btn-ghost"
+                    disabled={isTyping}
+                  >
+                    {action}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </main>
 
       <style jsx>{`
+        .chat-container {
+          min-height: 100vh;
+          background: var(--color-background);
+          display: flex;
+          flex-direction: column;
+        }
+
+        .chat-header {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background: var(--gradient-glass);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid var(--color-border);
+          box-shadow: var(--shadow-sm);
+        }
+
+        .chat-nav-content {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: var(--space-4) 0;
+          gap: var(--space-4);
+        }
+
+        .nav-left {
+          display: flex;
+          align-items: center;
+          gap: var(--space-4);
+        }
+
+        .back-button {
+          font-size: 0.875rem;
+          padding: var(--space-2) var(--space-4);
+        }
+
+        .chat-brand {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+        }
+
+        .chat-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: var(--color-text-primary);
+          margin: 0;
+        }
+
+        .chat-subtitle {
+          font-size: 0.875rem;
+          color: var(--color-brand-primary);
+          margin: 0;
+        }
+
+        .nav-right {
+          display: flex;
+          align-items: center;
+          gap: var(--space-4);
+        }
+
+        .processing-indicator {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+          padding: var(--space-2) var(--space-4);
+          background: var(--gradient-glass);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-full);
+        }
+
+        .processing-spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid var(--color-brand-primary);
+          border-top: 2px solid transparent;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        .processing-info {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-1);
+        }
+
+        .processing-agent {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: var(--color-text-primary);
+        }
+
+        .processing-model {
+          font-size: 0.7rem;
+          color: var(--color-text-tertiary);
+          font-family: var(--font-mono);
+        }
+
+        .chat-status {
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+          padding: var(--space-2) var(--space-3);
+          background: rgba(245, 158, 11, 0.1);
+          color: var(--color-brand-warning);
+          border: 1px solid rgba(245, 158, 11, 0.2);
+          border-radius: var(--radius-full);
+          font-size: 0.875rem;
+          font-weight: 500;
+        }
+
+        .chat-main {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          max-height: calc(100vh - 80px);
+        }
+
+        .chat-messages {
+          flex: 1;
+          overflow-y: auto;
+          padding: var(--space-8) 0;
+        }
+
+        .chat-container-content {
+          max-width: 900px;
+        }
+
+        .message-wrapper {
+          margin-bottom: var(--space-6);
+          animation: fadeInUp 0.3s ease-out;
+        }
+
+        .message-wrapper.user {
+          display: flex;
+          justify-content: flex-end;
+        }
+
+        .message-wrapper.assistant {
+          display: flex;
+          justify-content: flex-start;
+        }
+
+        .message-container {
+          max-width: 70%;
+          min-width: 200px;
+        }
+
+        .message-bubble {
+          position: relative;
+          border-radius: var(--radius-2xl);
+          box-shadow: var(--shadow-lg);
+          transition: var(--transition-all);
+        }
+
+        .message-bubble:hover {
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-xl);
+        }
+
+        .message-bubble.user {
+          background: var(--gradient-brand);
+          color: var(--color-text-inverse);
+          padding: var(--space-4) var(--space-6);
+        }
+
+        .message-bubble.assistant {
+          background: var(--gradient-surface);
+          color: var(--color-text-primary);
+          border: 1px solid var(--color-border);
+          padding: var(--space-6);
+        }
+
+        .message-content {
+          white-space: pre-wrap;
+          line-height: 1.6;
+          font-size: 0.95rem;
+        }
+
+        .message-bubble.assistant .message-content {
+          font-family: var(--font-mono);
+        }
+
+        .message-metadata {
+          margin-top: var(--space-4);
+          padding-top: var(--space-4);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metadata-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2);
+          margin-bottom: var(--space-3);
+        }
+
+        .metadata-tag {
+          padding: var(--space-1) var(--space-2);
+          border-radius: var(--radius-md);
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+
+        .enhancement-type {
+          background: rgba(139, 92, 246, 0.1);
+          color: var(--color-brand-accent);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .enhancement-ratio {
+          background: rgba(5, 150, 105, 0.1);
+          color: var(--color-brand-success);
+          border: 1px solid rgba(5, 150, 105, 0.2);
+        }
+
+        .confidence {
+          background: rgba(244, 63, 94, 0.1);
+          color: var(--color-brand-error);
+          border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+
+        .models-used-section {
+          margin-top: var(--space-3);
+        }
+
+        .models-label {
+          font-size: 0.75rem;
+          color: var(--color-text-tertiary);
+          margin-bottom: var(--space-2);
+          font-weight: 600;
+        }
+
+        .models-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2);
+        }
+
+        .model-tag {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-1);
+          padding: var(--space-2) var(--space-3);
+          background: var(--color-surface-elevated);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-lg);
+        }
+
+        .model-step {
+          font-size: 0.7rem;
+          color: var(--color-text-tertiary);
+          text-transform: capitalize;
+          font-weight: 500;
+        }
+
+        .model-name {
+          font-size: 0.7rem;
+          color: var(--color-brand-primary);
+          font-family: var(--font-mono);
+          word-break: break-all;
+        }
+
+        .copy-button {
+          position: absolute;
+          top: var(--space-2);
+          right: var(--space-2);
+          padding: var(--space-1);
+          font-size: 0.75rem;
+          opacity: 0.7;
+        }
+
+        .message-timestamp {
+          margin-top: var(--space-2);
+          font-size: 0.75rem;
+          opacity: 0.6;
+          text-align: right;
+        }
+
+        .message-bubble.user .message-timestamp {
+          text-align: left;
+        }
+
+        .typing-indicator {
+          background: var(--gradient-surface);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          padding: var(--space-4) var(--space-6);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .typing-content {
+          display: flex;
+          align-items: center;
+          gap: var(--space-4);
+        }
+
+        .typing-dots {
+          display: flex;
+          gap: var(--space-1);
+        }
+
+        .typing-dot {
+          width: 8px;
+          height: 8px;
+          background: var(--color-brand-primary);
+          border-radius: 50%;
+          animation: pulse 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+          animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+          animation-delay: 0.4s;
+        }
+
+        .typing-text {
+          flex: 1;
+        }
+
+        .typing-title {
+          font-size: 0.875rem;
+          color: var(--color-text-secondary);
+          font-weight: 500;
+        }
+
+        .typing-details {
+          display: flex;
+          gap: var(--space-2);
+          margin-top: var(--space-1);
+          font-size: 0.75rem;
+        }
+
+        .typing-agent {
+          color: var(--color-brand-primary);
+          font-weight: 600;
+        }
+
+        .typing-model {
+          color: var(--color-text-tertiary);
+          font-family: var(--font-mono);
+        }
+
+        .chat-input-area {
+          border-top: 1px solid var(--color-border);
+          background: var(--gradient-surface);
+          padding: var(--space-6) 0;
+        }
+
+        .input-wrapper {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-4);
+        }
+
+        .input-container {
+          display: flex;
+          gap: var(--space-4);
+          align-items: flex-end;
+        }
+
+        .chat-input {
+          flex: 1;
+          min-height: 48px;
+          max-height: 200px;
+          resize: none;
+          font-size: 1rem;
+          line-height: 1.5;
+          padding: var(--space-3) var(--space-4);
+        }
+
+        .send-button {
+          min-height: 48px;
+          padding: var(--space-3) var(--space-6);
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+        }
+
+        .send-icon {
+          font-size: 1.1rem;
+        }
+
+        .quick-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2);
+        }
+
+        .quick-action {
+          font-size: 0.8rem;
+          padding: var(--space-2) var(--space-3);
+          opacity: 0.8;
+        }
+
+        .quick-action:hover {
+          opacity: 1;
+        }
+
+        .quick-action:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
         @keyframes fadeInUp {
           from {
             opacity: 0;
@@ -519,10 +830,42 @@ Please try rephrasing your prompt or check your connection.`,
             transform: translateY(0);
           }
         }
-        
+
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .chat-nav-content {
+            flex-direction: column;
+            gap: var(--space-4);
+          }
+          
+          .nav-left,
+          .nav-right {
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+          
+          .message-container {
+            max-width: 85%;
+          }
+          
+          .input-container {
+            flex-direction: column;
+            gap: var(--space-3);
+          }
+          
+          .send-button {
+            width: 100%;
+            justify-content: center;
+          }
+          
+          .quick-actions {
+            justify-content: center;
+          }
         }
       `}</style>
     </div>
