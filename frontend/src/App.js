@@ -747,6 +747,34 @@ const AppContent = () => {
                   </div>
                 </div>
                 
+                {/* Multi-modal Input Mode Toggle */}
+                <div className="input-mode-toggle">
+                  <span className="input-mode-label">Input Mode:</span>
+                  <div className="input-mode-options">
+                    <button
+                      className={`input-mode-option ${inputMode === "text" ? "active" : ""}`}
+                      onClick={() => setInputMode("text")}
+                    >
+                      <span className="input-mode-icon">📝</span>
+                      Text Only
+                    </button>
+                    <button
+                      className={`input-mode-option ${inputMode === "image" ? "active" : ""}`}
+                      onClick={() => setInputMode("image")}
+                    >
+                      <span className="input-mode-icon">🖼️</span>
+                      Image Only
+                    </button>
+                    <button
+                      className={`input-mode-option ${inputMode === "both" ? "active" : ""}`}
+                      onClick={() => setInputMode("both")}
+                    >
+                      <span className="input-mode-icon">🎯</span>
+                      Text + Image
+                    </button>
+                  </div>
+                </div>
+                
                 {/* Text Input Section */}
                 {(inputMode === "text" || inputMode === "both") && (
                 <div className="input-section enhanced-input-section">
