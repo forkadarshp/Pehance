@@ -29,3 +29,5 @@ litellm>=1.40.0
 httpcore>=0.18.0
 httpx>=0.24.0
 distro>=1.8.0
+Pillow==10.0.0
+markdown==3.5.1
