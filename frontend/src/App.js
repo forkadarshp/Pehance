@@ -356,6 +356,8 @@ const AppContent = () => {
       });
     }
   };
+
+  const handleEnhance = async () => {
     if (!prompt.trim()) {
       setError("Please enter a prompt to enhance");
       setTimeout(() => setError(""), 4000);
