@@ -517,12 +517,12 @@ const AppContent = () => {
       {/* Scroll Progress Indicator */}
       <div className="scroll-indicator">
         <div 
-          className={`scroll-dot ${window.scrollY < window.innerHeight * 0.5 ? 'active' : ''}`}
+          className={`scroll-dot ${currentSection === 0 ? 'active' : ''}`}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           title="Hero Section"
         ></div>
         <div 
-          className={`scroll-dot ${window.scrollY >= window.innerHeight * 0.5 ? 'active' : ''}`}
+          className={`scroll-dot ${currentSection === 1 ? 'active' : ''}`}
           onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
           title="Prompt Enhancement"
         ></div>
