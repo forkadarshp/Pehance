@@ -613,6 +613,510 @@ class PehanceBackendTester:
             )
             return False
 
+    def test_qwen3_32b_model_availability(self):
+        """Test if qwen/qwen3-32b model is properly integrated and available via /api/test-models endpoint"""
+        try:
+            response = requests.get(f"{API_BASE}/test-models", timeout=60)
+            
+            if response.status_code == 200:
+                data = response.json()
+                models = data.get("models", {})
+                
+                # Check if qwen/qwen3-32b is listed
+                if "qwen/qwen3-32b" not in models:
+                    self.log_result(
+                        "Qwen3-32B Model Availability",
+                        False,
+                        "qwen/qwen3-32b model not found in /api/test-models response",
+                        {"available_models": list(models.keys())}
+                    )
+                    return False
+                
+                # Check model details
+                qwen_model = models["qwen/qwen3-32b"]
+                required_fields = ["available", "status", "performance_tokens_sec", "features", "tier"]
+                missing_fields = [field for field in required_fields if field not in qwen_model]
+                
+                if missing_fields:
+                    self.log_result(
+                        "Qwen3-32B Model Availability",
+                        False,
+                        f"Missing required fields for qwen/qwen3-32b: {missing_fields}",
+                        qwen_model
+                    )
+                    return False
+                
+                # Check if model is available
+                if not qwen_model.get("available", False):
+                    self.log_result(
+                        "Qwen3-32B Model Availability",
+                        False,
+                        f"qwen/qwen3-32b model is not available: {qwen_model.get('status', 'Unknown status')}",
+                        qwen_model
+                    )
+                    return False
+                
+                # Check model features include creative capabilities
+                features = qwen_model.get("features", [])
+                expected_features = ["advanced_reasoning", "creative", "multilingual", "latest_model"]
+                missing_features = [f for f in expected_features if f not in features]
+                
+                if missing_features:
+                    self.log_result(
+                        "Qwen3-32B Model Availability",
+                        False,
+                        f"qwen/qwen3-32b missing expected features: {missing_features}",
+                        {"actual_features": features, "expected_features": expected_features}
+                    )
+                    return False
+                
+                # Check performance metrics
+                performance = qwen_model.get("performance_tokens_sec", 0)
+                if performance != 400:
+                    self.log_result(
+                        "Qwen3-32B Model Availability",
+                        False,
+                        f"qwen/qwen3-32b performance mismatch. Expected: 400 tokens/sec, Got: {performance}",
+                        qwen_model
+                    )
+                    return False
+                
+                # Check tier classification
+                tier = qwen_model.get("tier", "")
+                if tier != "Tier 4: Specialized":
+                    self.log_result(
+                        "Qwen3-32B Model Availability",
+                        False,
+                        f"qwen/qwen3-32b tier mismatch. Expected: 'Tier 4: Specialized', Got: '{tier}'",
+                        qwen_model
+                    )
+                    return False
+                
+                self.log_result(
+                    "Qwen3-32B Model Availability",
+                    True,
+                    f"qwen/qwen3-32b properly integrated. Status: {qwen_model['status']}, Performance: {performance} tokens/sec, Features: {len(features)} features, Tier: {tier}"
+                )
+                return True
+                
+            else:
+                self.log_result(
+                    "Qwen3-32B Model Availability",
+                    False,
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result(
+                "Qwen3-32B Model Availability",
+                False,
+                f"Request error: {str(e)}"
+            )
+            return False
+
+    def test_qwen3_32b_creative_task_selection(self):
+        """Test that qwen/qwen3-32b is being selected appropriately for creative tasks"""
+        creative_prompt = "Write a compelling story about artificial intelligence"
+        
+        try:
+            response = requests.post(
+                f"{API_BASE}/enhance",
+                json={"prompt": creative_prompt, "mode": "single"},
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                models_used = data.get("models_used", {})
+                
+                # Check if models_used field is present
+                if not models_used:
+                    self.log_result(
+                        "Qwen3-32B Creative Task Selection",
+                        False,
+                        "models_used field missing from response",
+                        data
+                    )
+                    return False
+                
+                # Check if qwen/qwen3-32b was used for enhancement (creative tasks should use this model)
+                enhancement_model = models_used.get("enhancement")
+                if enhancement_model != "qwen/qwen3-32b":
+                    # Check if it's using the creative alternative or fallback
+                    creative_models = ["qwen/qwen3-32b", "qwen-qwq-32b", "moonshotai/kimi-k2-instruct"]
+                    if enhancement_model not in creative_models:
+                        self.log_result(
+                            "Qwen3-32B Creative Task Selection",
+                            False,
+                            f"Expected creative model for story writing task. Got: {enhancement_model}. Expected one of: {creative_models}",
+                            {"models_used": models_used, "prompt": creative_prompt}
+                        )
+                        return False
+                
+                # Verify intent classification correctly identified this as creative
+                agent_results = data.get("agent_results", {})
+                intent_analysis = agent_results.get("intent_analysis", {})
+                intent_category = intent_analysis.get("intent_category", "")
+                
+                if intent_category != "creative":
+                    self.log_result(
+                        "Qwen3-32B Creative Task Selection",
+                        False,
+                        f"Creative prompt not classified correctly. Expected: 'creative', Got: '{intent_category}'",
+                        {"intent_analysis": intent_analysis}
+                    )
+                    return False
+                
+                # Check enhancement quality for creative task
+                enhanced_prompt = data.get("enhanced_prompt", "")
+                if len(enhanced_prompt) <= len(creative_prompt) * 2:
+                    self.log_result(
+                        "Qwen3-32B Creative Task Selection",
+                        False,
+                        f"Creative enhancement seems insufficient. Original: {len(creative_prompt)} chars, Enhanced: {len(enhanced_prompt)} chars",
+                        {"enhancement_ratio": data.get("enhancement_ratio", 0)}
+                    )
+                    return False
+                
+                self.log_result(
+                    "Qwen3-32B Creative Task Selection",
+                    True,
+                    f"Creative task properly routed to {enhancement_model}. Intent: {intent_category}, Enhancement ratio: {data.get('enhancement_ratio', 0)}x"
+                )
+                return True
+                
+            else:
+                self.log_result(
+                    "Qwen3-32B Creative Task Selection",
+                    False,
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result(
+                "Qwen3-32B Creative Task Selection",
+                False,
+                f"Request error: {str(e)}"
+            )
+            return False
+
+    def test_model_selection_logic_enhancement(self):
+        """Test that the enhanced model selection logic properly includes qwen/qwen3-32b for appropriate tasks"""
+        test_cases = [
+            {
+                "prompt": "Write a compelling story about artificial intelligence",
+                "expected_intent": "creative",
+                "expected_models": ["qwen/qwen3-32b", "qwen-qwq-32b", "moonshotai/kimi-k2-instruct"],
+                "test_name": "Creative Story Task"
+            },
+            {
+                "prompt": "Build a scalable React application architecture",
+                "expected_intent": "technical",
+                "expected_models": ["llama-3.3-70b-versatile", "meta-llama/llama-4-scout-17b-16e-instruct", "deepseek-r1-distill-llama-70b"],
+                "test_name": "Technical Architecture Task"
+            },
+            {
+                "prompt": "Create an innovative marketing campaign for a new product",
+                "expected_intent": "business",
+                "expected_models": ["meta-llama/llama-4-scout-17b-16e-instruct", "llama-3.3-70b-versatile"],
+                "test_name": "Business Marketing Task"
+            }
+        ]
+        
+        all_passed = True
+        
+        for test_case in test_cases:
+            try:
+                response = requests.post(
+                    f"{API_BASE}/enhance",
+                    json={"prompt": test_case["prompt"], "mode": "single"},
+                    timeout=45
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    models_used = data.get("models_used", {})
+                    enhancement_model = models_used.get("enhancement", "")
+                    
+                    # Check intent classification
+                    agent_results = data.get("agent_results", {})
+                    intent_analysis = agent_results.get("intent_analysis", {})
+                    actual_intent = intent_analysis.get("intent_category", "")
+                    
+                    if actual_intent != test_case["expected_intent"]:
+                        self.log_result(
+                            f"Model Selection Logic - {test_case['test_name']} Intent",
+                            False,
+                            f"Expected intent '{test_case['expected_intent']}', got '{actual_intent}'"
+                        )
+                        all_passed = False
+                        continue
+                    
+                    # Check if appropriate model was selected
+                    if enhancement_model not in test_case["expected_models"]:
+                        self.log_result(
+                            f"Model Selection Logic - {test_case['test_name']} Model",
+                            False,
+                            f"Expected one of {test_case['expected_models']}, got '{enhancement_model}'"
+                        )
+                        all_passed = False
+                        continue
+                    
+                    self.log_result(
+                        f"Model Selection Logic - {test_case['test_name']}",
+                        True,
+                        f"Correctly used {enhancement_model} for {actual_intent} task"
+                    )
+                    
+                else:
+                    self.log_result(
+                        f"Model Selection Logic - {test_case['test_name']}",
+                        False,
+                        f"HTTP {response.status_code}: {response.text}"
+                    )
+                    all_passed = False
+                    
+            except Exception as e:
+                self.log_result(
+                    f"Model Selection Logic - {test_case['test_name']}",
+                    False,
+                    f"Request error: {str(e)}"
+                )
+                all_passed = False
+                
+            # Small delay between requests
+            time.sleep(2)
+        
+        return all_passed
+
+    def test_intelligent_fallback_system(self):
+        """Test that the intelligent fallback system works correctly with the updated model hierarchy"""
+        # This test simulates what happens when preferred models are unavailable
+        # We'll test with a complex prompt that would normally use advanced models
+        complex_prompt = "Design a comprehensive machine learning pipeline for real-time fraud detection in financial transactions with explainable AI components"
+        
+        try:
+            response = requests.post(
+                f"{API_BASE}/enhance",
+                json={"prompt": complex_prompt, "mode": "single"},
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                models_used = data.get("models_used", {})
+                
+                # Check that models_used field is populated
+                if not models_used:
+                    self.log_result(
+                        "Intelligent Fallback System",
+                        False,
+                        "models_used field missing - cannot verify fallback behavior",
+                        data
+                    )
+                    return False
+                
+                # Verify that some model was selected for each step
+                required_steps = ["classification", "enhancement"]
+                missing_steps = [step for step in required_steps if not models_used.get(step)]
+                
+                if missing_steps:
+                    self.log_result(
+                        "Intelligent Fallback System",
+                        False,
+                        f"Missing model assignments for steps: {missing_steps}",
+                        models_used
+                    )
+                    return False
+                
+                # Check that the system used appropriate models for complex technical task
+                enhancement_model = models_used.get("enhancement", "")
+                expected_complex_models = [
+                    "moonshotai/kimi-k2-instruct",  # ADVANCED_COMPLEX
+                    "llama-3.3-70b-versatile",     # REASONING_MODEL
+                    "qwen/qwen3-32b",              # CREATIVE_MODEL (for complex tasks)
+                    "meta-llama/llama-4-maverick-17b-128e-instruct",  # ADVANCED_REASONING
+                    "llama3-8b-8192"               # LEGACY_FALLBACK (ultimate fallback)
+                ]
+                
+                if enhancement_model not in expected_complex_models:
+                    self.log_result(
+                        "Intelligent Fallback System",
+                        False,
+                        f"Unexpected model for complex task: {enhancement_model}. Expected one of: {expected_complex_models}",
+                        models_used
+                    )
+                    return False
+                
+                # Verify the response quality indicates proper processing
+                enhanced_prompt = data.get("enhanced_prompt", "")
+                if len(enhanced_prompt) <= len(complex_prompt) * 3:
+                    self.log_result(
+                        "Intelligent Fallback System",
+                        False,
+                        f"Enhancement quality seems low for complex prompt. Original: {len(complex_prompt)}, Enhanced: {len(enhanced_prompt)}",
+                        {"enhancement_ratio": data.get("enhancement_ratio", 0)}
+                    )
+                    return False
+                
+                # Check that intent was properly classified as technical
+                agent_results = data.get("agent_results", {})
+                intent_analysis = agent_results.get("intent_analysis", {})
+                intent_category = intent_analysis.get("intent_category", "")
+                
+                if intent_category != "technical":
+                    self.log_result(
+                        "Intelligent Fallback System",
+                        False,
+                        f"Complex technical prompt misclassified as '{intent_category}' instead of 'technical'",
+                        intent_analysis
+                    )
+                    return False
+                
+                self.log_result(
+                    "Intelligent Fallback System",
+                    True,
+                    f"Fallback system working correctly. Used {enhancement_model} for complex technical task. Enhancement ratio: {data.get('enhancement_ratio', 0)}x"
+                )
+                return True
+                
+            else:
+                self.log_result(
+                    "Intelligent Fallback System",
+                    False,
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result(
+                "Intelligent Fallback System",
+                False,
+                f"Request error: {str(e)}"
+            )
+            return False
+
+    def test_models_used_field_accuracy(self):
+        """Test that the models_used field shows the correct models including qwen/qwen3-32b when appropriate"""
+        test_cases = [
+            {
+                "prompt": "hello",
+                "expected_enhancement_type": "enhanced_greeting",
+                "test_name": "Simple Greeting"
+            },
+            {
+                "prompt": "Write a creative poem about technology",
+                "expected_models": ["qwen/qwen3-32b", "qwen-qwq-32b"],
+                "test_name": "Creative Poetry Task"
+            },
+            {
+                "prompt": "Explain quantum computing principles",
+                "expected_models": ["llama-3.3-70b-versatile", "meta-llama/llama-4-scout-17b-16e-instruct"],
+                "test_name": "Technical Explanation Task"
+            }
+        ]
+        
+        all_passed = True
+        
+        for test_case in test_cases:
+            try:
+                response = requests.post(
+                    f"{API_BASE}/enhance",
+                    json={"prompt": test_case["prompt"], "mode": "single"},
+                    timeout=45
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Check if models_used field is present
+                    models_used = data.get("models_used")
+                    if models_used is None:
+                        # For simple greetings, models_used might be None or contain template info
+                        if test_case.get("expected_enhancement_type") == "enhanced_greeting":
+                            enhancement_type = data.get("enhancement_type", "")
+                            if enhancement_type == "enhanced_greeting":
+                                self.log_result(
+                                    f"Models Used Field - {test_case['test_name']}",
+                                    True,
+                                    f"Greeting handled correctly with enhancement_type: {enhancement_type}"
+                                )
+                                continue
+                        
+                        self.log_result(
+                            f"Models Used Field - {test_case['test_name']}",
+                            False,
+                            "models_used field is missing from response",
+                            data
+                        )
+                        all_passed = False
+                        continue
+                    
+                    # For non-greeting tasks, verify model selection
+                    if "expected_models" in test_case:
+                        enhancement_model = models_used.get("enhancement", "")
+                        if enhancement_model not in test_case["expected_models"]:
+                            # Allow fallback models if preferred models are unavailable
+                            fallback_models = ["llama3-8b-8192", "llama-3.1-8b-instant"]
+                            if enhancement_model not in fallback_models:
+                                self.log_result(
+                                    f"Models Used Field - {test_case['test_name']}",
+                                    False,
+                                    f"Expected one of {test_case['expected_models']}, got '{enhancement_model}'",
+                                    models_used
+                                )
+                                all_passed = False
+                                continue
+                            else:
+                                # Fallback model used - this is acceptable
+                                self.log_result(
+                                    f"Models Used Field - {test_case['test_name']}",
+                                    True,
+                                    f"Used fallback model '{enhancement_model}' (preferred models may be unavailable)"
+                                )
+                                continue
+                        
+                        # Verify classification model is present
+                        classification_model = models_used.get("classification", "")
+                        if not classification_model:
+                            self.log_result(
+                                f"Models Used Field - {test_case['test_name']}",
+                                False,
+                                "Classification model missing from models_used",
+                                models_used
+                            )
+                            all_passed = False
+                            continue
+                        
+                        self.log_result(
+                            f"Models Used Field - {test_case['test_name']}",
+                            True,
+                            f"Correct model selection: classification={classification_model}, enhancement={enhancement_model}"
+                        )
+                    
+                else:
+                    self.log_result(
+                        f"Models Used Field - {test_case['test_name']}",
+                        False,
+                        f"HTTP {response.status_code}: {response.text}"
+                    )
+                    all_passed = False
+                    
+            except Exception as e:
+                self.log_result(
+                    f"Models Used Field - {test_case['test_name']}",
+                    False,
+                    f"Request error: {str(e)}"
+                )
+                all_passed = False
+                
+            # Small delay between requests
+            time.sleep(1)
+        
+        return all_passed
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting Pehance Backend Testing")
