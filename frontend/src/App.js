@@ -469,9 +469,7 @@ const AppContent = () => {
             
             {/* Main Headline */}
             <h1 className="hero-title display-2xl">
-              Professional
-              <br />
-              <span className="title-accent">Prompt Engineering</span>
+              Just One Prompt!
             </h1>
             
             {/* Subtitle */}
@@ -493,10 +491,32 @@ const AppContent = () => {
                   </div>
                 ))}
               </div>
+              
+              {/* Scroll hint */}
+              <div className="scroll-hint animate-fade-in-up delay-600">
+                <p className="text-sm">
+                  <span className="scroll-arrow">↓</span>
+                  Scroll down to start enhancing your prompts
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Scroll Progress Indicator */}
+      <div className="scroll-indicator">
+        <div 
+          className={`scroll-dot ${window.scrollY < window.innerHeight * 0.5 ? 'active' : ''}`}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          title="Hero Section"
+        ></div>
+        <div 
+          className={`scroll-dot ${window.scrollY >= window.innerHeight * 0.5 ? 'active' : ''}`}
+          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          title="Prompt Enhancement"
+        ></div>
+      </div>
 
       {/* Main Content */}
       <section ref={inputSectionRef} className="main-content">
