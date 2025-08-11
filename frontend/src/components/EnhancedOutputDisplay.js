@@ -237,6 +237,23 @@ const EnhancedOutputDisplay = ({
           </div>
 
           {/* Format Selector */}
+
+      <style jsx>{`
+        .quick-actions { display: flex; gap: 8px; align-items: center; }
+        .copy-all-btn, .copy-md-btn, .toggle-code-btn { 
+          display: inline-flex; align-items: center; gap: 6px; 
+          padding: 8px 12px; border-radius: 10px; border: 1px solid var(--color-border);
+          background: var(--color-surface); color: var(--color-text-primary);
+          transition: var(--transition-all);
+        }
+        .copy-all-btn:hover, .copy-md-btn:hover, .toggle-code-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-sm);
+          border-color: var(--color-brand-primary);
+        }
+        .toggle-code-btn.active { background: rgba(59,130,246,0.08); border-color: var(--color-brand-primary); }
+      `}</style>
+
           <div className="format-selector">
             <select
               value={selectedFormat}
