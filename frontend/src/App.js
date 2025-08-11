@@ -97,6 +97,13 @@ const AppContent = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
+
+  // Persist UI preferences
+  useEffect(() => { localStorage.setItem('pehance:mode', mode); }, [mode]);
+  useEffect(() => { localStorage.setItem('pehance:modelPref', modelPreference); }, [modelPreference]);
+  useEffect(() => { localStorage.setItem('pehance:inputMode', inputMode); }, [inputMode]);
+  useEffect(() => { localStorage.setItem('pehance:outputFormat', outputFormat); }, [outputFormat]);
+
     const checkModelStatus = async () => {
       try {
         const response = await axios.get(`${API}/test-models`);
