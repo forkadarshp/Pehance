@@ -81,7 +81,7 @@ export default function CostBar({
 
   const chips = [];
   if (modelsUsed && typeof modelsUsed === "object") {
-    Object.entries(modelsUsed).forEach(([stage, model]) =&gt; {
+    Object.entries(modelsUsed).forEach(([stage, model]) => {
       if (model) chips.push({ stage, model });
     });
   } else if (typeof modelsUsed === "string") {
