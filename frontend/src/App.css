@@ -138,6 +138,10 @@ html {
   line-height: 1.6;
   -webkit-text-size-adjust: 100%;
   -moz-tab-size: 4;
+  @media (prefers-reduced-motion: reduce) {
+    scroll-behavior: auto;
+  }
+
   tab-size: 4;
   font-family: var(--font-body);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
