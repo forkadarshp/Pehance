@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 
 function estimateTokens(chars) {
-  if (!chars || chars &lt;= 0) return 0;
+  if (!chars || chars <= 0) return 0;
   return Math.ceil(chars / 4); // rough heuristic
 }
 
