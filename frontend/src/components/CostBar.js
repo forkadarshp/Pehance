@@ -75,7 +75,7 @@ export default function CostBar({
     [preference, modelStatus, modelSummary]
   );
 
-  const preferredPerf = preferredModel &amp;&amp; modelStatus &amp;&amp; modelStatus[preferredModel]
+  const preferredPerf = preferredModel && modelStatus && modelStatus[preferredModel]
     ? modelStatus[preferredModel].performance_tokens_sec
     : null;
 
