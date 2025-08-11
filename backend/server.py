@@ -332,7 +332,7 @@ async def enhance_multimodal_prompt(request: PromptEnhanceRequest):
             
             # Combine text prompt with image analysis
             if image_result.description:
-                if request.prompt.strip():
+                if request.prompt and request.prompt.strip():
                     combined_prompt = f"""User Request: {request.prompt}
 
 Image Analysis: {image_result.description}
