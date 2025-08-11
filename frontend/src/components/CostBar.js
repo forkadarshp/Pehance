@@ -71,7 +71,7 @@ export default function CostBar({
   const totalTokens = inputTokens + outputTokens;
 
   const preferredModel = useMemo(
-    () =&gt; findRecommendedModel(preference, modelStatus, modelSummary),
+    () => findRecommendedModel(preference, modelStatus, modelSummary),
     [preference, modelStatus, modelSummary]
   );
 
