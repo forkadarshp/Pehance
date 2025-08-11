@@ -125,7 +125,7 @@ export default function CostBar({
           )}
         </div>
 
-        {chips.length &gt; 0 &amp;&amp; (
+        {chips.length > 0 && (
           <div className="cost-item span-2">
             <div className="cost-label">Models Used</div>
             <div className="chips">
