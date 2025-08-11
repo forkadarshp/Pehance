@@ -67,7 +67,7 @@ export default function CostBar({
   const outputChars = enhanced?.length || 0;
 
   const inputTokens = useMemo(() => estimateTokens(inputChars), [inputChars]);
-  const outputTokens = useMemo(() =&gt; estimateTokens(outputChars), [outputChars]);
+  const outputTokens = useMemo(() => estimateTokens(outputChars), [outputChars]);
   const totalTokens = inputTokens + outputTokens;
 
   const preferredModel = useMemo(
