@@ -36,7 +36,7 @@ const AppContent = () => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [typingAnimation, setTypingAnimation] = useState("");
   const [enhancementMetrics, setEnhancementMetrics] = useState(null);
-  const [mode, setMode] = useState("single");
+  const [mode, setMode] = useState(() => localStorage.getItem('pehance:mode') || "single");
   const [modelStatus, setModelStatus] = useState(null);
   const [modelSummary, setModelSummary] = useState(null);
   const [showChatInterface, setShowChatInterface] = useState(false);
