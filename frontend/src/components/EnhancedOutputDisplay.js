@@ -13,6 +13,35 @@ const EnhancedOutputDisplay = ({
   const [copyingCodeId, setCopyingCodeId] = useState(null);
   const contentRef = useRef(null);
 
+  const [showCodeBlocks, setShowCodeBlocks] = useState(false);
+
+  const buildMarkdown = () => {
+    try {
+      let plainText = content;
+      if (selectedFormat === 'rich_text') {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = content || '';
+        plainText = tmp.textContent || tmp.innerText || '';
+      }
+      let md = plainText || '';
+      if (Array.isArray(codeBlocks) && codeBlocks.length > 0) {
+        const codeMd = codeBlocks
+          .filter(b => !b.inline)
+          .map(b => {
+            const lang = (b.language || '').toLowerCase();
+            const code = (b.content || b.code || '').trim();
+            return `\n\n\
+\`\`\`${lang}\n${code}\n\`\`\``;
+          })
+          .join('');
+        md += codeMd;
+      }
+      return md.trim();
+    } catch (e) {
+      return content || '';
+    }
+  };
+
   const formatOptions = [
     { value: 'auto_detect', label: 'Auto Detect', icon: '🎯' },
     { value: 'rich_text', label: 'Rich Text', icon: '📝' },
