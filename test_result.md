@@ -231,6 +231,9 @@
         - working: true
           agent: "testing"
           comment: "Validation confirmed: /api/enhance returns 400 'Prompt cannot be empty'; /api/enhance-multimodal returns 400 'Either prompt or image_data is required'."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE VALIDATION TESTING COMPLETED: All validation scenarios verified in comprehensive backend regression testing. /api/enhance correctly returns 400 for empty prompts with proper error message. /api/enhance-multimodal correctly returns 400 when both prompt and image_data are missing. Fixed critical bug where image-only multimodal requests caused 500 errors due to None prompt handling - now properly handles image-only scenarios. All validation endpoints working correctly and production-ready."
 
   - task: "Fix /api/detect-format to use Pydantic models and response_model"
     implemented: true
