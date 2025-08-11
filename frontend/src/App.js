@@ -690,6 +690,7 @@ const AppContent = () => {
                     </button>
                     
                     <button
+                      aria-label="Clear prompt and results"
                       onClick={handleClear}
                       className="btn btn-secondary enhanced-secondary hover-lift press-scale"
                     >
