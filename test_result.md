@@ -249,6 +249,9 @@
         - working: true
           agent: "testing"
           comment: "/api/detect-format accepts JSON body and returns detected_format, confidence, suggestions as specified. Basic connectivity also verified."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE FORMAT DETECTION TESTING COMPLETED: /api/detect-format endpoint fully operational in comprehensive backend regression testing. Accepts JSON body with 'content' field, returns proper response structure with detected_format (string), confidence (string), and suggestions (object). Successfully detects various content types including markdown, code, and plain text. All format detection scenarios working correctly and production-ready."
 
   - task: "Create Pehance landing page UI"
     implemented: true
