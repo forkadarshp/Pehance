@@ -43,7 +43,7 @@ const AppContent = () => {
   const [showModelBoard, setShowModelBoard] = useState(false);
   const [currentModel, setCurrentModel] = useState("");
   const [processingTime, setProcessingTime] = useState(0);
-  const [modelPreference, setModelPreference] = useState("balanced");
+  const [modelPreference, setModelPreference] = useState(() => localStorage.getItem('pehance:modelPref') || "balanced");
   
   // Multi-modal state
   const [inputMode, setInputMode] = useState("text"); // "text", "image", "both"
