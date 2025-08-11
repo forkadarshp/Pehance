@@ -48,7 +48,7 @@ function findRecommendedModel(preference, modelStatus, modelSummary) {
     return best[0]?.[0] || null;
   }
   if (preference === "safety") {
-    const best = entries.find(([, v]) =&gt; v.tier === "Safety Models" &amp;&amp; v.available);
+    const best = entries.find(([, v]) => v.tier === "Safety Models" && v.available);
     return best?.[0] || null;
   }
   return null;
