@@ -648,6 +648,41 @@ const AppContent = () => {
                         </>
                       )}
                     </div>
+
+                  {/* Enhanced Action Buttons */}
+                  <div className="action-buttons enhanced-actions" aria-live="polite">
+                    <button
+                      aria-label="Enhance prompt"
+                      title="Enhance (Cmd/Ctrl+Enter)"
+                      onClick={handleEnhance}
+                      disabled={isLoading || !prompt.trim()}
+                      className="btn btn-primary enhanced-primary press-scale light-trail"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="btn-spinner"></div>
+                          <span>Enhancing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="btn-icon">✨</span>
+                          <span>Enhance Prompt</span>
+                          <span className="btn-shortcut">⏎</span>
+                        </>
+                      )}
+                    </button>
+                    
+                    <button
+                      aria-label="Clear prompt and results"
+                      title="Clear (Esc)"
+                      onClick={handleClear}
+                      className="btn btn-secondary enhanced-secondary hover-lift press-scale"
+                    >
+                      <span className="btn-icon">🗑️</span>
+                      <span>Clear</span>
+                    </button>
+                  </div>
+
                   </div>
 
                   <div className="textarea-container surface enhanced-textarea">
