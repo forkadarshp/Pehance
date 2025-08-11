@@ -773,7 +773,7 @@ const AppContent = () => {
 
                 {/* Error Display */}
                 {error && (
-                  <div className="error-display animate-scale-in">
+                  <div className="error-display animate-scale-in" role="alert" aria-live="assertive">
                     <div className="error-content">
                       <span className="error-icon">⚠️</span>
                       <div className="error-text">
