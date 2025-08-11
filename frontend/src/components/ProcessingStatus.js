@@ -227,7 +227,7 @@ const ProcessingStatus = ({
         .stage-item.active .stage-icon {
           background: var(--color-brand-primary);
           color: white;
-          animation: pulse 2s infinite;
+          animation: ${typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'none' : 'pulse 2s infinite'};
         }
 
         .stage-details {
