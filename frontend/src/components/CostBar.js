@@ -112,7 +112,7 @@ export default function CostBar({
             {preference === "balanced" && "🎯 Balanced"}
             {preference === "reasoning" && "🧠 Reasoning"}
             {preference === "specialized" && "🔬 Specialized"}
-            {preference === "safety" &amp;&amp; "🛡️ Safety"}
+            {preference === "safety" && "🛡️ Safety"}
           </div>
           {preferredModel &amp;&amp; (
             <div className="model-meta">
