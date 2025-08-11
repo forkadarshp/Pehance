@@ -724,6 +724,9 @@ const AppContent = () => {
                       <h3 className="heading-md">Image Analysis</h3>
                       <div className="analysis-badge">
                         <span className="badge-icon">🔍</span>
+                aria-live="polite"
+                aria-atomic="true"
+
                         <span>AI Analyzed</span>
                       </div>
                     </div>
