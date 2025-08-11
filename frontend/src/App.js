@@ -15,6 +15,17 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const AppContent = () => {
+  // Load last prompt from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('pehance:lastPrompt');
+    if (saved) setPrompt(saved);
+  }, []);
+
+  // Persist prompt changes
+  useEffect(() => {
+    localStorage.setItem('pehance:lastPrompt', prompt);
+  }, [prompt]);
+
   const [prompt, setPrompt] = useState("");
   const [enhancedPrompt, setEnhancedPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
