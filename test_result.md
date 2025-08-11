@@ -285,7 +285,8 @@
 
 ## test_plan:
   current_focus:
-    - "Multi-Modal Enhancement Features Testing"
+    - "Backend: Empty prompt validation returns 400"
+    - "Backend: /api/detect-format accepts JSON body and returns response_model"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
