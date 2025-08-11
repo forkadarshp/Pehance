@@ -111,7 +111,7 @@ export default function CostBar({
             {preference === "fast" && "⚡ Ultra-Fast"}
             {preference === "balanced" && "🎯 Balanced"}
             {preference === "reasoning" && "🧠 Reasoning"}
-            {preference === "specialized" &amp;&amp; "🔬 Specialized"}
+            {preference === "specialized" && "🔬 Specialized"}
             {preference === "safety" &amp;&amp; "🛡️ Safety"}
           </div>
           {preferredModel &amp;&amp; (
