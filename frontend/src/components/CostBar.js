@@ -22,7 +22,7 @@ function findRecommendedModel(preference, modelStatus, modelSummary) {
   if (modelSummary) {
     if (preference === "fast" && modelSummary.recommended_fast) return modelSummary.recommended_fast;
     if (preference === "reasoning" && modelSummary.recommended_reasoning) return modelSummary.recommended_reasoning;
-    if (preference === "specialized" &amp;&amp; modelSummary.recommended_creative) return modelSummary.recommended_creative;
+    if (preference === "specialized" && modelSummary.recommended_creative) return modelSummary.recommended_creative;
     if (preference === "safety" &amp;&amp; modelSummary.safety_model) return modelSummary.safety_model;
   }
   // Otherwise scan by tier
