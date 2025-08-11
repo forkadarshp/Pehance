@@ -114,7 +114,7 @@ export default function CostBar({
             {preference === "specialized" && "🔬 Specialized"}
             {preference === "safety" && "🛡️ Safety"}
           </div>
-          {preferredModel &amp;&amp; (
+          {preferredModel && (
             <div className="model-meta">
               <span className="model-name">{preferredModel}</span>
               <span className="model-tier">{getTierForModel(modelStatus, preferredModel)}</span>
