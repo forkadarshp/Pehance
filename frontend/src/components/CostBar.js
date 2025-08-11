@@ -29,7 +29,7 @@ function findRecommendedModel(preference, modelStatus, modelSummary) {
   const entries = Object.entries(modelStatus);
   const byTier = (tier) => entries
     .filter(([, v]) => (v.tier === tier) && v.available)
-    .sort((a, b) =&gt; (b[1].performance_tokens_sec || 0) - (a[1].performance_tokens_sec || 0));
+    .sort((a, b) => (b[1].performance_tokens_sec || 0) - (a[1].performance_tokens_sec || 0));
 
   if (preference === "fast") {
     const best = byTier("Tier 1: Ultra-Fast");
