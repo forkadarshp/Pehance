@@ -309,6 +309,10 @@ async def enhance_multimodal_prompt(request: PromptEnhanceRequest):
         combined_prompt = request.prompt
         image_analysis = None
         
+        # Validate prompt when no image provided
+        if (not request.prompt or not request.prompt.strip()) and not request.image_data:
+            raise HTTPException(status_code=400, detail="Either prompt or image_data is required")
+
         # Process image if provided
         if request.image_data:
             print("🖼️ Processing image input...")
