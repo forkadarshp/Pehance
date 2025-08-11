@@ -48,7 +48,7 @@ class StatusCheckCreate(BaseModel):
 
 # Pehance Models
 class PromptEnhanceRequest(BaseModel):
-    prompt: str
+    prompt: Optional[str] = None
     mode: str = "single"  # "single" or "multi" - defaults to single turn
     image_data: Optional[str] = None  # Base64 encoded image
     preferred_format: Optional[str] = "auto_detect"  # Output format preference
