@@ -182,7 +182,7 @@ const EnhancedOutputDisplay = ({
   return (
     <div className="enhanced-output-display">
       {/* Format Control Header */}
-      <div className="output-control-header">
+      <div className="output-control-header" role="region" aria-live="polite">
         <div className="format-info">
           <h3 className="output-title">Enhanced Output</h3>
           <div className="format-badge">
