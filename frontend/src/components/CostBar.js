@@ -115,11 +115,17 @@ export default function CostBar({
             {preference === "safety" && "🛡️ Safety"}
           </div>
           {preferredModel && (
-            <div className="model-meta">
-              <span className="model-name">{preferredModel}</span>
-              <span className="model-tier">{getTierForModel(modelStatus, preferredModel)}</span>
+            <div className="model-meta" role="group" aria-label="Preferred model details">
+              <span className="model-name" title="Recommended model">
+                {preferredModel}
+              </span>
+              <span className="model-tier" title="Tier">
+                {getTierForModel(modelStatus, preferredModel)}
+              </span>
               {preferredPerf && (
-                <span className="model-perf">{preferredPerf} tok/s</span>
+                <span className="model-perf" title="Approximate throughput">
+                  {preferredPerf} tok/s
+                </span>
               )}
             </div>
           )}
