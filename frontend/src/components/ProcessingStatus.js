@@ -8,6 +8,9 @@ const ProcessingStatus = ({
   currentModel, 
   processingTime 
 }) => {
+  // Accessibility: live region updates and reduced motion preference
+  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   if (!isActive) return null;
 
   const progress = ((stageIndex + 1) / stages.length) * 100;
