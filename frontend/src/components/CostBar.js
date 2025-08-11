@@ -80,7 +80,7 @@ export default function CostBar({
     : null;
 
   const chips = [];
-  if (modelsUsed &amp;&amp; typeof modelsUsed === "object") {
+  if (modelsUsed && typeof modelsUsed === "object") {
     Object.entries(modelsUsed).forEach(([stage, model]) =&gt; {
       if (model) chips.push({ stage, model });
     });
