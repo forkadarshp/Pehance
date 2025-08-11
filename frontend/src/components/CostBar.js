@@ -118,7 +118,7 @@ export default function CostBar({
             <div className="model-meta">
               <span className="model-name">{preferredModel}</span>
               <span className="model-tier">{getTierForModel(modelStatus, preferredModel)}</span>
-              {preferredPerf &amp;&amp; (
+              {preferredPerf && (
                 <span className="model-perf">{preferredPerf} tok/s</span>
               )}
             </div>
