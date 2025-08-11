@@ -644,7 +644,7 @@ const AppContent = () => {
                   </div>
 
                   <div className="textarea-container surface enhanced-textarea">
-                    <textarea
+                    <textarea aria-label="Prompt input"
                       value={prompt}
                       onChange={(e) => {
                         setPrompt(e.target.value);
