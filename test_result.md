@@ -190,6 +190,30 @@
           comment: "MULTI-MODEL INTEGRATION SYSTEM TESTING COMPLETED: ✅ ROOT CAUSE IDENTIFIED AND RESOLVED: The critical intent classification failures were caused by corrupted GROQ_API_KEY in .env file (two keys concatenated). After fixing API key, all systems operational. ✅ MODEL AVAILABILITY TESTING: /api/test-models endpoint working correctly, 8/9 models available with proper tier system (Tier 1: Ultra-Fast, Tier 2: Balanced, Tier 3: High-Reasoning, Tier 4: Specialized, Safety Models). Performance metrics and features properly returned. ✅ INTENT CLASSIFICATION RESTORED: Simple greetings correctly classified as 'greeting' (0.95 confidence, 0.10 complexity), technical requests as 'technical' (0.80 confidence, 0.60 complexity), creative requests as 'creative' (0.80 confidence, 0.30 complexity). JSON parsing reliability: 100% success rate. ✅ SINGLE VS MULTI MODE WORKING: Single mode provides enhanced_greeting responses, Multi mode provides clarification_request responses. Mode parameter handled correctly. ✅ MULTI-MODEL SELECTION OPERATIONAL: Different models selected for different task types and complexity levels. Smart routing system working correctly. ✅ ENHANCED GREETING RESPONSES: Time-based context additions working, personalized responses generated in single mode. The multi-model integration system is now fully operational and production-ready."
 
 ## frontend:
+  - task: "Add Model Selection UI (frontend-only)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ModelSelector.js, /app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Implemented ModelSelector with 5 preferences (fast, balanced, reasoning, specialized, safety). Displays selection and integrates with CostBar; backend unchanged (UI-only)."
+
+  - task: "Add Token/Cost Bar with model chips"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/CostBar.js, /app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Implemented CostBar showing estimated tokens, processing time, preference mapping to recommended model via /api/test-models, and chips for models_used from backend response."
+
   - task: "Validate empty prompt handling in /api/enhance and multimodal"
     implemented: true
     working: true
