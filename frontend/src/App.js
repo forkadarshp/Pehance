@@ -670,6 +670,7 @@ const AppContent = () => {
                   {/* Enhanced Action Buttons */}
                   <div className="action-buttons enhanced-actions">
                     <button
+                      aria-label="Enhance prompt"
                       onClick={handleEnhance}
                       disabled={isLoading || !prompt.trim()}
                       className="btn btn-primary enhanced-primary press-scale light-trail"
