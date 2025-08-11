@@ -118,6 +118,29 @@ const AppContent = () => {
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
       
+
+  // Global key bindings for UX
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      const isMac = navigator.platform.toUpperCase().includes('MAC');
+      const cmdEnter = (isMac && e.metaKey && e.key === 'Enter');
+      const ctrlEnter = (!isMac && e.ctrlKey && e.key === 'Enter');
+      if (cmdEnter || ctrlEnter) {
+        e.preventDefault();
+        if (!isLoading) {
+          handleEnhance();
+        }
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClear();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isLoading, prompt, uploadedImage, inputMode]);
+
       if (Math.abs(scrollY - lastScrollY) < 10) {
         ticking = false;
         return;
