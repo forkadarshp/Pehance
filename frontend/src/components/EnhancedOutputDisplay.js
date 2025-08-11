@@ -109,7 +109,7 @@ const EnhancedOutputDisplay = ({
           dangerouslySetInnerHTML={{ __html: content }}
         />
       );
-    } else if (format === 'code_blocks' && codeBlocks.length > 0) {
+    } else if ((format === 'code_blocks' || showCodeBlocks) && codeBlocks.length > 0) {
       // Render with enhanced code blocks
       return (
         <div ref={contentRef} className="code-enhanced-content">
