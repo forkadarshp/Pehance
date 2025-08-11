@@ -216,7 +216,7 @@ const AppContent = () => {
   };
 
   const handleEnhance = async () => {
-    if (!prompt.trim() &amp;&amp; (!uploadedImage || !uploadedImage.base64)) return;
+    if (!prompt.trim() && (!uploadedImage || !uploadedImage.base64)) return;
 
     setIsLoading(true);
     setError("");
