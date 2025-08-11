@@ -46,7 +46,7 @@ const AppContent = () => {
   const [modelPreference, setModelPreference] = useState(() => localStorage.getItem('pehance:modelPref') || "balanced");
   
   // Multi-modal state
-  const [inputMode, setInputMode] = useState("text"); // "text", "image", "both"
+  const [inputMode, setInputMode] = useState(() => localStorage.getItem('pehance:inputMode') || "text"); // "text", "image", "both"
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageAnalysis, setImageAnalysis] = useState(null);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
