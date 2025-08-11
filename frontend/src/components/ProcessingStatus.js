@@ -17,7 +17,7 @@ const ProcessingStatus = ({
   const currentStage = stages[stageIndex] || {};
 
   return (
-    <div className="processing-status animate-scale-in">
+    <div className="processing-status animate-scale-in" role="status" aria-live="polite" aria-atomic="true">
       <div className="processing-header">
         <div className="processing-icon animate-glow">
           <div className="processing-spinner"></div>
