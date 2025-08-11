@@ -129,7 +129,7 @@ export default function CostBar({
           <div className="cost-item span-2">
             <div className="cost-label">Models Used</div>
             <div className="chips">
-              {chips.map((c, idx) =&gt; (
+              {chips.map((c, idx) => (
                 <div key={`${c.stage}-${idx}`} className="chip">
                   <span className="chip-stage">{c.stage}</span>
                   <span className="chip-model">{c.model}</span>
