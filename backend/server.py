@@ -438,6 +438,10 @@ async def enhance_prompt(request: PromptEnhanceRequest):
     - multi: Allows conversational follow-ups when needed
     """
     try:
+        # Validate prompt
+        if not request.prompt or not request.prompt.strip():
+            raise HTTPException(status_code=400, detail="Prompt cannot be empty")
+
         # Run the enhanced multi-agent enhancement pipeline with mode awareness
         result = await orchestrate_enhancement(request.prompt, mode=request.mode)
         
