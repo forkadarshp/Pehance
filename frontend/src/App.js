@@ -8,6 +8,8 @@ import ProcessingStatus from "./components/ProcessingStatus";
 import ModelStatusBoard from "./components/ModelStatusBoard";
 import ImageUpload from "./components/ImageUpload";
 import EnhancedOutputDisplay from "./components/EnhancedOutputDisplay";
+import ModelSelector from "./components/ModelSelector";
+import CostBar from "./components/CostBar";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -25,10 +27,12 @@ const AppContent = () => {
   const [enhancementMetrics, setEnhancementMetrics] = useState(null);
   const [mode, setMode] = useState("single");
   const [modelStatus, setModelStatus] = useState(null);
+  const [modelSummary, setModelSummary] = useState(null);
   const [showChatInterface, setShowChatInterface] = useState(false);
   const [showModelBoard, setShowModelBoard] = useState(false);
   const [currentModel, setCurrentModel] = useState("");
   const [processingTime, setProcessingTime] = useState(0);
+  const [modelPreference, setModelPreference] = useState("balanced");
   
   // Multi-modal state
   const [inputMode, setInputMode] = useState("text"); // "text", "image", "both"
@@ -81,6 +85,19 @@ const AppContent = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
 
+  useEffect(() => {
+    const checkModelStatus = async () => {
+      try {
+        const response = await axios.get(`${API}/test-models`);
+        setModelStatus(response.data.models);
+        setModelSummary(response.data.summary || null);
+      } catch (err) {
+        // fail silently, UI remains functional
+      }
+    };
+    checkModelStatus();
+  }, []);
+
   // Bidirectional scroll detection and animations
   useEffect(() => {
     let ticking = false;
@@ -98,14 +115,12 @@ const AppContent = () => {
       setScrollDirection(scrollY > lastScrollY ? 'down' : 'up');
       setLastScrollY(scrollY);
       
-      // Update current section based on scroll position
       if (scrollY < windowHeight * 0.5) {
         setCurrentSection(0); // Hero section
       } else {
         setCurrentSection(1); // Main content section
       }
       
-      // Calculate scroll progress percentage
       const scrollableHeight = documentHeight - windowHeight;
       const progress = Math.min((scrollY / scrollableHeight) * 100, 100);
       setScrollProgress(progress);
@@ -128,7 +143,6 @@ const AppContent = () => {
 
   // Initialize elements to hidden state on page load
   useEffect(() => {
-    // Reset all elements to initial state on page load
     if (heroRef.current) {
       heroRef.current.classList.remove('animate-fade-in-up', 'animate-fade-out-down');
     }
@@ -138,322 +152,150 @@ const AppContent = () => {
       
       if (inputColumn) {
         inputColumn.classList.remove('animate-slide-in-left', 'animate-slide-out-left');
-        inputColumn.style.opacity = '0';
-        inputColumn.style.transform = 'translateX(-24px)';
       }
       if (outputColumn) {
         outputColumn.classList.remove('animate-slide-in-right', 'animate-slide-out-right');
-        outputColumn.style.opacity = '0';
-        outputColumn.style.transform = 'translateX(24px)';
       }
     }
   }, []);
 
-  // Enhanced intersection observer for bidirectional animations
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          const element = entry.target;
-          const isHeroSection = element === heroRef.current;
-          const isInputSection = element === inputSectionRef.current;
-          
-          if (entry.isIntersecting) {
-            // Element is entering viewport
-            if (isHeroSection) {
-              element.classList.remove('animate-fade-out-down');
-              element.classList.add('animate-fade-in-up');
-            } else if (isInputSection) {
-              // Add staggered animations to input section children
-              const inputColumn = element.querySelector('.input-column');
-              const outputColumn = element.querySelector('.output-column');
-              
-              if (inputColumn) {
-                inputColumn.classList.remove('animate-slide-out-left');
-                inputColumn.style.opacity = '1';
-                inputColumn.style.transform = 'translateX(0)';
-                inputColumn.classList.add('animate-slide-in-left');
-              }
-              if (outputColumn) {
-                outputColumn.classList.remove('animate-slide-out-right');
-                setTimeout(() => {
-                  outputColumn.style.opacity = '1';
-                  outputColumn.style.transform = 'translateX(0)';
-                  outputColumn.classList.add('animate-slide-in-right');
-                }, 200);
-              }
-            }
-          } else {
-            // Element is leaving viewport
-            if (scrollDirection === 'up') {
-              // Scrolling up - elements disappear with animation
-              if (isInputSection) {
-                const inputColumn = element.querySelector('.input-column');
-                const outputColumn = element.querySelector('.output-column');
-                
-                if (outputColumn) {
-                  outputColumn.classList.remove('animate-slide-in-right');
-                  outputColumn.classList.add('animate-slide-out-right');
-                  setTimeout(() => {
-                    outputColumn.style.opacity = '0';
-                    outputColumn.style.transform = 'translateX(24px)';
-                  }, 300);
-                }
-                if (inputColumn) {
-                  setTimeout(() => {
-                    inputColumn.classList.remove('animate-slide-in-left');
-                    inputColumn.classList.add('animate-slide-out-left');
-                    setTimeout(() => {
-                      inputColumn.style.opacity = '0';
-                      inputColumn.style.transform = 'translateX(-24px)';
-                    }, 300);
-                  }, 100);
-                }
-              }
-            } else if (scrollDirection === 'down') {
-              // Scrolling down past hero - hero can fade out
-              if (isHeroSection) {
-                element.classList.remove('animate-fade-in-up');
-                element.classList.add('animate-fade-out-down');
-              }
-            }
-          }
-        });
-      },
-      { 
-        threshold: [0.1, 0.3, 0.6], 
-        rootMargin: '0px 0px -50px 0px' 
-      }
-    );
-
-    if (heroRef.current) observer.observe(heroRef.current);
-    if (inputSectionRef.current) observer.observe(inputSectionRef.current);
-
-    return () => observer.disconnect();
-  }, [scrollDirection]);
-
-  // Check model status
-  useEffect(() => {
-    const checkModelStatus = async () => {
-      try {
-        const response = await axios.get(`${API}/test-models`);
-        setModelStatus(response.data.models);
-      } catch (err) {
-        console.warn("Model status check failed:", err);
-      }
-    };
-    
-    checkModelStatus();
-    const interval = setInterval(checkModelStatus, 30000); // Check every 30 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  // Handle mode changes
-  useEffect(() => {
-    if (mode === "multi") {
-      setShowChatInterface(true);
-    } else {
-      setShowChatInterface(false);
-    }
-  }, [mode]);
-
-  // Auto-resize textarea
-  const adjustTextareaHeight = (element) => {
-    const minHeight = 120;
-    const maxHeight = 300;
-    
-    element.style.height = 'auto';
-    const newHeight = Math.min(Math.max(element.scrollHeight, minHeight), maxHeight);
-    element.style.height = newHeight + 'px';
-  };
-
-  // Typewriter effect
-  const typewriterEffect = (text, callback) => {
+  const typewriterEffect = (text, onDone) => {
+    const words = text.split(' ');
     let index = 0;
-    const speed = 10;
-    setTypingAnimation("");
-    
-    const type = () => {
-      if (index < text.length) {
-        setTypingAnimation((prev) => prev + text.charAt(index));
+    setTypingAnimation('');
+
+    const interval = setInterval(() => {
+      if (index < words.length) {
+        setTypingAnimation(prev => (prev + (prev ? ' ' : '') + words[index]));
         index++;
-        setTimeout(type, speed);
       } else {
-        callback && callback();
+        clearInterval(interval);
+        onDone && onDone();
       }
-    };
-    
-    type();
+    }, 10);
   };
 
-  // Handle image upload and processing
-  const handleImageUpload = async (imageBase64, fileName) => {
-    if (!imageBase64) {
-      setUploadedImage(null);
-      setImageAnalysis(null);
-      return;
-    }
-
-    setUploadedImage({ base64: imageBase64, fileName });
-    setIsProcessingImage(true);
-    setImageAnalysis(null);
-
+  const handleFormatChange = async (newFormat) => {
+    setOutputFormat(newFormat);
+    if (!enhancedPrompt) return;
     try {
-      const response = await axios.post(`${API}/process-image`, {
-        image_data: imageBase64,
+      const { data } = await axios.post(`${API}/format-response`, {
+        content: enhancedPrompt,
+        target_format: newFormat,
+        enhance_quality: true
+      });
+      setFormattedOutput({
+        content: data.formatted_content,
+        format: data.detected_format,
+        metadata: data.metadata,
+        codeBlocks: data.code_blocks
+      });
+    } catch (e) {
+      // no-op
+    }
+  };
+
+  const handleImageUpload = async (image) => {
+    setIsProcessingImage(true);
+    setUploadedImage(image);
+    try {
+      const { data } = await axios.post(`${API}/process-image`, {
+        image_data: image.base64,
         analysis_type: "comprehensive"
       });
-
-      if (response.data.success) {
-        setImageAnalysis({
-          description: response.data.description,
-          extractedText: response.data.extracted_text,
-          analysis: response.data.analysis,
-          suggestions: response.data.suggestions
-        });
-        
-        // If there's extracted text and no current prompt, use it as a starting point
-        if (response.data.extracted_text && !prompt.trim()) {
-          setPrompt(response.data.extracted_text);
-        }
-      }
-    } catch (err) {
-      console.error("Image processing failed:", err);
-      setError("Failed to process image. Please try again.");
-      setTimeout(() => setError(""), 4000);
+      setImageAnalysis({
+        description: data.description,
+        extractedText: data.extracted_text,
+        suggestions: data.suggestions
+      });
+    } catch (e) {
+      setImageAnalysis(null);
     } finally {
       setIsProcessingImage(false);
     }
   };
 
-  // Handle output format changes
-  const handleFormatChange = async (newFormat) => {
-    if (!enhancedPrompt) return;
-    
-    setOutputFormat(newFormat);
-    
-    try {
-      const response = await axios.post(`${API}/format-response`, {
-        content: enhancedPrompt,
-        target_format: newFormat,
-        enhance_quality: true
-      });
-
-      setFormattedOutput({
-        content: response.data.formatted_content,
-        format: response.data.detected_format,
-        metadata: response.data.metadata,
-        codeBlocks: response.data.code_blocks
-      });
-    } catch (err) {
-      console.error("Response formatting failed:", err);
-      // Fallback to original content
-      setFormattedOutput({
-        content: enhancedPrompt,
-        format: "plain_text",
-        metadata: { error: "Formatting failed", fallback: true },
-        codeBlocks: []
-      });
-    }
-  };
-
   const handleEnhance = async () => {
-    if (!prompt.trim() && !uploadedImage) {
-      setError("Please enter a prompt or upload an image to enhance");
-      setTimeout(() => setError(""), 4000);
-      return;
-    }
+    if (!prompt.trim() &amp;&amp; (!uploadedImage || !uploadedImage.base64)) return;
 
     setIsLoading(true);
     setError("");
     setEnhancedPrompt("");
     setTypingAnimation("");
-    setIntentAnalysis(null);
-    setCopySuccess(false);
-    setCurrentStageIndex(0);
     setEnhancementMetrics(null);
-    setCurrentModel("");
-    setProcessingTime(0);
-    setFormattedOutput(null);
 
-    // Start processing timer
     const startTime = Date.now();
-    processingIntervalRef.current = setInterval(() => {
-      setProcessingTime(((Date.now() - startTime) / 1000).toFixed(1));
-    }, 100);
 
-    // Enhanced processing stages simulation
-    let currentStage = 0;
-    
+    const models = [
+      'llama-3.1-8b-instant',
+      'meta-llama/llama-4-scout-17b-16e-instruct', 
+      'llama-3.3-70b-versatile', 
+      'qwen/qwen3-32b',
+      'meta-llama/llama-guard-4-12b'
+    ];
+
+    const stages = [
+      { name: 'Intent Analysis', duration: 1800, icon: '🎯' },
+      { name: 'Context Research', duration: 1600, icon: '🔍' },
+      { name: 'Best Practices', duration: 1400, icon: '⚙️' },
+      { name: 'Enhancement', duration: 1600, icon: '✨' }
+    ];
+
     const advanceStage = () => {
-      if (currentStage < stages.length - 1) {
-        currentStage++;
-        setCurrentStageIndex(currentStage);
-        setProcessingStage(stages[currentStage].description);
-        
-        // Simulate model switching
-        const models = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'moonshotai/kimi-k2-instruct'];
-        setCurrentModel(models[currentStage % models.length]);
-        
-        setTimeout(advanceStage, stages[currentStage].duration);
-      }
+      setCurrentStageIndex((prev) => (prev + 1) % stages.length);
+      setProcessingStage(stages[(currentStageIndex + 1) % stages.length].name);
+      const nextModel = models[(currentStageIndex + 1) % models.length];
+      setCurrentModel(nextModel);
+      setTimeout(advanceStage, stages[(currentStageIndex + 1) % stages.length].duration);
     };
 
-    setProcessingStage(stages[0].description);
-    setCurrentModel('llama-3.1-8b-instant');
+    setProcessingStage(stages[0].name);
+    setCurrentModel(models[0]);
     setTimeout(advanceStage, stages[0].duration);
 
     try {
-      // Use multi-modal endpoint if image is uploaded
       const endpoint = uploadedImage ? '/enhance-multimodal' : '/enhance';
       const requestData = {
         prompt: prompt || "",
         mode: mode,
         preferred_format: outputFormat
       };
-
-      // Add image data if available
       if (uploadedImage) {
         requestData.image_data = uploadedImage.base64;
       }
 
       const response = await axios.post(`${API}${endpoint}`, requestData);
-      
-      clearInterval(processingIntervalRef.current);
       const endTime = Date.now();
       const totalProcessingTime = ((endTime - startTime) / 1000).toFixed(1);
       setProcessingTime(totalProcessingTime);
-      
+
       setProcessingStage("Enhancement complete");
-      
+
+      // Build metrics
+      const enhancedContent = response.data.enhanced_prompt || "";
+      const intent = response.data.agent_results?.intent_analysis || null;
+      const modelsUsed = response.data.agent_results?.models_used || response.data.agent_results?.model_used || null;
+
       const metrics = {
         originalLength: prompt.length,
-        enhancedLength: response.data.enhanced_prompt.length,
-        improvementRatio: response.data.enhancement_ratio || (response.data.enhanced_prompt.length / (prompt.length || 1)).toFixed(1),
+        enhancedLength: enhancedContent.length,
+        improvementRatio: response.data.enhancement_ratio || (enhancedContent.length / (prompt.length || 1)).toFixed(1),
         processingTime: totalProcessingTime,
-        confidenceScore: response.data.agent_results?.intent_analysis?.confidence || 0.85,
+        confidenceScore: intent?.confidence || 0.85,
         agentSteps: response.data.agent_results?.process_steps?.length || 4,
         enhancementType: response.data.enhancement_type || 'standard_enhancement',
-        complexityScore: response.data.complexity_score || response.data.agent_results?.complexity_score || 0.5,
+        complexityScore: response.data.complexity_score || intent?.input_complexity_score || 0.5,
         mode: response.data.mode || mode,
-        modelsUsed: response.data.agent_results?.models_used || {
-          classification: 'llama-3.1-8b-instant',
-          context: 'llama-3.3-70b-versatile', 
-          methodology: 'moonshotai/kimi-k2-instruct',
-          enhancement: 'llama-3.3-70b-versatile'
-        },
+        modelsUsed: modelsUsed,
         multimodal: !!uploadedImage,
-        imageAnalysis: response.data.agent_results?.image_analysis || null
+        imageAnalysis: response.data.agent_results?.image_analysis || null,
       };
-      
+
       setEnhancementMetrics(metrics);
-      
-      // Check if response is already formatted
+
       const isFormatted = response.data.agent_results?.format_metadata?.formatted;
-      const enhancedContent = response.data.enhanced_prompt;
-      
+
       if (isFormatted) {
-        // Response is already formatted
         setFormattedOutput({
           content: enhancedContent,
           format: response.data.agent_results.format_metadata.format_type,
@@ -461,11 +303,11 @@ const AppContent = () => {
           codeBlocks: response.data.agent_results.format_metadata.code_blocks || []
         });
       }
-      
+
       setTimeout(() => {
         typewriterEffect(enhancedContent, () => {
           setEnhancedPrompt(enhancedContent);
-          setIntentAnalysis(response.data.agent_results?.intent_analysis || {
+          setIntentAnalysis(intent || {
             intent_category: 'creative',
             confidence: 0.85,
             specific_domain: 'Content Creation',
@@ -475,11 +317,10 @@ const AppContent = () => {
           setCurrentStageIndex(0);
           setCurrentModel("");
         });
-      }, 1000);
-      
+      }, 800);
+
     } catch (err) {
       console.error("Enhancement error:", err);
-      clearInterval(processingIntervalRef.current);
       const errorMessage = err.response?.data?.detail || 
         "Enhancement failed. Please try again in a moment.";
       setError(errorMessage);
@@ -523,18 +364,12 @@ const AppContent = () => {
     setEnhancementMetrics(null);
     setCurrentModel("");
     setProcessingTime(0);
-    
-    // Clear multi-modal state
     setUploadedImage(null);
     setImageAnalysis(null);
     setIsProcessingImage(false);
     setFormattedOutput(null);
     setOutputFormat("auto_detect");
     setInputMode("text");
-    
-    if (processingIntervalRef.current) {
-      clearInterval(processingIntervalRef.current);
-    }
   };
 
   if (showChatInterface) {
@@ -611,34 +446,29 @@ const AppContent = () => {
       <section ref={heroRef} className="hero-section light-trail">
         <div className="container">
           <div className="hero-content">
-            {/* Floating Badge */}
             <div className="hero-badge animate-float">
               <span className="badge-icon">✨</span>
               <span>Advanced Multi-Agent Intelligence</span>
             </div>
             
-            {/* Main Headline */}
             <h1 className="hero-title display-2xl">
               One Single Prompt
               <br />
               <span className="title-accent">Is All It Takes</span>
             </h1>
             
-            {/* Subtitle */}
             <div className="hero-subtitle animate-fade-in-up delay-200">
               <p className="text-xl">
                 Our core philosophy: Transform any idea into a precision-crafted prompt with just one input. 
                 Professional-grade enhancement powered by sophisticated AI multi-agent intelligence.
               </p>
               
-              {/* Self-Made Badge */}
               <div className="self-made-badge animate-fade-in-up delay-300">
                 <span className="badge-sparkle">✨</span>
                 <span className="badge-text">This website was created using Pehance itself</span>
                 <span className="badge-icon">🚀</span>
               </div>
               
-              {/* Process Steps */}
               <div className="process-steps">
                 {stages.map((step, index) => (
                   <div 
@@ -651,7 +481,6 @@ const AppContent = () => {
                 ))}
               </div>
               
-              {/* Scroll hint */}
               <div className="scroll-hint animate-fade-in-up delay-600">
                 <p className="text-sm">
                   <span className="scroll-arrow">↓</span>
@@ -663,7 +492,7 @@ const AppContent = () => {
         </div>
       </section>
 
-      {/* Scroll Progress Indicator */}
+      {/* Scroll Indicator */}
       <div className="scroll-indicator">
         <div 
           className={`scroll-dot ${currentSection === 0 ? 'active' : ''}`}
@@ -718,34 +547,9 @@ const AppContent = () => {
                     </span>
                   </div>
                 </div>
-                
-                {/* Multi-modal Input Mode Toggle */}
-                <div className="input-mode-toggle">
-                  <span className="input-mode-label">Input Mode:</span>
-                  <div className="input-mode-options">
-                    <button
-                      className={`input-mode-option ${inputMode === "text" ? "active" : ""}`}
-                      onClick={() => setInputMode("text")}
-                    >
-                      <span className="input-mode-icon">📝</span>
-                      Text Only
-                    </button>
-                    <button
-                      className={`input-mode-option ${inputMode === "image" ? "active" : ""}`}
-                      onClick={() => setInputMode("image")}
-                    >
-                      <span className="input-mode-icon">🖼️</span>
-                      Image Only
-                    </button>
-                    <button
-                      className={`input-mode-option ${inputMode === "both" ? "active" : ""}`}
-                      onClick={() => setInputMode("both")}
-                    >
-                      <span className="input-mode-icon">🎯</span>
-                      Text + Image
-                    </button>
-                  </div>
-                </div>
+
+                {/* Model Preference Selector */}
+                <ModelSelector value={modelPreference} onChange={setModelPreference} className="animate-fade-in-up" />
                 
                 {/* Multi-modal Input Mode Toggle */}
                 <div className="input-mode-toggle">
@@ -810,16 +614,13 @@ const AppContent = () => {
                       value={prompt}
                       onChange={(e) => {
                         setPrompt(e.target.value);
-                        adjustTextareaHeight(e.target);
+                        const target = e.target;
+                        if (target) {
+                          target.style.height = 'auto';
+                          target.style.height = Math.min(Math.max(140, target.scrollHeight), 320) + 'px';
+                        }
                       }}
-                      placeholder="Enter your idea, question, or concept here...
-
-✨ Perfect examples to try:
-• Write a compelling story about artificial intelligence and human creativity
-• Help me build a scalable React application with modern best practices  
-• Create a comprehensive marketing strategy for a SaaS startup
-• Develop a research methodology for studying climate change impact
-• Design a user onboarding flow for a mobile app"
+                      placeholder={`Enter your idea, question, or concept here...\n\n✨ Perfect examples to try:\n• Write a compelling story about artificial intelligence and human creativity\n• Help me build a scalable React application with modern best practices\n• Create a comprehensive marketing strategy for a SaaS startup\n• Develop a research methodology for studying climate change impact\n• Design a user onboarding flow for a mobile app`}
                       className="input textarea text-mono enhanced-textarea-input"
                       style={{ minHeight: '140px', maxHeight: '320px' }}
                     />
@@ -1027,17 +828,24 @@ const AppContent = () => {
                         <div className="models-used">
                           <h4 className="models-title">🤖 AI Models Used</h4>
                           <div className="models-grid">
-                            {Object.entries(enhancementMetrics.modelsUsed).map(([step, model]) => 
-                              model && (
-                                <div key={step} className="model-item card-elevated">
-                                  <div className="model-step">
-                                    {step.replace('_', ' ')}
+                            {typeof enhancementMetrics.modelsUsed === 'object' ? (
+                              Object.entries(enhancementMetrics.modelsUsed).map(([step, model]) => 
+                                model && (
+                                  <div key={step} className="model-item card-elevated">
+                                    <div className="model-step">
+                                      {step.replace('_', ' ')}
+                                    </div>
+                                    <div className="model-name">
+                                      {model}
+                                    </div>
                                   </div>
-                                  <div className="model-name">
-                                    {model}
-                                  </div>
-                                </div>
+                                )
                               )
+                            ) : (
+                              <div className="model-item card-elevated">
+                                <div className="model-step">enhancement</div>
+                                <div className="model-name">{enhancementMetrics.modelsUsed}</div>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -1050,9 +858,19 @@ const AppContent = () => {
 
             {/* Output Column */}
             <div className="output-column animate-slide-in-right delay-200">
+              {/* Cost/Token Bar */}
+              <CostBar 
+                prompt={prompt}
+                enhanced={enhancedPrompt || typingAnimation}
+                processingTime={processingTime}
+                modelsUsed={enhancementMetrics?.modelsUsed || null}
+                preference={modelPreference}
+                modelStatus={modelStatus}
+                modelSummary={modelSummary}
+              />
+
               {enhancedPrompt || typingAnimation ? (
                 formattedOutput ? (
-                  /* Enhanced Output Display */
                   <EnhancedOutputDisplay
                     content={formattedOutput.content}
                     format={formattedOutput.format}
@@ -1062,7 +880,6 @@ const AppContent = () => {
                     onFormatChange={handleFormatChange}
                   />
                 ) : (
-                  /* Standard Output Display */
                   <div className="output-card card enhanced-output-card">
                     <div className="output-header enhanced-output-header">
                       <div className="output-title-group">
@@ -1080,7 +897,7 @@ const AppContent = () => {
                           <div className="stat-group">
                             <span className="output-stat">
                               <span className="stat-icon">📝</span>
-                              {enhancedPrompt.length || typingAnimation.length} chars
+                              {(enhancedPrompt.length || typingAnimation.length)} chars
                             </span>
                             <span className="output-stat">
                               <span className="stat-icon">📄</span>
@@ -1089,7 +906,6 @@ const AppContent = () => {
                           </div>
                         </div>
                         
-                        {/* Format Selector */}
                         <div className="format-selector">
                           <select
                             value={outputFormat}
@@ -1136,7 +952,6 @@ const AppContent = () => {
                         )}
                       </div>
                       
-                      {/* Quality Indicators */}
                       {enhancedPrompt && enhancementMetrics && (
                         <div className="quality-indicators">
                           <div className="quality-item">
