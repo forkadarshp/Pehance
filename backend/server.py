@@ -396,23 +396,31 @@ Please create an enhanced prompt that helps the user accomplish their goals with
         raise HTTPException(status_code=500, detail="Internal server error")
 
 # Content format detection endpoint
-@api_router.post("/detect-format")
-async def detect_content_format_endpoint(content: str):
+class DetectFormatRequest(BaseModel):
+    content: str
+
+class DetectFormatResponse(BaseModel):
+    detected_format: str
+    confidence: str
+    suggestions: Dict[str, str]
+
+@api_router.post("/detect-format", response_model=DetectFormatResponse)
+async def detect_content_format_endpoint(request: DetectFormatRequest):
     """
     Auto-detect the most appropriate format for content
     """
     try:
-        detected_format = detect_content_format(content)
-        return {
-            "detected_format": detected_format,
-            "confidence": "high",  # Could be enhanced with confidence scoring
-            "suggestions": {
+        detected_format = detect_content_format(request.content)
+        return DetectFormatResponse(
+            detected_format=detected_format,
+            confidence="high",  # Could be enhanced with confidence scoring
+            suggestions={
                 "rich_text": "Best for instructional and explanatory content",
                 "code_blocks": "Best for technical content with code",
                 "markdown": "Best for structured documentation",
                 "plain_text": "Best for simple, unformatted content"
             }
-        }
+        )
     except Exception as e:
         logger.error(f"Format detection failed: {e}")
         raise HTTPException(status_code=500, detail="Format detection error")
