@@ -194,6 +194,48 @@ const EnhancedOutputDisplay = ({
         </div>
 
         <div className="output-actions">
+          {/* Quick Actions */}
+          <div className="quick-actions">
+            <button
+              onClick={handleCopyAll}
+              className={`copy-all-btn ${copySuccess ? 'copied' : ''}`}
+              disabled={isLoading}
+              title="Copy all content"
+            >
+              <span className="copy-icon">
+                {copySuccess ? '✅' : '📋'}
+              </span>
+              <span className="copy-text">
+                {copySuccess ? 'Copied!' : 'Copy All'}
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                const md = buildMarkdown();
+                navigator.clipboard.writeText(md);
+              }}
+              className="copy-md-btn"
+              disabled={isLoading}
+              title="Copy as Markdown"
+            >
+              <span className="copy-icon">📝</span>
+              <span className="copy-text">Copy as MD</span>
+            </button>
+
+            {codeBlocks && codeBlocks.length > 0 && (
+              <button
+                onClick={() => setShowCodeBlocks(v => !v)}
+                className={`toggle-code-btn ${showCodeBlocks ? 'active' : ''}`}
+                disabled={isLoading}
+                title={showCodeBlocks ? 'Hide code blocks' : 'Expand code blocks'}
+              >
+                <span className="copy-icon">💻</span>
+                <span className="copy-text">{showCodeBlocks ? 'Hide Code' : 'Show Code'}</span>
+              </button>
+            )}
+          </div>
+
           {/* Format Selector */}
           <div className="format-selector">
             <select
