@@ -190,6 +190,30 @@
           comment: "MULTI-MODEL INTEGRATION SYSTEM TESTING COMPLETED: ✅ ROOT CAUSE IDENTIFIED AND RESOLVED: The critical intent classification failures were caused by corrupted GROQ_API_KEY in .env file (two keys concatenated). After fixing API key, all systems operational. ✅ MODEL AVAILABILITY TESTING: /api/test-models endpoint working correctly, 8/9 models available with proper tier system (Tier 1: Ultra-Fast, Tier 2: Balanced, Tier 3: High-Reasoning, Tier 4: Specialized, Safety Models). Performance metrics and features properly returned. ✅ INTENT CLASSIFICATION RESTORED: Simple greetings correctly classified as 'greeting' (0.95 confidence, 0.10 complexity), technical requests as 'technical' (0.80 confidence, 0.60 complexity), creative requests as 'creative' (0.80 confidence, 0.30 complexity). JSON parsing reliability: 100% success rate. ✅ SINGLE VS MULTI MODE WORKING: Single mode provides enhanced_greeting responses, Multi mode provides clarification_request responses. Mode parameter handled correctly. ✅ MULTI-MODEL SELECTION OPERATIONAL: Different models selected for different task types and complexity levels. Smart routing system working correctly. ✅ ENHANCED GREETING RESPONSES: Time-based context additions working, personalized responses generated in single mode. The multi-model integration system is now fully operational and production-ready."
 
 ## frontend:
+  - task: "Validate empty prompt handling in /api/enhance and multimodal"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "Added 400 validation for empty prompt in /api/enhance and for multimodal when both prompt and image are missing. Needs backend testing."
+
+  - task: "Fix /api/detect-format to use Pydantic models and response_model"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "Replaced raw str body with DetectFormatRequest/Response models, added response_model and consistent JSON contract. Needs testing."
+
   - task: "Create Pehance landing page UI"
     implemented: true
     working: true
