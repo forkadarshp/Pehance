@@ -108,7 +108,7 @@ export default function CostBar({
         <div className="cost-item">
           <div className="cost-label">Preference</div>
           <div className="cost-value pref">
-            {preference === "fast" &amp;&amp; "⚡ Ultra-Fast"}
+            {preference === "fast" && "⚡ Ultra-Fast"}
             {preference === "balanced" &amp;&amp; "🎯 Balanced"}
             {preference === "reasoning" &amp;&amp; "🧠 Reasoning"}
             {preference === "specialized" &amp;&amp; "🔬 Specialized"}
