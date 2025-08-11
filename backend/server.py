@@ -473,6 +473,8 @@ async def enhance_prompt(request: PromptEnhanceRequest):
             status_code=400, 
             detail=f"Content safety check failed: {str(e)}"
         )
+    except HTTPException:
+        raise  # Re-raise HTTPException as-is
     except Exception as e:
         logger.error(f"Unexpected error in enhance_prompt: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
