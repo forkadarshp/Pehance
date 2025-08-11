@@ -366,7 +366,7 @@ Please create an enhanced prompt that helps the user accomplish their goals with
         
         # Create response object with multi-modal enhancements
         response = PromptEnhanceResponse(
-            original_prompt=request.prompt,
+            original_prompt=request.prompt or "",
             enhanced_prompt=enhanced_prompt,
             agent_results={
                 **result,
